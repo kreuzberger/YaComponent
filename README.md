@@ -8,6 +8,8 @@ YaComponent includes
  * perl base generator for c++ code for components and interfaces
  * implementation of the publish/subscriper pattern by using [crossroads-io](http://www.crossroads.io/)
 
-=== Currently not productive code uploaded, no initial revision available
+Currently not productive code uploaded, no initial revision available
+=====================================================================
+
 
 
