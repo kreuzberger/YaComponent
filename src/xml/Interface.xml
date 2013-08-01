@@ -1,0 +1,25 @@
+<interface>
+  <version maj="1" min="1" rev="0"/>
+  <include file="/home/src/test"/>
+  <properties>
+    <prop id="myName" onChange="1">
+      <type name="QString"/>
+    </prop>
+    <prop id="myCenterFreq" onChange="0">
+      <type name="double" />
+    </prop>
+    <prop id="myMoreCplxType">
+      <type name="int"/>
+      <type name="QString"/>
+      <type name="float"/>
+    </prop>
+  </properties>
+  <requests>
+    <req action="Action1()"/>
+    <req action="Action2()" respid="ACTION1"/>
+  </requests>
+  <responses>
+    <resp id="ACTION1" action="responseAction1()"/>
+    <resp id="SIGNAL" action="responseSignal()"/>
+  </responses>
+</interface>

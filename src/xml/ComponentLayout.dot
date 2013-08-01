@@ -1,0 +1,18 @@
+digraph G {
+  node [ shape="component", style="" nodesep="0.3"]
+  edge [ arrowhead="box" fontsize="8" ]
+  labeljust = "l"
+
+  subgraph clusterprocess1 {
+    label = defaultprocess
+      component1
+      
+    subgraph clusterthread1 {
+      label = text1
+      component2 [label=< <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="3" CELLPADDING="0" VALIGN="top" ALIGN="center"> <TR><TD BORDER="1">left</TD><TD PORT="f1" BORDER="1">middle</TD><TD PORT="f2" BORDER="1">right</TD></TR><TR><TD colspan="3" CELLPADDING="5">component2</TD></TR> </TABLE>>];
+    }
+    component1 -> component2:f1 [taillabel="middle"]
+    component1 -> component2:f2 [taillabel="right"]
+    
+  }
+ }
