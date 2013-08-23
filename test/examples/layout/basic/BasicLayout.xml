@@ -1,0 +1,24 @@
+<componentlayout>
+<processes>
+<process name="process1" id="PROCESS1">
+  <description></description>
+  <thread name="thread1" id="THREAD1">
+    <component name="mycomp" id="COMP1"/>
+<!--
+      <provides>
+        <if name="" id="" classname="" header="" xmldef=""/>
+      </provides>
+      <uses>
+        <if id="" maj="" min="" rev=""/>
+        <if id="" maj="" min="" rev=""/>
+        <if id="" maj="" min="" rev=""/>
+        <if id="" maj="" min="" rev=""/>
+      </uses>
+      -->
+  </thread>
+</process>
+<process name="process2" id="PROCESS2">
+  <description></description>
+</process>
+</processes>
+</componentlayout>
