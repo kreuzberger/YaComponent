@@ -11,13 +11,17 @@ project(YaComponent_GENERATOR)
 
 #ADD_CUSTOM_TARGET(Generate ALL DEPENDS FSM)
 #if ( FSM_SRC )
-macro (COMPONENT_GENERATE outfiles)
+macro (IFC_GENERATE outfiles)
   foreach( it ${ARGN})
    get_filename_component( it ${it} ABSOLUTE )
    get_filename_component( component ${it} NAME_WE )
 #   set(outfile ${CMAKE_CURRENT_BINARY_DIR}/code/I${outfile}.h ${CMAKE_CURRENT_BINARY_DIR}/code/${outfile}.h ${CMAKE_CURRENT_BINARY_DIR}/code/${outfile}StateBase.h ${CMAKE_CURRENT_BINARY_DIR}/code/I${outfile}.h${CMAKE_CURRENT_BINARY_DIR}/code/I${outfile}State.h)
+
    set(outfile ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/I${component}Comp.h
-               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Comp.h
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompProxy.h
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompProxy.cpp
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompStub.h
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompStub.cpp
                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompImpl.h
                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompImpl.cpp
    )
@@ -38,8 +42,8 @@ macro (COMPONENT_GENERATE outfiles)
 #   )
 
   add_custom_command( OUTPUT ${outfile}
-      #COMMAND perl -I${YaFSM_GENERATOR_SOURCE_DIR} -f ${YaFSM_GENERATOR_SOURCE_DIR}/YaFsm.pl --fsm=${it}  --gendot --gendsc --gencode --verbose --outdot=${CMAKE_CURRENT_BINARY_DIR}/${fsm}/dot --outdsc=${CMAKE_CURRENT_BINARY_DIR}/${fsm}/dsc --outcode=${CMAKE_CURRENT_BINARY_DIR}/${fsm}/code
-      COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --comp=${it}  --genview --gencode --outview=${CMAKE_CURRENT_BINARY_DIR}/${component}/view --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code
+      #COMMAND echo perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code
+      COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --verbose
       #ARGS -o ${outfile} ${it}
       DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} )
       #COMMENT "Generating FSM ${FSM_SRC}"
@@ -65,7 +69,7 @@ macro (COMPONENT_GENERATE outfiles)
   INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
 #  QT4_WRAP_CPP( GENERATED_FSM_SRC_MOC_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/YaCompTimer.h ${CMAKE_CURRENT_BINARY_DIR}/${cmponent}/code/YaCompEvent.h)
  endforeach( it )
-endmacro( COMPONENT_GENERATE )
+endmacro( IFC_GENERATE )
 #endif( FSM_SRC )
 
 
