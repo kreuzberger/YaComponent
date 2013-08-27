@@ -7,6 +7,8 @@ project(YaComponent)
 set( DESIRED_QT_VERSION 4)
 
 INCLUDE (${CMAKE_ROOT}/Modules/FindQt.cmake)
+INCLUDE (FindZeroMQ.cmake)
+
 #INCLUDE_DIRECTORIES( ${QT_INCLUDE_DIR} )
 if( CMAKE_HOST_UNIX )
   include_directories(/usr/include)
