@@ -44,23 +44,10 @@ our $MINOR_VERSION = 0;
 our @EXPORT_OK;
 
 
+
 sub writeProcessMain
 {
   my $CompName = shift;
-  my $fhSource;
-  my $fhHeader;
-  open ( $fhSource, "> $YaCompLayoutParser::gLayoutCodeOutPath" . '/' . "$CompName" . "CompLayout.cpp") || YaComponent::printFatal("error creating outfile");
-  open ( $fhHeader, "> $YaCompLayoutParser::gLayoutCodeOutPath" . '/' . "$CompName" . "CompLayout.h") || YaComponent::printFatal("error creating outfile");
-
-  print $fhHeader '#ifndef ' . uc($CompName) ."COMPLAYOUT_H\n";
-  print $fhHeader '#define ' . uc($CompName) ."COMPLAYOUT_H\n\n";
-  print $fhHeader "#include <QtCore/QThread>\n";
-  print $fhHeader "#include <stdio.h>\n";
-
-  
-  print $fhSource '#include "' . $CompName . 'CompLayout.h"' . "\n";
-  print $fhSource "#include \"YaComponent.h\"\n";
-
   if($YaComponent::gVerbose)
   {
     eval "use Data::Dumper";
@@ -70,16 +57,32 @@ sub writeProcessMain
       YaComponent::printFatal("Missing required package Data::Dumper");
     }
   }
-  
-  
+
+  my $fhHeader;
+  open ( $fhHeader, "> $YaCompLayoutParser::gLayoutCodeOutPath" . '/' . "$CompName" . ".h") || YaComponent::printFatal("error creating outfile");
+  print $fhHeader '#ifndef ' . uc($CompName) ."_H\n";
+  print $fhHeader '#define ' . uc($CompName) ."_H\n\n";
+  print $fhHeader "#include <QtCore/QThread>\n";
+  print $fhHeader "#include <stdio.h>\n";
+
   foreach my $process (@YaCompLayoutParser::gLayoutProcesses)
   {
-   print Dumper($process) if $YaComponent::gVerbose;
+    print Dumper($process) if $YaComponent::gVerbose;
 
-    print $fhHeader 'extern void ' . $process->{name} ."Start();\n";
+    my $fhSource;
+    open ( $fhSource, "> $YaCompLayoutParser::gLayoutCodeOutPath" . '/' . "$CompName" . $process->{name} . ".cpp") || YaComponent::printFatal("error creating outfile");
 
-    print $fhSource 'void ' . $process->{name} ."Start()\n";
-    print $fhSource '{' ."\n";
+
+
+#    print $fhSource '#include "' . $CompName . 'CompLayout.h"' . "\n";
+#    print $fhSource "#include \"YaComponent.h\"\n";
+
+
+#    print $fhHeader 'extern void ' . $process->{name} ."Start();\n";
+
+    #print $fhSource 'void ' . $process->{name} ."Start()\n";
+    #print $fhSource '{' ."\n";
+
     foreach my $thread (@{$process->{thread}})
     {
       print $fhHeader " class YaThread" . $thread->{name} .": public QThread\n";
@@ -103,13 +106,13 @@ sub writeProcessMain
 
     }
 
-    print $fhSource '}' ."\n";
-    }
+   # print $fhSource '}' ."\n";
 
-    print $fhHeader "\n#endif\n";
-
+    close( $fhSource);
+  }
+  print $fhHeader "\n#endif\n";
   close( $fhHeader);
-  close( $fhSource);
+
 }
 
 

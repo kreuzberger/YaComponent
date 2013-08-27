@@ -1,12 +1,12 @@
- 
-#include "BasicLayoutCompLayout.h"
+
+#include "BasicLayout.h"
+#include "YaComponent.h"
 #include <stdio.h>
 #include <QtGui/QApplication>
 
 int main(int argc, char** argv)
 {
   QApplication app(argc,argv);
-  process1Start();
-
+  #include "BasicLayoutprocess1.cpp"
   return app.exec();
 }

@@ -68,19 +68,17 @@ macro (COMPLAYOUT_GENERATE outfiles)
    get_filename_component( it ${it} ABSOLUTE )
    get_filename_component( component ${it} NAME_WE )
 
+   set(outfile)
    set(outfile #${CMAKE_CURRENT_BINARY_DIR}/${component}/code/I${component}CompLayout.h
                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompLayout.h
-               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompLayout.cpp
+               #${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompLayout.cpp
    )
 
-   set(fileCode )
+   set (fileCode )
 
-#   set(fileCode YaCompTimer.h
-#                YaCompTimer.cpp
-#                YaCompEvent.h
-#                YaCompEvent.cpp
+#   set(fileCode  MainPre.cpp
+#                 MainPost.cpp
 #   )
-   set(fileIfc )
 
    set(fileIfc  YaComponent.h
 #                IYaCompTimerCB.h
@@ -97,8 +95,8 @@ macro (COMPLAYOUT_GENERATE outfiles)
     foreach ( file ${fileCode} )
     add_custom_command(
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${file}
-      COMMAND ${CMAKE_COMMAND} -E copy ${YaComponent_GENERATOR_SOURCE_DIR}/codeimpl/cpp/qt4/${file}  ${CMAKE_CURRENT_BINARY_DIR}/${component}/code
-      DEPENDS ${YaComponent_GENERATOR_SOURCE_DIR}/codeimpl/cpp/qt4/${file}
+      COMMAND ${CMAKE_COMMAND} -E copy ${YaComponent_GENERATOR_SOURCE_DIR}/code/cpp/${file}  ${CMAKE_CURRENT_BINARY_DIR}/${component}/code
+      DEPENDS ${YaComponent_GENERATOR_SOURCE_DIR}/code/cpp/${file}
     )
     set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${file})
     endforeach( file )
@@ -111,6 +109,8 @@ macro (COMPLAYOUT_GENERATE outfiles)
     )
     set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${fileI})
     endforeach( fileI )
+
+    set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${fileI})
 
   set( ${outfiles} ${${outfiles}} ${outfile})
   INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
