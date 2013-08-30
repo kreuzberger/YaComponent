@@ -65,6 +65,7 @@ sub writeProcessMain
   print $fhHeader "#include <QtCore/QThread>\n";
   print $fhHeader "#include <stdio.h>\n";
 
+
   foreach my $process (@YaCompLayoutParser::gLayoutProcesses)
   {
     print Dumper($process) if $YaComponent::gVerbose;
@@ -73,11 +74,8 @@ sub writeProcessMain
     open ( $fhSource, "> $YaCompLayoutParser::gLayoutCodeOutPath" . '/' . "$CompName" . $process->{name} . ".cpp") || YaComponent::printFatal("error creating outfile");
 
 
-
 #    print $fhSource '#include "' . $CompName . 'CompLayout.h"' . "\n";
 #    print $fhSource "#include \"YaComponent.h\"\n";
-
-
 #    print $fhHeader 'extern void ' . $process->{name} ."Start();\n";
 
     #print $fhSource 'void ' . $process->{name} ."Start()\n";
@@ -99,12 +97,20 @@ sub writeProcessMain
       print $fhSource "  $thread->{name}.start();\n";
       foreach my $comp (@{$thread->{component}})
       {
-        print $fhSource "  YaComponent $comp->{name};\n";
+        print $fhSource "  #include \"$comp->{xml}\"\n";
+        print $fhSource "  YaComponent$comp->{name} $comp->{name};\n";
         print $fhSource "  $comp->{name}.moveToThread(&$thread->{name});\n";
         print $fhSource "  printf(\"calling move to thread\\n\");\n";
       }
 
     }
+
+    # components associated with the main thread
+    foreach my $comp (@{$process->{component}})
+    {
+      print $fhSource "  YaComponent$comp->{name} $comp->{name};\n";
+    }
+
 
    # print $fhSource '}' ."\n";
 

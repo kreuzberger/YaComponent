@@ -3,7 +3,7 @@
 <process name="process1" id="PROCESS1">
   <description></description>
   <thread name="thread1" id="THREAD1">
-    <component name="mycomp" id="COMP1"/>
+    <component name="TextGen" id="TEXTGEN" xml="TextGenComp.xml"/>
 <!--
       <provides>
         <if name="" id="" classname="" header="" xmldef=""/>
@@ -19,6 +19,7 @@
 </process>
 <process name="process2" id="PROCESS2">
   <description></description>
+  <component name="TextOut" id="TEXTOUT" xml="TextOutComp.xml"/>
 </process>
 </processes>
 </componentlayout>

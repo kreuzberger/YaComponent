@@ -1,0 +1,9 @@
+<component>
+  <version maj="1" min="1" rev="0"/>
+  <description/>
+  <provides>
+    <interface xml="TextGenIfc.xml"/>
+  </provides>
+  <source/>
+  <header/>
+</component>

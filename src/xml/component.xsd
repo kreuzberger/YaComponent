@@ -1,26 +1,19 @@
 <?xml version="1.0"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
-  <xsd:element name="componentlayout">
+  <xsd:element name="component">
     <xsd:complexType>
     <xsd:sequence>
-      <xsd:element name="processes" type="tProcesses" minOccurs="1" maxOccurs="1"/>
-<!--
-      <xsd:element name="include" type="tInclude" minOccurs="0" maxOccurs="unbounded"/>
-      <xsd:element name="requests" minOccurs="0" maxOccurs="1">
+      <xsd:element name="version" type="tVersion" minOccurs="1" maxOccurs="1"/>
+      <xsd:element name="description" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="provides" minOccurs="1" maxOccurs="1">
         <xsd:complexType>
           <xsd:sequence>
-            <xsd:element name="req" type="tRequest" minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="interface" type="tInterface" minOccurs="0" maxOccurs="unbounded"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
-      <xsd:element name="responses" minOccurs="0" maxOccurs="1">
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element name="resp" type="tResponse" minOccurs="0" maxOccurs="unbounded"/>
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
-      -->
+      <xsd:element name="header" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      <xsd:element name="source" type="xsd:string" minOccurs="1" maxOccurs="1"/>
     </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
@@ -32,47 +25,10 @@
     <xsd:attribute name="rev" type="xsd:integer" use="required"/>
   </xsd:complexType>
 
-  <xsd:complexType name="tInclude">
-    <xsd:attribute name="file" type="xsd:string" use="required"/>
-  </xsd:complexType>
 
-  <xsd:complexType name="tType">
-    <xsd:attribute name="name" type="xsd:string" use="required"/>
-  </xsd:complexType>
-
-
-  <xsd:complexType name="tProcesses">
-    <xsd:sequence>
-      <xsd:element name="process" type="tProcess" minOccurs="1" maxOccurs="unbounded"/>
-    </xsd:sequence>
-  </xsd:complexType>
-
-  <xsd:complexType name="tProcess">
-    <xsd:sequence>
-      <xsd:element name="description" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-      <xsd:element name="thread" type="tThread" minOccurs="0" maxOccurs="unbounded"/>
-      <xsd:element name="component" type="tComponent" minOccurs="0" maxOccurs="unbounded"/>
-    </xsd:sequence>
-    <xsd:attribute name="id" type="xsd:string" use="required"/>
-    <xsd:attribute name="name" type="xsd:string" use="required"/>
-  </xsd:complexType>
-
-  <xsd:complexType name="tThread">
-    <xsd:sequence>
-      <xsd:element name="component" type="tComponent" minOccurs="1" maxOccurs="unbounded"/>
-    </xsd:sequence>
-    <xsd:attribute name="id" type="xsd:string" use="required"/>
-    <xsd:attribute name="name" type="xsd:string" use="required"/>
-  </xsd:complexType>
-
-  <xsd:complexType name="tComponent">
-    <xsd:attribute name="id" type="xsd:string" use="required"/>
-    <xsd:attribute name="name" type="xsd:string" use="required"/>
+  <xsd:complexType name="tInterface">
     <xsd:attribute name="xml" type="xsd:string" use="required"/>
   </xsd:complexType>
-
-
-
 
 </xsd:schema>
 
