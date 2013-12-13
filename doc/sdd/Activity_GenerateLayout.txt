@@ -1,0 +1,28 @@
+ 
+@startuml
+
+start
+
+:Open and Read Layout Configuration XML;
+
+repeat
+  :**Read Process**;
+  repeat
+  :**Read Thread**;
+  note: at least one should be there, the main thread
+    repeat
+      :**Read Component**;
+      repeat
+        : **Read Interface**;
+      repeat while(interfaces?)
+      : **Generate Interfaces Code**;
+    repeat while(components?)
+  : **Generate Components Code**;
+  repeat while(threads?)
+  : **Generate Threads Code**;
+repeat while(processes?)
+:**Generate Processes Code**;
+
+stop
+
+@enduml

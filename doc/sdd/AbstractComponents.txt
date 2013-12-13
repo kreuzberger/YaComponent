@@ -1,0 +1,15 @@
+@startuml
+
+title: Abstract component diagram
+
+A - [Component A]
+
+B - [Component B] 
+B1 - [Component B]
+
+[Component C] --> A : use
+[Component C] --> B : use
+[Component A] -> B1: use
+
+
+@enduml 

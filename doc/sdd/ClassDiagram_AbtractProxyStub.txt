@@ -1,0 +1,75 @@
+@startuml
+
+
+
+ICompIfc <|-- class CompIfcImpl 
+ICompIfcProxy <|-- class CompIfcProxy
+CompIfcProxy *-- ICompIfcConnection
+CompIfcProxy *-- ICompIfcProxyHandler
+CompIfcImpl *-- ICompIfcConnection
+
+ICompIfcConnection <|-- CompTCPConnection
+ICompIfcConnection <|-- CompInterProcConnection
+ICompIfcConnection <|-- CompInProcConnection
+ICompIfcConnection <|-- CompInThreadConnection
+
+ICompIfcProxyHandler <|-- class ConcreteUsingComponent
+ConcreteUsingComponent *-- ICompIfcProxy
+
+ConcreteProvideComponent *-- CompIfcImpl
+ICompIfcStubHandler <|-- class ConcreteProvideComponent
+
+class CompIfcImpl {
+    ICompIfcConnection* mpoConnection
+    ICompIfcStubHandler moHandler
+}
+
+class ICompIfcProxy {
+  {abstract} setNotification( int PropertyID)
+  {abstract} clearNotification( int PropertyID)
+  {abstract} requestXXX(...)
+}
+
+class ICompIfcProxyHandler {
+  {abstract} onNotifyXXX( ... )
+  {abstract} onResponseXXX(...)
+}
+
+class ICompIfcStubHandler {
+  {abstract} onRequestXXX( ... )
+}
+
+
+class CompIfcProxy {
+    CompIfcProxy(ICompIfcHandler&)
+    --
+    ICompIfcProxyHandler mHandler
+    ICompIfcConnection* mpoConnection
+}
+
+class ICompIfc {
+  {abstract} notifyXXX( ... )
+  {abstract} responseXXX(...)
+}
+
+class ConcreteProvideComponent {
+   CompIfcImpl moCompImpl
+   
+}
+
+class ConcreteUsingComponent {
+    ICompIfcProxy moProxy
+}
+
+class ICompIfcConnection {
+  {abstract} connectTo()
+  {abstract} setNotification( int PropertyID)
+  {abstract} clearNotification( int PropertyID)
+  {abstract} requestXXX(...)
+  {abstract} notifyXXX( ... )
+  {abstract} responseXXX(...)
+--
+}
+
+
+@enduml

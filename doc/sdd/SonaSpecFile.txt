@@ -1,0 +1,19 @@
+@startuml
+
+title: Sonagramm with file input component diagram
+
+interface "FileControl" as B
+interface "FileData" as B1
+interface "Spec" as A
+
+A - [SonaSpec]
+
+B - [File Reader] 
+B1 - [File Reader]
+
+[SonaSpekFile] --> A : use
+[SonaSpekFile] --> B : use
+[SonaSpec] -> B1: use
+
+
+@enduml 

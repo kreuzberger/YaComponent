@@ -1,0 +1,31 @@
+@startuml
+
+title: Multi Process Multi Threads
+
+package ProcessSonaSpec {
+  frame gui {
+  [SonaSpekFile]
+  }
+  
+  
+  package sonaspec {
+    interface "Spec" as A
+    A - [SonaSpec]
+  [SonaSpekFile] --> A : use
+  }
+}
+
+package ProcessFile {
+  package file {
+    interface "FileControl" as B
+    interface "FileData" as B1
+    B - [File Reader] 
+    B1 - [File Reader]
+   [SonaSpekFile] --> B : use
+   [SonaSpec] -> B1: use
+  }
+
+
+}
+
+@enduml 
