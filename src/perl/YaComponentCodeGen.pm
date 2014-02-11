@@ -68,13 +68,59 @@ sub writeComponentIfc
   print $fhHeader "class Ya" . $CompName ."Ifc\n";
   print $fhHeader "{\n";
   print $fhHeader "  public:\n";
-  print $fhHeader "    Ya" . $CompName . "() {}\n";
-  print $fhHeader "    virtual ~ Ya" . $CompName . "() {}\n";
+  print $fhHeader "    Ya" . $CompName . "Ifc() {}\n";
+  print $fhHeader "    virtual ~ Ya" . $CompName . "Ifc() {}\n";
   print $fhHeader "  protected:\n";
   print $fhHeader "};\n";
 
   print $fhHeader "\n#endif\n";
   close( $fhHeader);
+
+}
+
+
+sub writeComponentImpl
+{
+  my $CompName = shift;
+  my $fhHeader;
+  my $fhSource;
+
+  open ( $fhHeader, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "Impl.h") || YaComponent::printFatal("error creating outfile");
+  open ( $fhSource, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "Impl.cpp") || YaComponent::printFatal("error creating outfile");
+
+  if($YaComponent::gVerbose)
+  {
+    eval "use Data::Dumper";
+    if($@)
+    {
+      YaComponent::printWarn $@;
+      YaComponent::printFatal("Missing required package Data::Dumper");
+    }
+  }
+
+  print $fhHeader '#ifndef ' . uc($CompName) ."IMPL_H\n";
+  print $fhHeader '#define ' . uc($CompName) ."IMPL_H\n\n";
+  print $fhHeader "#include <QtCore/QObject>\n";
+  print $fhHeader "#include <stdio.h>\n";
+
+  print $fhHeader "class Ya" . $CompName ."Impl: public QObject\n";
+  print $fhHeader "{\n";
+  print $fhHeader "  Q_OBJECT\n";
+  print $fhHeader "  public:\n";
+  print $fhHeader "    Ya" . $CompName . "Impl() {}\n";
+  print $fhHeader "    virtual ~ Ya" . $CompName . "Impl() {}\n";
+  print $fhHeader "  protected:\n";
+  print $fhHeader "};\n";
+
+  print $fhHeader "\n#endif\n";
+
+
+  print $fhSource "#include \"" . $CompName . "Impl.h\"\n";
+  print $fhSource "#include \"" . $CompName . "Impl.moc\"\n";
+
+  close( $fhHeader);
+
+  close( $fhSource)
 
 }
 
@@ -95,10 +141,7 @@ sub writeCodeFiles
   close( $fh);
   open ( $fh, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "CompStub.cpp") || YaComponent::printFatal("error creating outfile");
   close( $fh);
-  open ( $fh, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "CompImpl.h") || YaComponent::printFatal("error creating outfile");
-  close( $fh);
-  open ( $fh, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "CompImpl.cpp") || YaComponent::printFatal("error creating outfile");
-  close( $fh);
+  writeComponentImpl($CompName);
 }
 
 

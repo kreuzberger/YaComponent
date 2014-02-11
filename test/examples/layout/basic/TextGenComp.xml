@@ -4,6 +4,6 @@
   <provides>
     <interface xml="TextGenIfc.xml"/>
   </provides>
-  <source/>
-  <header/>
+  <source path="textgencomp.cpp"/>
+  <header path="textgencomp.h"/>
 </component>
