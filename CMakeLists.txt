@@ -20,6 +20,10 @@ enable_testing()
 include(CTest)
 
 
+find_package(Protobuf REQUIRED)
+
+
+
 #ADD_DEFINITIONS( ${QT_DEFINITIONS} )
 add_subdirectory(src)
 add_subdirectory(test)

@@ -1,6 +1,6 @@
 
 #include "BasicLayout.h"
-#include "YaComponent.h"
+//#include "YaComponent.h"
 #include <stdio.h>
 #include <QtGui/QApplication>
 

@@ -9,12 +9,11 @@ INCLUDE_DIRECTORIES( ${QT_INCLUDE_DIR} )
 IFC_GENERATE(GENERATED_IFC_GEN_SRC TextGenComp.xml)
 IFC_GENERATE(GENERATED_IFC_OUT_SRC TextOutComp.xml)
 
-
 COMPLAYOUT_GENERATE(GENERATED_LAYOUT_SRC BasicLayout.xml)
 
-#QT4_WRAP_CPP( GENERATED_IFC_GEN_SRC_MOC_HEADERS  ${GENERATED_IFC_GEN_SRC})
 add_executable( process1  ${GENERATED_LAYOUT_SRC} main1.cpp  textgencomp.cpp ${GENERATED_IFC_GEN_SRC})
 add_executable( process2  ${GENERATED_LAYOUT_SRC} main2.cpp  textoutcomp.cpp ${GENERATED_IFC_OUT_SRC})
+
 target_link_libraries(process1 ${QT_LIBRARIES})
 target_link_libraries(process2 ${QT_LIBRARIES})
 

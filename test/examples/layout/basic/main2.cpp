@@ -1,5 +1,5 @@
 #include "BasicLayout.h"
-#include "YaComponent.h"
+//#include "YaComponent.h"
 
 #include <QtCore/QCoreApplication>
 #include <stdio.h>
