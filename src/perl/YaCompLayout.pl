@@ -14,7 +14,7 @@ my $optOk = GetOptions (
 #            'rootpath=s' => \$ProBuild::RootPath,
  #           'debug' => sub{$ProBuild::currBuildCfg = 'debug'},
  #           'genmake!' => \$ProBuild::gCurrCfgRef->{'genmake'},
-            'comp=s' => \$YaCompLayoutParser::gLayoutFileName,
+            'layout=s' => \$YaCompLayoutParser::gLayoutFileName,
             'outcode=s' => \$YaCompLayoutParser::gLayoutCodeOutPath,
             'verbose' => \$YaComponent::gVerbose,
             'help' => sub{pod2usage(-verbose => 0);CORE::exit;},
@@ -36,7 +36,7 @@ if($optOk)
 
   if(!defined $YaCompLayoutParser::gLayoutFileName)
   {
-    YaComponent::printFatal("Missing definition of Component layout file name, please use option --comp");
+    YaComponent::printFatal("Missing definition of Component layout file name, please use option --layout");
   }
   else
   {
@@ -49,7 +49,7 @@ __END__
 
 =head1 NAME
 
-yacomponent - Component Layout Parser and Code Generator
+yacomponentlayout - Component Layout Parser and Code Generator
 
 =head1 SYNOPSIS
 
@@ -59,7 +59,7 @@ yafsm [options]
    --help             brief help message
    --man              detailed options description
    --verbose          verbose debug messages
-   --comp             Component layout file name
+   --layout             Component layout file name
    --outcode          path for code generation
 
 =head1 OPTIONS

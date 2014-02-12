@@ -1,0 +1,27 @@
+option cc_generic_services = true;
+
+message Text {
+  required string text = 1;
+}
+
+message Request {
+  required int32 id = 1;
+}
+
+message Response {
+  required int32 id = 1;
+}
+
+
+message startedText {
+  optional Response id = 1;
+}
+
+message stoppedText {
+  optional Response id = 1;
+}
+
+service TextGenIfcRequests {
+  rpc StartText(Request) returns (startedText);
+  rpc StopText(Request) returns (stoppedText);
+}

@@ -49,7 +49,7 @@ sub writeComponentIfc
   my $CompName = shift;
   my $fhHeader;
 
-  open ( $fhHeader, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "I$CompName" . "Comp.h") || YaComponent::printFatal("error creating outfile");
+  open ( $fhHeader, "> $YaComponentParser::gCompCodeOutPath" . '/' . "I$CompName" . "Comp.h") || YaComponent::printFatal("error creating outfile");
 
   if($YaComponent::gVerbose)
   {
@@ -85,8 +85,8 @@ sub writeComponentImpl
   my $fhHeader;
   my $fhSource;
 
-  open ( $fhHeader, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "Impl.h") || YaComponent::printFatal("error creating outfile");
-  open ( $fhSource, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "Impl.cpp") || YaComponent::printFatal("error creating outfile");
+  open ( $fhHeader, "> $YaComponentParser::gCompCodeOutPath" . '/' . "$CompName" . "Impl.h") || YaComponent::printFatal("error creating outfile");
+  open ( $fhSource, "> $YaComponentParser::gCompCodeOutPath" . '/' . "$CompName" . "Impl.cpp") || YaComponent::printFatal("error creating outfile");
 
   if($YaComponent::gVerbose)
   {
@@ -133,13 +133,13 @@ sub writeCodeFiles
   my $fh;
 
   writeComponentIfc($CompName);
-  open ( $fh, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "CompProxy.h") || YaComponent::printFatal("error creating outfile");
+  open ( $fh, "> $YaComponentParser::gCompCodeOutPath" . '/' . "$CompName" . "CompProxy.h") || YaComponent::printFatal("error creating outfile");
   close( $fh);
-  open ( $fh, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "CompProxy.cpp") || YaComponent::printFatal("error creating outfile");
+  open ( $fh, "> $YaComponentParser::gCompCodeOutPath" . '/' . "$CompName" . "CompProxy.cpp") || YaComponent::printFatal("error creating outfile");
   close( $fh);
-  open ( $fh, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "CompStub.h") || YaComponent::printFatal("error creating outfile");
+  open ( $fh, "> $YaComponentParser::gCompCodeOutPath" . '/' . "$CompName" . "CompStub.h") || YaComponent::printFatal("error creating outfile");
   close( $fh);
-  open ( $fh, "> $YaComponentParser::gIfcCodeOutPath" . '/' . "$CompName" . "CompStub.cpp") || YaComponent::printFatal("error creating outfile");
+  open ( $fh, "> $YaComponentParser::gCompCodeOutPath" . '/' . "$CompName" . "CompStub.cpp") || YaComponent::printFatal("error creating outfile");
   close( $fh);
   writeComponentImpl($CompName);
 }

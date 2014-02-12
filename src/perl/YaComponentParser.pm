@@ -46,9 +46,15 @@ our $MAJOR_VERSION = 1;
 our $MINOR_VERSION = 0;
 our @EXPORT_OK;
 
-our $gIfcFileName;
-our $gIfcGenCode=1;
-our $gIfcCodeOutPath;
+our $gRootPath;
+our $gCompFileName;
+our $gCompGenCode=1;
+our $gCompCodeOutPath;
+our $gComp;
+our $gCompName;
+our $gCompPath;
+our @gCompInterfaces;
+
 our @gIfcRequests;
 our @gIfcResponses;
 our @gIfcProperties;
@@ -66,25 +72,25 @@ $slash = "\\" if $isWin;
 
 sub init
 {
-  my $ifcname = shift;
-  my $ifcbasename=basename($ifcname,'.xml');
-  if(!defined $gIfcCodeOutPath)
+  my $compname = shift;
+  my $compbasename=basename($compname,'.xml');
+  if(!defined $gCompCodeOutPath)
   {
-    $gIfcCodeOutPath= cwd() . '/' .lc($ifcbasename).'/code';
+    $gCompCodeOutPath= cwd() . '/' .lc($compbasename).'/code';
   }
 
 
-  if($gIfcGenCode && (defined $gIfcCodeOutPath))
+  if($gCompGenCode && (defined $gCompCodeOutPath))
   {
-    mkpath( $gIfcCodeOutPath, {verbose => 1, mode => 0755}) if (!(-d $gIfcCodeOutPath));
+    mkpath( $gCompCodeOutPath, {verbose => 1, mode => 0755}) if (!(-d $gCompCodeOutPath));
   }
 }
 
 
-sub readIfc
+sub readComp
 {
   my $filename = shift;
-  undef $gIfcFileName;
+  undef $gCompFileName;
   if( -f $filename)
   {
     eval "use XML::Simple";
@@ -111,7 +117,7 @@ sub readIfc
     # read XML file
     # force array is useful for configurations that have only one entry and are not parsed into
     # array by default. So we ensure that the buildcfg always is an array!
-    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(include type)])};
+    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(interface)])};
     if ($@)
     {
       # parse error messages look like this:
@@ -123,35 +129,125 @@ sub readIfc
     }
     else
     {
-      $gIfcFileName = $filename;
-      $gIfcName = basename($gIfcFileName,'.xml');
+      $gCompFileName = $filename;
+      my $suffix;
+      ($gCompName, $gCompPath, $suffix) = fileparse($gCompFileName,qw(.xml));
 
-      $gIfc = $xmlContent;
+      $gComp = $xmlContent;
 
-      print Dumper($gIfc) if $YaComponent::gVerbose;
-      YaComponent::printDbg("parsing Ifc Definition");
-      parseDefinitions($gIfc);# if $YaComponent::gVerbose;
+      print Dumper($gComp) if $YaComponent::gVerbose;
+      YaComponent::printDbg("parsing Component Definition");
+      parseCompDefinitions($gComp);# if $YaComponent::gVerbose;
 
       # write out code files
-      YaComponentCodeGen::writeCodeFiles($gIfcName)  if( $gIfcGenCode);
+      YaComponentCodeGen::writeCodeFiles($gCompName)  if( $gCompGenCode);
     }
 
 
-    if(!defined $gIfcFileName)
+    if(!defined $gCompFileName)
     {
-      YaComponent::printFatal("fsm file $filename could not be read");
+      YaComponent::printFatal("component file $filename could not be read");
     }
   }
   else
   {
-    YaComponent::printFatal("fsm file $filename not found");
+    YaComponent::printFatal("component file $filename not found");
+  }
+}
+
+
+sub parseCompDefinitions
+{
+  my $currRef = shift;
+
+  foreach my $ifc (@{$currRef->{provides}->{interface}})
+  {
+    if(!defined $ifc->{id} || !defined $ifc->{xml})
+    {
+      YaComponent::printFatal("missing definition of interface id or xml file");
+    }
+    YaComponent::printDbg("if id: $ifc->{id}, xml = $ifc->{xml}");
+    readIfc($ifc);
+    push(@gCompInterfaces,$ifc);
+  }
+}
+
+sub readIfc
+{
+  my $ifc = shift;
+  my $currfilename = $ifc->{xml};
+  my $filename = $currfilename;
+
+  if(defined $currfilename)
+  {
+    $filename = $gCompPath . "/" . $currfilename if (! -f $currfilename);
+    $filename = $gRootPath . "/" . $currfilename if (! -f $currfilename);
+  }
+
+  if( -f $filename)
+  {
+    eval "use XML::Simple";
+    if($@)
+    {
+      YaComponent::printWarn $@;
+      YaComponent::printFatal("Missing required package XML::Simple");
+    }
+
+    if($YaComponent::gVerbose)
+    {
+      eval "use Data::Dumper";
+      if($@)
+      {
+        YaComponent::printWarn $@;
+        YaComponent::printFatal("Missing required package Data::Dumper");
+      }
+    }
+
+
+    # create object
+    my $xml = new XML::Simple (KeyAttr=>[]);
+
+    # read XML file
+    # force array is useful for configurations that have only one entry and are not parsed into
+    # array by default. So we ensure that the buildcfg always is an array!
+    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(prop req resp include)])};
+    if ($@)
+    {
+      # parse error messages look like this:
+      # not well-formed at line 10, column 8, byte 382 at d:/bin/perl/site/lib/XML/Parser.pm line 183
+      $@ =~ /(.*) at .*? line \d+\.?\s*$/;
+      my $errmsg = $@;
+      YaComponent::printWarn("Parse error: $errmsg");
+      YaComponent::printFatal("exiting script due to parse error");
+    }
+    else
+    {
+      my $ifcFileName = $filename;
+      my $ifcBaseName = basename($ifcFileName,'.xml');
+
+      my $localIfc = $xmlContent;
+
+      print Dumper($localIfc) if $YaComponent::gVerbose;
+      YaComponent::printDbg("parsing Interface Definition");
+      parseIfcDefinitions($localIfc);# if $YaComponent::gVerbose;
+
+    }
+
+    if(!defined $filename)
+    {
+      YaComponent::printFatal("interface file $filename could not be read");
+    }
+  }
+  else
+  {
+    YaComponent::printFatal("interface file $filename not found");
   }
 }
 
 
 
 
-sub parseDefinitions
+sub parseIfcDefinitions
 {
   my $currRef = shift;
 
@@ -164,12 +260,11 @@ sub parseDefinitions
     {
       $property->{onChange} = 0;
     }
-    if(!defined $property->{id} || !defined $property->{type})
+    if(!defined $property->{id} )
     {
-      YaComponent::printFatal("missing definition of property id or type");
+      YaComponent::printFatal("missing definition of property id");
     }
     YaComponent::printDbg("property id: $property->{id}, onChange = $property->{onChange}");
-#    YaComponent::printDbg("property type: $property->{type}");
     push(@gIfcProperties,$property);
   }
 
@@ -180,7 +275,7 @@ sub parseDefinitions
     #my $cnt = keys(%{$cfg});
      #YaComponent::printDbg("$cnt");
     push(@gIfcRequests,$request);
-    YaComponent::printDbg("request: $request->{action}");
+    YaComponent::printDbg("request: $request->{id}");
   }
 
   foreach my $response (@{$currRef->{responses}->{resp}})
@@ -188,7 +283,7 @@ sub parseDefinitions
     #my $cnt = keys(%{$cfg});
      #YaComponent::printDbg("$cnt");
     push(@gIfcResponses,$response);
-    YaComponent::printDbg("response ($response->{id}): $response->{action} ");
+    YaComponent::printDbg("response: $response->{id}");
   }
 
 

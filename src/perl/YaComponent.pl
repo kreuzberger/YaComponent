@@ -14,8 +14,9 @@ my $optOk = GetOptions (
 #            'rootpath=s' => \$ProBuild::RootPath,
  #           'debug' => sub{$ProBuild::currBuildCfg = 'debug'},
  #           'genmake!' => \$ProBuild::gCurrCfgRef->{'genmake'},
-            'ifc=s' => \$YaComponentParser::gIfcFileName,
-            'outcode=s' => \$YaComponentParser::gIfcCodeOutPath,
+            'comp=s' => \$YaComponentParser::gCompFileName,
+            'outcode=s' => \$YaComponentParser::gCompCodeOutPath,
+            'rootpath=s' => \$YaComponentParser::gRootPath,
             'verbose' => \$YaComponent::gVerbose,
             'help' => sub{pod2usage(-verbose => 0);CORE::exit;},
             'man' => sub{pod2usage(-verbose => 1);CORE::exit;}
@@ -34,14 +35,14 @@ if($optOk)
     }
   }
 
-  if(!defined $YaComponentParser::gIfcFileName)
+  if(!defined $YaComponentParser::gCompFileName)
   {
-    YaComponent::printFatal("Missing definition of IFC file name, please use option --ifc");
+    YaComponent::printFatal("Missing definition of Component file name, please use option --comp");
   }
   else
   {
-    YaComponentParser::init($YaComponentParser::gIfcFileName);
-    YaComponentParser::readIfc($YaComponentParser::gIfcFileName);
+    YaComponentParser::init($YaComponentParser::gCompFileName);
+    YaComponentParser::readComp($YaComponentParser::gCompFileName);
   }
 
 }
@@ -50,7 +51,7 @@ __END__
 
 =head1 NAME
 
-yacomponent - Component Ifc Parser and Code Generator
+yacomponent - Component Parser and Code Generator
 
 =head1 SYNOPSIS
 
@@ -60,7 +61,7 @@ yafsm [options]
    --help             brief help message
    --man              detailed options description
    --verbose          verbose debug messages
-   --ifc              IFC file name
+   --comp             comp file name
    --outcode          path for code generation
 
 =head1 OPTIONS
@@ -79,10 +80,10 @@ Print detailed options descriptions and exit.
 
 Print detailled debug messages. Only important through debugging of probuild
 
-=item B<--ifc>
+=item B<--comp>
 
-IFC File name.
-XML IFC File description.
+Compenent File name.
+XML Component File description.
 
 =head1 DESCRIPTION
 

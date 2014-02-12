@@ -138,12 +138,12 @@ sub readLayout
 
     if(!defined $gLayoutFileName)
     {
-      YaComponent::printFatal("fsm file $filename could not be read");
+      YaComponent::printFatal("layout file $filename could not be read");
     }
   }
   else
   {
-    YaComponent::printFatal("fsm file $filename not found");
+    YaComponent::printFatal("layout file $filename not found");
   }
 }
 

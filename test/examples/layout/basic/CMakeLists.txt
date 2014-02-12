@@ -6,16 +6,18 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 include(${QT_USE_FILE})
 INCLUDE_DIRECTORIES( ${QT_INCLUDE_DIR} )
 
-IFC_GENERATE(GENERATED_IFC_GEN_SRC TextGenComp.xml)
-IFC_GENERATE(GENERATED_IFC_OUT_SRC TextOutComp.xml)
+YACOMPONENT_GENERATE(GENERATED_IFC_GEN_SRC TextGenComp.xml)
+YACOMPONENT_GENERATE(GENERATED_IFC_OUT_SRC TextOutComp.xml)
 
-COMPLAYOUT_GENERATE(GENERATED_LAYOUT_SRC BasicLayout.xml)
+YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT_SRC BasicLayout.xml)
 
-add_executable( process1  ${GENERATED_LAYOUT_SRC} main1.cpp  textgencomp.cpp ${GENERATED_IFC_GEN_SRC})
+PROTOBUF_GENERATE_CPP(ProtoSourcesTextGen ProtoHeadersTextGen TextGenIfc.proto)
+
+add_executable( process1  ${GENERATED_LAYOUT_SRC} main1.cpp  textgencomp.cpp ${GENERATED_IFC_GEN_SRC} ${ProtoSourcesTextGen})
 add_executable( process2  ${GENERATED_LAYOUT_SRC} main2.cpp  textoutcomp.cpp ${GENERATED_IFC_OUT_SRC})
 
-target_link_libraries(process1 ${QT_LIBRARIES})
-target_link_libraries(process2 ${QT_LIBRARIES})
+target_link_libraries(process1 ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES})
+target_link_libraries(process2 ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES})
 
 
 

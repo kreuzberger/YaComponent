@@ -2,7 +2,7 @@
 project(YaComponent_GENERATOR)
 
 
-macro (IFC_GENERATE outfiles)
+macro (YACOMPONENT_GENERATE outfiles)
   foreach( it ${ARGN})
     get_filename_component( it ${it} ABSOLUTE )
     get_filename_component( component ${it} NAME_WE )
@@ -17,8 +17,7 @@ macro (IFC_GENERATE outfiles)
     )
 
     add_custom_command( OUTPUT ${outfile}
-      #COMMAND echo perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code
-      COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --verbose
+      COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --comp=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --rootpath=${CMAKE_SOURCE_DIR} --verbose
       #ARGS -o ${outfile} ${it}
       DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR}
     )
@@ -28,10 +27,10 @@ macro (IFC_GENERATE outfiles)
     set( ${outfiles} ${${outfiles}} ${outfile})
     INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
   endforeach( it )
-endmacro( IFC_GENERATE )
+endmacro( YACOMPONENT_GENERATE )
 
 
-macro (COMPLAYOUT_GENERATE outfiles)
+macro (YACOMPONENT_LAYOUT_GENERATE outfiles)
   foreach( it ${ARGN})
    get_filename_component( it ${it} ABSOLUTE )
    get_filename_component( component ${it} NAME_WE )
@@ -43,8 +42,7 @@ macro (COMPLAYOUT_GENERATE outfiles)
 
 
   add_custom_command( OUTPUT ${outfile}
-      #COMMAND echo perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code
-      COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaCompLayout.pl --comp=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --verbose
+      COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaCompLayout.pl --layout=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code
       #ARGS -o ${outfile} ${it}
       DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR}
   )
@@ -73,6 +71,6 @@ macro (COMPLAYOUT_GENERATE outfiles)
   INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
   #QT4_WRAP_CPP( GENERATED_COMPLAYOUT_SRC_MOC_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/YaComponent.h )
  endforeach( it )
-endmacro( COMPLAYOUT_GENERATE )
+endmacro( YACOMPONENT_LAYOUT_GENERATE )
 
 
