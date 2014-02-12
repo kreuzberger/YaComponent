@@ -2,7 +2,7 @@
   <version maj="1" min="1" rev="0"/>
   <include file="TextGenIfc.pb.h"/>
   <properties>
-    <prop id="Text">
+    <prop id="Text"/>
   </properties>
   <requests>
     <req id="StartText"/>
