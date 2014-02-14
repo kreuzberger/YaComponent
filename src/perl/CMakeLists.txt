@@ -1,6 +1,32 @@
 #add_subdirectory(images)
 project(YaComponent_GENERATOR)
 
+macro (YACOMPONENT_IFC_GENERATE outfiles)
+  foreach( it ${ARGN})
+    get_filename_component( it ${it} ABSOLUTE )
+    get_filename_component( component ${it} NAME_WE )
+
+    set(outfile ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Proxy.h
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Proxy.cpp
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.cpp
+    )
+
+    add_custom_command( OUTPUT ${outfile}
+      COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --rootpath=${CMAKE_SOURCE_DIR} --verbose
+      DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR}
+    )
+
+    QT4_WRAP_CPP(blablub ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h
+                         ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Proxy.h
+    )
+
+    set( ${outfiles} ${${outfiles}} ${outfile})
+    INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
+  endforeach( it )
+endmacro( YACOMPONENT_IFC_GENERATE )
+
+
 
 macro (YACOMPONENT_GENERATE outfiles)
   foreach( it ${ARGN})
@@ -8,10 +34,10 @@ macro (YACOMPONENT_GENERATE outfiles)
     get_filename_component( component ${it} NAME_WE )
 
     set(outfile ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/I${component}Comp.h
-               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompProxy.h
-               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompProxy.cpp
-               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompStub.h
-               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}CompStub.cpp
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Proxy.h
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Proxy.cpp
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h
+               ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.cpp
                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Impl.h
                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Impl.cpp
     )
@@ -22,7 +48,10 @@ macro (YACOMPONENT_GENERATE outfiles)
       DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR}
     )
 
-    QT4_WRAP_CPP(blablub ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Impl.h)
+    QT4_WRAP_CPP(blablub ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h
+                         ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Proxy.h
+                         ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Impl.h
+    )
 
     set( ${outfiles} ${${outfiles}} ${outfile})
     INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )

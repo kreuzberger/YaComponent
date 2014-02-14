@@ -10,12 +10,16 @@ use Pod::Usage;
 use YaComponent;
 use YaComponentParser;
 
+my $compFilename;
+my $ifcFilename;
+
 my $optOk = GetOptions (
 #            'rootpath=s' => \$ProBuild::RootPath,
  #           'debug' => sub{$ProBuild::currBuildCfg = 'debug'},
  #           'genmake!' => \$ProBuild::gCurrCfgRef->{'genmake'},
-            'comp=s' => \$YaComponentParser::gCompFileName,
-            'outcode=s' => \$YaComponentParser::gCompCodeOutPath,
+            'comp=s' => \$compFilename,
+            'ifc=s' => \$ifcFilename,
+            'outcode=s' => \$YaComponentParser::gCodeOutPath,
             'rootpath=s' => \$YaComponentParser::gRootPath,
             'verbose' => \$YaComponent::gVerbose,
             'help' => sub{pod2usage(-verbose => 0);CORE::exit;},
@@ -35,14 +39,26 @@ if($optOk)
     }
   }
 
-  if(!defined $YaComponentParser::gCompFileName)
+  if(!defined $compFilename and !defined $ifcFilename )
   {
-    YaComponent::printFatal("Missing definition of Component file name, please use option --comp");
+    YaComponent::printFatal("Missing definition of file name, please use option --comp or --ifc");
   }
   else
   {
-    YaComponentParser::init($YaComponentParser::gCompFileName);
-    YaComponentParser::readComp($YaComponentParser::gCompFileName);
+    if(defined $compFilename)
+    {
+      YaComponentParser::init($compFilename);
+      my $comp = YaComponentParser::readComp($compFilename);
+      YaComponentCodeGen::writeCompCodeFiles($comp) if( $YaComponentParser::gGenCode);
+
+    }
+    elsif(defined $ifcFilename)
+    {
+      YaComponentParser::init($ifcFilename);
+      my $ifc = YaComponentParser::readIfc($ifcFilename);
+      YaComponentCodeGen::writeIfcCodeFiles($ifc) if( $YaComponentParser::gGenCode);
+    }
+
   }
 
 }

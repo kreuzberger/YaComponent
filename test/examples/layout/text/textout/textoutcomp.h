@@ -3,7 +3,7 @@
 
 #include "TextOutCompImpl.h"
 
-class TextOutComp : public YaTextOutCompImpl
+class TextOutComp : public YaComponent::TextOutCompImpl
 {
 public:
   TextOutComp();

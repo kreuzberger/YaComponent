@@ -2,7 +2,7 @@
   <version maj="1" min="1" rev="0"/>
   <description/>
   <provides>
-    <interface id="textgen" xml="test/examples/layout/basic/TextGenIfc.xml"/>
+    <interface id="textgen" xml="TextGenIfc.xml"/>
   </provides>
   <source path="textgencomp.cpp"/>
   <header path="textgencomp.h"/>

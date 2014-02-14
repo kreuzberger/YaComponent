@@ -3,7 +3,7 @@
 
 #include "TextGenCompImpl.h"
 
-class TextGenComp: public YaTextGenCompImpl
+class TextGenComp: public YaComponent::TextGenCompImpl
 {
 public:
   TextGenComp();

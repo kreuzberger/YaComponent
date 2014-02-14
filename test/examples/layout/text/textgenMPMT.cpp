@@ -1,14 +1,14 @@
 
-#include "BasicLayout.h"
+#include "TextExampleMPMT.h"
 //#include "YaComponent.h"
 #include <stdio.h>
 #include <QtGui/QApplication>
 
-#include "textgencomp.h"
+#include "textgen/textgencomp.h"
 
 int main(int argc, char** argv)
 {
   QApplication app(argc,argv);
-  #include "BasicLayoutprocess1.cpp"
+  #include "TextExampleMPMTTextGenProcess.cpp"
   return app.exec();
 }
