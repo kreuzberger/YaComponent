@@ -1,0 +1,15 @@
+<interface>
+  <version maj="1" min="1" rev="0"/>
+  <include file="TextGenIfc.pb.h"/>
+  <properties>
+    <prop id="Text"/>
+  </properties>
+  <requests>
+    <req id="StartText"/>
+    <req id="StopText"/>
+  </requests>
+  <responses>
+    <resp id="startedText"/>
+    <resp id="stoppedText"/>
+  </responses>
+</interface>

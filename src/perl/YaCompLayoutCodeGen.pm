@@ -97,8 +97,10 @@ sub writeProcessMain
       print $fhSource "  $thread->{name}.start();\n";
       foreach my $comp (@{$thread->{component}})
       {
-        print $fhSource "  #include \"$comp->{xml}\"\n";
-        print $fhSource "  YaComponent$comp->{name} $comp->{name};\n";
+        my($xmlfilename, $directories, $suffix) = fileparse($comp->{xml}, qw(.xml));
+
+        #print $fhSource "  #include \"" . $xmlfilename . "Impl.h\"\n";
+        print $fhSource "  " . $xmlfilename . " $comp->{name};\n";
         print $fhSource "  $comp->{name}.moveToThread(&$thread->{name});\n";
         print $fhSource "  printf(\"calling move to thread\\n\");\n";
       }
@@ -108,7 +110,8 @@ sub writeProcessMain
     # components associated with the main thread
     foreach my $comp (@{$process->{component}})
     {
-      print $fhSource "  YaComponent$comp->{name} $comp->{name};\n";
+      my($xmlfilename, $directories, $suffix) = fileparse($comp->{xml}, qw(.xml));
+      print $fhSource "  " . $xmlfilename ." $comp->{name};\n";
     }
 
 

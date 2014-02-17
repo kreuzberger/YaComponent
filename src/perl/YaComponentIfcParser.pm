@@ -1,4 +1,4 @@
-package YaCompLayoutParser;
+package YaComponentIfcParser;
 
 use strict;
 use warnings;
@@ -15,7 +15,7 @@ use File::Copy;
 #use Time::HiRes qw(gettimeofday tv_interval);
 #use ProBuildMake;
 
-use YaCompLayoutCodeGen;
+use YaComponentCodeGen;
 use FindBin;
 
 #use vars qw($VERSION @ISA @EXPORT);
@@ -46,14 +46,15 @@ our $MAJOR_VERSION = 1;
 our $MINOR_VERSION = 0;
 our @EXPORT_OK;
 
-our $gLayoutFileName;
-our $gLayoutGenCode=1;
-our $gLayoutCodeOutPath;
-our @gLayoutProcesses;
-our @gLayoutThreads;
-our $gLayout;
-our $gLayoutName;
-our @gLayoutIncludes;
+our $gIfcFileName;
+our $gIfcGenCode=1;
+our $gIfcCodeOutPath;
+our @gIfcRequests;
+our @gIfcResponses;
+our @gIfcProperties;
+our $gIfc;
+our $gIfcName;
+our @gIfcIncludes;
 
 our $isWin = 0;
 if( $^O eq "MSWin32" )
@@ -65,25 +66,25 @@ $slash = "\\" if $isWin;
 
 sub init
 {
-  my $layoutname = shift;
-  my $layoutbasename=basename($layoutname,'.xml');
-  if(!defined $gLayoutCodeOutPath)
+  my $ifcname = shift;
+  my $ifcbasename=basename($ifcname,'.xml');
+  if(!defined $gIfcCodeOutPath)
   {
-    $gLayoutCodeOutPath= cwd() . '/' .lc($layoutbasename).'/code';
+    $gIfcCodeOutPath= cwd() . '/' .lc($ifcbasename).'/code';
   }
 
 
-  if($gLayoutGenCode && (defined $gLayoutCodeOutPath))
+  if($gIfcGenCode && (defined $gIfcCodeOutPath))
   {
-    mkpath( $gLayoutCodeOutPath, {verbose => 1, mode => 0755}) if (!(-d $gLayoutCodeOutPath));
+    mkpath( $gIfcCodeOutPath, {verbose => 1, mode => 0755}) if (!(-d $gIfcCodeOutPath));
   }
 }
 
 
-sub readLayout
+sub readIfc
 {
   my $filename = shift;
-  undef $gLayoutFileName;
+  undef $gIfcFileName;
   if( -f $filename)
   {
     eval "use XML::Simple";
@@ -110,7 +111,7 @@ sub readLayout
     # read XML file
     # force array is useful for configurations that have only one entry and are not parsed into
     # array by default. So we ensure that the buildcfg always is an array!
-    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(process thread component)])};
+    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(include type)])};
     if ($@)
     {
       # parse error messages look like this:
@@ -122,28 +123,28 @@ sub readLayout
     }
     else
     {
-      $gLayoutFileName = $filename;
-      $gLayoutName = basename($gLayoutFileName,'.xml');
+      $gIfcFileName = $filename;
+      $gIfcName = basename($gIfcFileName,'.xml');
 
-      $gLayout = $xmlContent;
+      $gIfc = $xmlContent;
 
-      print Dumper($gLayout) if $YaComponent::gVerbose;
-      YaComponent::printDbg("parsing Layout Definition");
-      parseDefinitions($gLayout);# if $YaComponent::gVerbose;
+      print Dumper($gIfc) if $YaComponent::gVerbose;
+      YaComponent::printDbg("parsing Ifc Definition");
+      parseDefinitions($gIfc);# if $YaComponent::gVerbose;
 
       # write out code files
-      YaCompLayoutCodeGen::writeCodeFiles($gLayoutName)  if( $gLayoutGenCode);
+      YaComponentCodeGen::writeCodeFiles($gIfcName)  if( $gIfcGenCode);
     }
 
 
-    if(!defined $gLayoutFileName)
+    if(!defined $gIfcFileName)
     {
-      YaComponent::printFatal("layout file $filename could not be read");
+      YaComponent::printFatal("fsm file $filename could not be read");
     }
   }
   else
   {
-    YaComponent::printFatal("layout file $filename not found");
+    YaComponent::printFatal("fsm file $filename not found");
   }
 }
 
@@ -154,23 +155,48 @@ sub parseDefinitions
 {
   my $currRef = shift;
 
+  foreach my $property (@{$currRef->{properties}->{prop}})
+  {
+    #my $cnt = keys(%{$cfg});
+     #YaComponent::printDbg("$cnt");
+
+    if(!defined $property->{onChange})
+    {
+      $property->{onChange} = 0;
+    }
+    if(!defined $property->{id} || !defined $property->{type})
+    {
+      YaComponent::printFatal("missing definition of property id or type");
+    }
+    YaComponent::printDbg("property id: $property->{id}, onChange = $property->{onChange}");
+#    YaComponent::printDbg("property type: $property->{type}");
+    push(@gIfcProperties,$property);
+  }
+
+
+
+  foreach my $request (@{$currRef->{requests}->{req}})
+  {
+    #my $cnt = keys(%{$cfg});
+     #YaComponent::printDbg("$cnt");
+    push(@gIfcRequests,$request);
+    YaComponent::printDbg("request: $request->{action}");
+  }
+
+  foreach my $response (@{$currRef->{responses}->{resp}})
+  {
+    #my $cnt = keys(%{$cfg});
+     #YaComponent::printDbg("$cnt");
+    push(@gIfcResponses,$response);
+    YaComponent::printDbg("response ($response->{id}): $response->{action} ");
+  }
+
+
   foreach my $include (@{$currRef->{include}})
   {
     YaComponent::printDbg("include: $include->{file}");
-    push(@gLayoutIncludes, $include->{file});
+    push(@gIfcIncludes, $include->{file});
   }
-
-
-  foreach my $process (@{$currRef->{processes}->{process}})
-  {
-    YaComponent::printDbg("process: $process->{name}");
-    if(defined $process->{thread})
-    {
-      YaComponent::printDbg("thread: $process->{thread}[0]->{name}");
-    }
-    push(@gLayoutProcesses, $process);
-  }
-
 }
 
 

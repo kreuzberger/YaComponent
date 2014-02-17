@@ -1,9 +1,9 @@
 <componentlayout>
 <processes>
-<process name="process1" id="PROCESS1">
+<process name="TextGenProcess" id="GENPROCESS">
   <description></description>
-  <thread name="thread1" id="THREAD1">
-    <component name="TextGen" id="TEXTGEN" xml="TextGenComp.xml"/>
+  <thread name="TextGenThread" id="TEXTGENTHREAD">
+    <component name="TextGen" id="TEXTGEN" xml="textgen/TextGenComp.xml"/>
 <!--
       <provides>
         <if name="" id="" classname="" header="" xmldef=""/>
@@ -17,9 +17,9 @@
       -->
   </thread>
 </process>
-<process name="process2" id="PROCESS2">
+<process name="TextOutProcess" id="OUTPROCESS">
   <description></description>
-  <component name="TextOut" id="TEXTOUT" xml="TextOutComp.xml"/>
+  <component name="TextOut" id="TEXTOUT" xml="textgen/TextOutComp.xml"/>
 </process>
 </processes>
 </componentlayout>
