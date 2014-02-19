@@ -32,4 +32,26 @@ A layout should define which components are used within applications (processes)
 So independent from your components you could define several layouts for the same purposes
 
 
+Example
+-------
+
+Consider an application that wants to read data from a wile (e.g. sound values from a wave file) and caluclate some spectrum lines on them. The spectrum should be displayed as a sonagram
+
+![](https://raw2.github.com/kreuzberger/YaComponent/master/doc/sdd/SonaSpecFile.png)
+
+Main purpose of the layout is now to define how the components are organized:
+
+**Multi Process and or Multi Threads**
+
+Each component should be in a seperate process (executable). The code generation has now to consider to choose the right communication (tcp or message queues)
+
+![](https://raw2.github.com/kreuzberger/YaComponent/master/doc/sdd/SonaSpecFileLayoutMPMT.png)
+
+**Single Process and Single Threads**
+Another purpose could be to create a single application (just one executable) with very fast communication in one thread (zero copy message queues)
+
+![](https://raw2.github.com/kreuzberger/YaComponent/master/doc/sdd/SonaSpecFileLayoutSPST.png)
+
+
+
 
