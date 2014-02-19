@@ -1,5 +1,5 @@
-Main concept
-============
+Design overview
+===============
 
 
 **Definition of a component**
