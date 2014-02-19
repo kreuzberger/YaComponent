@@ -48,6 +48,7 @@ Each component should be in a seperate process (executable). The code generation
 ![](https://raw2.github.com/kreuzberger/YaComponent/master/doc/sdd/SonaSpecFileLayoutMPMT.png)
 
 **Single Process and Single Threads**
+
 Another purpose could be to create a single application (just one executable) with very fast communication in one thread (zero copy message queues)
 
 ![](https://raw2.github.com/kreuzberger/YaComponent/master/doc/sdd/SonaSpecFileLayoutSPST.png)
