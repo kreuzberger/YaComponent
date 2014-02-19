@@ -1,5 +1,5 @@
-Design overview
-===============
+Concept
+=======
 
 
 **Definition of a component**
