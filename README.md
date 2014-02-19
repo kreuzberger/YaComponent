@@ -15,5 +15,5 @@ Currently development of the generator started, but still not usable. The docume
 simple PlantUML design views.
 
 
-[Main Concepts!](doc/Concept.md)
+[Main Concepts](doc/Concept.md)
 
