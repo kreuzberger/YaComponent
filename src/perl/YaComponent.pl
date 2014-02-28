@@ -9,6 +9,8 @@ use Pod::Usage;
 
 use YaComponent;
 use YaComponentParser;
+use YaComponentCodeGen;
+use YaComponentDocGen;
 
 my $compFilename;
 my $ifcFilename;
@@ -20,6 +22,7 @@ my $optOk = GetOptions (
             'comp=s' => \$compFilename,
             'ifc=s' => \$ifcFilename,
             'outcode=s' => \$YaComponentParser::gCodeOutPath,
+            'outdoc=s' => \$YaComponentParser::gDocOutPath,
             'rootpath=s' => \$YaComponentParser::gRootPath,
             'verbose' => \$YaComponent::gVerbose,
             'help' => sub{pod2usage(-verbose => 0);CORE::exit;},
@@ -50,6 +53,7 @@ if($optOk)
       YaComponentParser::init($compFilename);
       my $comp = YaComponentParser::readComp($compFilename);
       YaComponentCodeGen::writeCompCodeFiles($comp) if( $YaComponentParser::gGenCode);
+      YaComponentDocGen::writeCompDoc($comp) if( $YaComponentParser::gGenDoc);
 
     }
     elsif(defined $ifcFilename)
@@ -57,10 +61,9 @@ if($optOk)
       YaComponentParser::init($ifcFilename);
       my $ifc = YaComponentParser::readIfc($ifcFilename);
       YaComponentCodeGen::writeIfcCodeFiles($ifc) if( $YaComponentParser::gGenCode);
+      YaComponentDocGen::writeIfcDoc($ifc) if( $YaComponentParser::gGenDoc);
     }
-
   }
-
 }
 
 __END__
@@ -71,7 +74,7 @@ yacomponent - Component Parser and Code Generator
 
 =head1 SYNOPSIS
 
-yafsm [options]
+yacomponent [options]
 
  Options:
    --help             brief help message
@@ -79,6 +82,7 @@ yafsm [options]
    --verbose          verbose debug messages
    --comp             comp file name
    --outcode          path for code generation
+   --outdoc           path for documentation generation
 
 =head1 OPTIONS
 

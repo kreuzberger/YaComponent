@@ -2,6 +2,10 @@
   <version maj="1" min="1" rev="0"/>
   <description/>
   <provides/>
+  <uses>
+    <interface id="xml" xml="TextGenIfc.xml"/>
+    <interface id="plain" xml="TextGenIfc.xml"/>
+  </uses>
   <source/>
   <header/>
 </component>

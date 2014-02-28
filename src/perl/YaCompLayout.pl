@@ -16,6 +16,7 @@ my $optOk = GetOptions (
  #           'genmake!' => \$ProBuild::gCurrCfgRef->{'genmake'},
             'layout=s' => \$YaCompLayoutParser::gLayoutFileName,
             'outcode=s' => \$YaCompLayoutParser::gLayoutCodeOutPath,
+            'outdoc=s' => \$YaCompLayoutParser::gLayoutDocOutPath,
             'verbose' => \$YaComponent::gVerbose,
             'help' => sub{pod2usage(-verbose => 0);CORE::exit;},
             'man' => sub{pod2usage(-verbose => 1);CORE::exit;}
@@ -53,14 +54,15 @@ yacomponentlayout - Component Layout Parser and Code Generator
 
 =head1 SYNOPSIS
 
-yafsm [options]
+yacomplayout [options]
 
  Options:
    --help             brief help message
    --man              detailed options description
    --verbose          verbose debug messages
-   --layout             Component layout file name
+   --layout           Component layout file name
    --outcode          path for code generation
+   --outdoc           path for documenation generation
 
 =head1 OPTIONS
 
@@ -78,10 +80,10 @@ Print detailed options descriptions and exit.
 
 Print detailled debug messages. Only important through debugging of probuild
 
-=item B<--ifc>
+=item B<--layout>
 
-IFC File name.
-XML IFC File description.
+Layout File name.
+XML Layout File description.
 
 =head1 DESCRIPTION
 

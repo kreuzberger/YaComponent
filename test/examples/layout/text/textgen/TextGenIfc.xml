@@ -2,14 +2,18 @@
   <version maj="1" min="1" rev="0"/>
   <include file="TextGenIfc.pb.h"/>
   <properties>
-    <prop id="Text"/>
+    <prop id="Text" package="TextGen"/>
   </properties>
   <requests>
-    <req id="StartText"/>
-    <req id="StopText"/>
+    <req id="StartText" package="TextGen">
+      <para id="Request" package="TextGen"/>
+    </req>
+    <req id="StopText" package="TextGen">
+      <para id="Request" package="TextGen"/>
+    </req>
   </requests>
   <responses>
-    <resp id="startedText"/>
-    <resp id="stoppedText"/>
+    <resp id="startedText" package="TextGen"/>
+    <resp id="stoppedText" package="TextGen"/>
   </responses>
 </interface>

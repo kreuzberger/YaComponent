@@ -5,8 +5,10 @@ project(YaComponent)
 set( DESIRED_QT_VERSION 4)
 
 find_package(Qt4 REQUIRED)
+find_package(Java REQUIRED)
 
 INCLUDE (cmake/FindZeroMQ.cmake)
+INCLUDE (cmake/FindPlantUML.cmake)
 
 #INCLUDE_DIRECTORIES( ${QT_INCLUDE_DIR} )
 if( CMAKE_HOST_UNIX )

@@ -9,7 +9,7 @@ message ReceiverData {
   repeated double samples = 6 [packed=true];
 }
 
-message RecieverMeta {
+message ReceiverMeta {
   required int32 id = 1;
   optional double centerFrequency = 2;
   optional double bandwith = 3;

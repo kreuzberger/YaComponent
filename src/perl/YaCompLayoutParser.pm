@@ -16,6 +16,7 @@ use File::Copy;
 #use ProBuildMake;
 
 use YaCompLayoutCodeGen;
+use YaCompLayoutDocGen;
 use FindBin;
 
 #use vars qw($VERSION @ISA @EXPORT);
@@ -48,7 +49,9 @@ our @EXPORT_OK;
 
 our $gLayoutFileName;
 our $gLayoutGenCode=1;
+our $gLayoutGenDoc=1;
 our $gLayoutCodeOutPath;
+our $gLayoutDocOutPath;
 our @gLayoutProcesses;
 our @gLayoutThreads;
 our $gLayout;
@@ -67,15 +70,25 @@ sub init
 {
   my $layoutname = shift;
   my $layoutbasename=basename($layoutname,'.xml');
+
   if(!defined $gLayoutCodeOutPath)
   {
-    $gLayoutCodeOutPath= cwd() . '/' .lc($layoutbasename).'/code';
+    $gLayoutCodeOutPath= cwd() . '/' . $layoutbasename .'/code';
   }
 
+  if(!defined $gLayoutDocOutPath)
+  {
+    $gLayoutDocOutPath= cwd() . '/' . $layoutbasename .'/doc';
+  }
 
   if($gLayoutGenCode && (defined $gLayoutCodeOutPath))
   {
     mkpath( $gLayoutCodeOutPath, {verbose => 1, mode => 0755}) if (!(-d $gLayoutCodeOutPath));
+  }
+
+  if($gLayoutGenDoc && (defined $gLayoutDocOutPath))
+  {
+    mkpath( $gLayoutDocOutPath, {verbose => 1, mode => 0755}) if (!(-d $gLayoutDocOutPath));
   }
 }
 
@@ -103,14 +116,13 @@ sub readLayout
       }
     }
 
-
     # create object
     my $xml = new XML::Simple (KeyAttr=>[]);
 
     # read XML file
     # force array is useful for configurations that have only one entry and are not parsed into
     # array by default. So we ensure that the buildcfg always is an array!
-    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(process thread component)])};
+    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(process thread component interface)])};
     if ($@)
     {
       # parse error messages look like this:
@@ -133,6 +145,7 @@ sub readLayout
 
       # write out code files
       YaCompLayoutCodeGen::writeCodeFiles($gLayoutName)  if( $gLayoutGenCode);
+      YaCompLayoutDocGen::writeDocFiles($gLayoutName)  if( $gLayoutGenDoc);
     }
 
 

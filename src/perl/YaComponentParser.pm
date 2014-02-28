@@ -15,7 +15,8 @@ use File::Copy;
 #use Time::HiRes qw(gettimeofday tv_interval);
 #use ProBuildMake;
 
-use YaComponentCodeGen;
+#use YaComponentCodeGen;
+
 use FindBin;
 
 #use vars qw($VERSION @ISA @EXPORT);
@@ -51,6 +52,9 @@ our $gRootPath;
 our $gGenCode=1;
 our $gCodeOutPath;
 
+our $gGenDoc=1;
+our $gDocOutPath;
+
 our $gCompPath;
 
 our $gIfcFileName;
@@ -67,15 +71,20 @@ sub init
 {
   my $compname = shift;
   my $compbasename=basename($compname,'.xml');
+
   if(!defined $gCodeOutPath)
   {
-    $gCodeOutPath= cwd() . '/' .lc($compbasename).'/code';
+    $gCodeOutPath= cwd() . '/' . $compbasename .'/code';
   }
 
-
-  if($gGenCode && (defined $gCodeOutPath))
+  if(!defined $gDocOutPath)
   {
-    mkpath( $gCodeOutPath, {verbose => 1, mode => 0755}) if (!(-d $gCodeOutPath));
+    $gDocOutPath= cwd() . '/' . $compbasename .'/doc';
+  }
+
+  if($gGenDoc && (defined $gDocOutPath))
+  {
+    mkpath( $gDocOutPath, {verbose => 1, mode => 0755}) if (!(-d $gDocOutPath));
   }
 }
 
@@ -179,7 +188,7 @@ sub readIfc
     # read XML file
     # force array is useful for configurations that have only one entry and are not parsed into
     # array by default. So we ensure that the buildcfg always is an array!
-    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(prop req resp include)])};
+    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(prop req resp include para)])};
     if ($@)
     {
       # parse error messages look like this:
@@ -280,7 +289,7 @@ sub parseIfc
     # read XML file
     # force array is useful for configurations that have only one entry and are not parsed into
     # array by default. So we ensure that the buildcfg always is an array!
-    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(prop req resp include)])};
+    my $xmlContent = eval{$xml->XMLin("$filename", ForceArray => [qw(prop req resp include para)])};
     if ($@)
     {
       # parse error messages look like this:
@@ -297,7 +306,6 @@ sub parseIfc
 
       my $localIfc = $xmlContent;
 
-#      print Dumper($localIfc) if $YaComponent::gVerbose;
       YaComponent::printDbg("parsing Interface Definition");
       my($prop,$req,$resp,$incl) = parseIfcDefinitions($localIfc);# if $YaComponent::gVerbose;
       $ifc->{properties} = \@{$prop};
@@ -351,16 +359,12 @@ sub parseIfcDefinitions
 
   foreach my $request (@{$currRef->{requests}->{req}})
   {
-    #my $cnt = keys(%{$cfg});
-     #YaComponent::printDbg("$cnt");
     push(@ifcRequests,$request);
     YaComponent::printDbg("request: $request->{id}");
   }
 
   foreach my $response (@{$currRef->{responses}->{resp}})
   {
-    #my $cnt = keys(%{$cfg});
-     #YaComponent::printDbg("$cnt");
     push(@ifcResponses,$response);
     YaComponent::printDbg("response: $response->{id}");
   }

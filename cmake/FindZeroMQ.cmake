@@ -35,12 +35,8 @@
   #  ENDIF(ZeroMQ_FRAMEWORKS AND NOT ZEROMQ_INCLUDE_DIR)
 
   FIND_PATH(ZEROMQ_INCLUDE_DIR
-          NAMES zmq.hpp
-          PATHS
-  #               ${ZEROMQ_FRAMEWORK_INCLUDES}
-                  ${ZEROMQ_INCLUDE_DIRS}
-                  ${NSCP_INCLUDEDIR}
-                  ${ZEROMQ_INCLUDE_DIR}
+          NAMES zmq.h
+          PATHS ${ZEROMQ_INCLUDE_DIRS} ${NSCP_INCLUDEDIR} ${ZEROMQ_INCLUDE_DIR} /usr/local/include
   )
 
   MARK_AS_ADVANCED(

@@ -1,20 +1,18 @@
 <interface>
   <version maj="1" min="1" rev="0"/>
-  <include file="/home/src/test"/>
+  <include file="BasicInterface.pb.h"/>
   <properties>
-    <prop id="ReiverData" onChange="0">
-      <proto file="BasicInterface.proto"/>
+    <prop id="ReceiverData" onChange="0">
     </prop>
     <prop id="ReceiverMeta">
-      <proto file="BasicInterface.proto"/>
     </prop>
   </properties>
   <requests>
-    <req id="StartReceiver"/>
-    <proto file="BasicInterface.proto"/>
+    <req id="StartReceiver">
+      <para id="StartRequest"/>
+    </req>
   </requests>
   <responses>
     <resp id="StartResponse"/>
-    <proto file="BasicInterface.proto"/>
   </responses>
 </interface>
