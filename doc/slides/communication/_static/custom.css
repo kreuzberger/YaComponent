@@ -1,0 +1,23 @@
+.slides {
+  font-size: 25px;
+}
+
+h2 {
+  font-size: 1.5em;
+  line-height: 1em;
+
+  position: static;
+  top: 15px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+
+  padding: 0;
+  margin: 0;
+  padding-right: 40px;
+
+  /*font-weight: 600;*/
+
+  letter-spacing: -2px;
+
+  color: rgb(51, 51, 51);
+} 
