@@ -9,6 +9,7 @@ find_package(Java REQUIRED)
 
 INCLUDE (cmake/FindZeroMQ.cmake)
 INCLUDE (cmake/FindPlantUML.cmake)
+INCLUDE (cmake/FindSphinxBuild.cmake)
 
 #INCLUDE_DIRECTORIES( ${QT_INCLUDE_DIR} )
 if( CMAKE_HOST_UNIX )
@@ -25,7 +26,9 @@ find_package(Protobuf REQUIRED)
 
 
 
+
 #ADD_DEFINITIONS( ${QT_DEFINITIONS} )
+add_subdirectory(doc)
 add_subdirectory(src)
 add_subdirectory(test)
 
