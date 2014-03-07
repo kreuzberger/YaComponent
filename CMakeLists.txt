@@ -5,7 +5,7 @@ project(YaComponent)
 set( DESIRED_QT_VERSION 4)
 
 find_package(Qt4 REQUIRED)
-find_package(Java REQUIRED)
+#find_package(Java REQUIRED)
 
 INCLUDE (cmake/FindZeroMQ.cmake)
 INCLUDE (cmake/FindPlantUML.cmake)
@@ -23,6 +23,7 @@ include(CTest)
 
 
 find_package(Protobuf REQUIRED)
+include_directories(${PROTOBUF_INCLUDE_DIRS})
 
 
 

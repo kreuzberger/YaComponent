@@ -7,6 +7,9 @@ FIND_FILE(PLANTUML_JAR
             NAMES plantuml.jar
             PATHS  ${CMAKE_CURRENT_LIST_DIR}/../bin
          )
+FIND_PROGRAM(Java_JAVA_EXECUTABLE
+           NAMES java java.exe
+         )
 
 if( PLANTUML_JAR STREQUAL "" )
   set( PLANTUML_FOUND false )
