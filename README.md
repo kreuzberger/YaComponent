@@ -6,7 +6,7 @@ YaComponent includes
  * XML description to define components, deployment and interfaces
  * Interface definition is done with google protobuf
  * perl base generator for c++ code for components and interfaces
- * implementation of the publish/subscriper pattern by using [crossroads-io](http://www.crossroads.io/)
+ * implementation of the publish/subscriper pattern by using [libzmq](http://zeromq.org//)
 
 Status
 ------
