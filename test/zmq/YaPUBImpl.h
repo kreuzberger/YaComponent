@@ -3,19 +3,24 @@
 
 class YaPUBImpl
 {
-  public:
-    YaPUBImpl( void* context );
-    virtual ~YaPUBImpl();
-    bool bind( const char* );
-    int send(int key, int iDataCnt, const char* pcData );
 
-  private:
-    YaPUBImpl();
-    YaPUBImpl( const YaPUBImpl& );
-    YaPUBImpl& operator=( const YaPUBImpl& );
+public:
+  YaPUBImpl( void* context );
+  virtual ~YaPUBImpl();
+  bool bind( const char* address, const char* syncaddress);
+  int send(int key, int iDataCnt, const char* pcData );
+  bool checkSubscribers(int iNumExpectedSubscribers = 1);
+  void close();
 
-    void* mpPUBSocket;
-    bool mbBound;
+private:
+  YaPUBImpl();
+  YaPUBImpl( const YaPUBImpl& );
+  YaPUBImpl& operator=( const YaPUBImpl& );
+
+  void* mpPUBSocket;
+  void* mpPUBSyncSocket;
+  bool mbBound;
+  int miSubscribersCnt;
 };
 
 #endif // YAPUBIMPL_H

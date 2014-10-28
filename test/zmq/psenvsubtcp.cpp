@@ -7,8 +7,10 @@
 
 enum key
 {
-    A = 0
+  INVALID = -1
+  , A = 0
   , B = 1
+  , END = 2
 };
 
 int main (void)
@@ -18,29 +20,33 @@ void *context = zmq_ctx_new ();
 assert (context);
 
 YaSUBImpl oSUB( context );
-bool bConnect = oSUB.connect("tcp://localhost:5563");
+bool bConnect = oSUB.connect("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync");
+
 assert( bConnect );
+
 if( !bConnect )
 {
     return(1);
 }
 
 oSUB.setNotification(B);
+oSUB.setNotification(END);
 double charmax=10E8;
 double charcnt=0;
 void* watch = zmq_stopwatch_start();
+int iKey = INVALID;
+while (END != iKey) {
+  int nbytes = oSUB.receive(iKey,0);
 
-while (charcnt < charmax) {
-  int nbytes = oSUB.receive(0);
   if((int(charcnt/1000.0) % 1000) == 0) printf (".");
   charcnt += nbytes +1;
 }
 
 unsigned long microsecs = zmq_stopwatch_stop (watch);
 double secs = microsecs/1000000.0;
-printf("\nreceived %g Mbytes in %g secs\n",charmax/1E6,secs);
 printf("average: %g Mbytes / second\n", charcnt/1E6/secs);
-// We never get here but clean up anyhow
+printf("total number of messages: %d \n", oSUB.getMessageCnt());
+oSUB.close();
 zmq_ctx_destroy (context);
 
 return 0;
