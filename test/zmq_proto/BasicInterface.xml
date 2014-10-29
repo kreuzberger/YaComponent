@@ -1,0 +1,16 @@
+<interface>
+  <version maj="1" min="1" rev="0"/>
+  <include file="BasicInterface.pb.h"/>
+  <properties>
+    <prop id="Text" onChange="0">
+    </prop>
+  </properties>
+  <requests>
+    <req id="StartText">
+      <para id="StartRequest"/>
+    </req>
+  </requests>
+  <responses>
+    <resp id="StartResponse"/>
+  </responses>
+</interface>
