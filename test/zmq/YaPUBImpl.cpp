@@ -7,7 +7,7 @@
 
 YaPUBImpl::YaPUBImpl(void * context)
   : mpPUBSocket(0)
-  , mpPUBSyncSocket(0)
+  , mpReqRespSocket(0)
   , mbBound(false)
   , miSubscribersCnt(0)
 {
@@ -15,7 +15,7 @@ YaPUBImpl::YaPUBImpl(void * context)
   if( 0 != context )
   {
     mpPUBSocket = zmq_socket (context, ZMQ_PUB);
-    mpPUBSyncSocket = zmq_socket (context, ZMQ_REP);
+    mpReqRespSocket = zmq_socket (context, ZMQ_REP);
   }
   else
   {
@@ -26,13 +26,13 @@ YaPUBImpl::YaPUBImpl(void * context)
 YaPUBImpl::~YaPUBImpl()
 {
   zmq_close( mpPUBSocket );
-  zmq_close( mpPUBSyncSocket );
+  zmq_close( mpReqRespSocket );
 }
 
 void YaPUBImpl::close()
 {
   zmq_close( mpPUBSocket );
-  zmq_close( mpPUBSyncSocket );
+  zmq_close( mpReqRespSocket );
 }
 
 bool YaPUBImpl::checkSubscribers(int iNumExpectedSubscribers)
@@ -40,10 +40,10 @@ bool YaPUBImpl::checkSubscribers(int iNumExpectedSubscribers)
   char buffer [256];
   while( miSubscribersCnt < iNumExpectedSubscribers)
   {
-    char* str = YaComponent::socket_rcv(mpPUBSyncSocket);
+    char* str = YaComponent::socket_rcv(mpReqRespSocket);
     free(str);
       //  s_send (syncservice, "");
-    YaComponent::socket_snd(mpPUBSyncSocket, "SYNC_ACK");
+    YaComponent::socket_snd(mpReqRespSocket, "SYNC_ACK");
     miSubscribersCnt++;
   }
 
@@ -53,10 +53,10 @@ bool YaPUBImpl::checkSubscribers(int iNumExpectedSubscribers)
 bool YaPUBImpl::bind( const char* address, const char* syncaddress)
 {
   assert( 0 != mpPUBSocket && 0 != address );
-  assert( 0 != mpPUBSyncSocket && 0 != syncaddress );
-  if( mpPUBSocket && mpPUBSyncSocket && !mbBound )
+  assert( 0 != mpReqRespSocket && 0 != syncaddress );
+  if( mpPUBSocket && mpReqRespSocket && !mbBound )
   {
-    if( 0 == zmq_bind(mpPUBSocket,address) && 0 == zmq_bind(mpPUBSyncSocket,syncaddress))
+    if( 0 == zmq_bind(mpPUBSocket,address) && 0 == zmq_bind(mpReqRespSocket,syncaddress))
     {
       mbBound = true;
     }
@@ -71,7 +71,7 @@ bool YaPUBImpl::bind( const char* address, const char* syncaddress)
     {
       fprintf(stderr, "error: already bound!\n");
     }
-    if( !mpPUBSocket || !mpPUBSyncSocket)
+    if( !mpPUBSocket || !mpReqRespSocket)
     {
       fprintf(stderr, "error: no socket!\n");
     }

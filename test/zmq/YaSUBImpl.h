@@ -22,7 +22,7 @@ class YaSUBImpl
     bool checkSync();
 
     void* mpSUBSocket;
-    void* mpSUBSyncSocket;
+    void* mpReqRespSocket;
     bool mbConnected;
     char *mpcKey;
     char *mpcMessageSize;

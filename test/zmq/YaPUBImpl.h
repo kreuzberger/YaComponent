@@ -18,7 +18,7 @@ private:
   YaPUBImpl& operator=( const YaPUBImpl& );
 
   void* mpPUBSocket;
-  void* mpPUBSyncSocket;
+  void* mpReqRespSocket;
   bool mbBound;
   int miSubscribersCnt;
 };

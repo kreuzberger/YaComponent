@@ -8,7 +8,7 @@
 
 YaSUBImpl::YaSUBImpl(void * context)
   : mpSUBSocket(0)
-  , mpSUBSyncSocket(0)
+  , mpReqRespSocket(0)
   , mbConnected(false)
   , mpcKey(0)
   , mpcMessageSize(0)
@@ -20,7 +20,7 @@ YaSUBImpl::YaSUBImpl(void * context)
   {
     mpSUBSocket = zmq_socket (context, ZMQ_SUB);
     YaComponent::sleep(1);
-    mpSUBSyncSocket = zmq_socket (context, ZMQ_REQ);
+    mpReqRespSocket = zmq_socket (context, ZMQ_REQ);
   }
   else
   {
@@ -35,13 +35,13 @@ YaSUBImpl::YaSUBImpl(void * context)
 void YaSUBImpl::close()
 {
   zmq_close( mpSUBSocket );
-  zmq_close( mpSUBSyncSocket );
+  zmq_close( mpReqRespSocket );
 }
 
 YaSUBImpl::~YaSUBImpl()
 {
   zmq_close( mpSUBSocket );
-  zmq_close( mpSUBSyncSocket );
+  zmq_close( mpReqRespSocket );
 
   delete [] mpcKey;
   delete [] mpcMessageSize;
@@ -59,13 +59,13 @@ int YaSUBImpl::setNotification(int key)
 bool YaSUBImpl::connect( const char* address, const char* syncaddress)
 {
   assert( 0 != mpSUBSocket && 0 != address );
-  assert( 0 != mpSUBSyncSocket && 0 != syncaddress );
-  if( mpSUBSocket && mpSUBSyncSocket && !mbConnected )
+  assert( 0 != mpReqRespSocket && 0 != syncaddress );
+  if( mpSUBSocket && mpReqRespSocket && !mbConnected )
   {
-    if( 0 == zmq_connect(mpSUBSocket,address) && ( 0 == zmq_connect(mpSUBSyncSocket,syncaddress)))
+    if( 0 == zmq_connect(mpSUBSocket,address) && ( 0 == zmq_connect(mpReqRespSocket,syncaddress)))
     {
       mbConnected = true;
-      zmq_send (mpSUBSyncSocket, "SYNC_REQ", strlen("SYNC_REQ"), 0);
+      zmq_send (mpReqRespSocket, "SYNC_SYN", strlen("SYNC_SYN"), 0);
       checkSync();
     }
     else
@@ -92,7 +92,7 @@ bool YaSUBImpl::connect( const char* address, const char* syncaddress)
 bool YaSUBImpl::checkSync()
 {
   char buffer [256];
-  int size = zmq_recv (mpSUBSyncSocket, buffer, 255, 0);
+  int size = zmq_recv (mpReqRespSocket, buffer, 255, 0);
   if (size == -1);
   if (size > 255)
       size = 255;
