@@ -5,11 +5,12 @@
 
 #include "zmq.h"
 #include "zmq_utils.h"
-#include "zhelpers.h"
+#include "YaComponent.h"
 
 #include <assert.h>
-
 #include <string.h>
+#include <malloc.h>
+
 int main (void)
 {
   // Prepare our context and subscriber
@@ -19,17 +20,17 @@ int main (void)
   zmq_setsockopt (subscriber, ZMQ_SUBSCRIBE, "B", 1);
 
   // 0MQ is so fast, we need to wait a while…
-  s_sleep (1);
+  YaComponent::sleep (1);
 
   // Second, synchronize with publisher
   void *syncclient = zmq_socket (context, ZMQ_REQ);
   zmq_connect (syncclient, "ipc:///tmp/hardcoresync");
 
   // - send a synchronization request
-  s_send (syncclient, "");
+  YaComponent::socket_snd(syncclient, "");
 
   // - wait for synchronization reply
-  char *string = s_recv (syncclient);
+  char *string = YaComponent::socket_rcv(syncclient);
   free (string);
 
   double charmax=10E8;

@@ -1,6 +1,6 @@
 #include "psenvbase.h"
 
-#include "zhelpers.h"
+#include "YaComponent.h"
 #include "zmq.h"
 
 
@@ -26,10 +26,10 @@ int main (void)
   int subscribers = 0;
   while (subscribers < 1) {
     // - wait for synchronization request
-    char *string = s_recv (syncservice);
+    char *string = YaComponent::socket_rcv(syncservice);
     free (string);
     // - send synchronization reply
-    s_send (syncservice, "");
+    YaComponent::socket_snd (syncservice, "");
     subscribers++;
   }
 
@@ -47,7 +47,7 @@ int main (void)
     if(rc == -1 && EAGAIN == errno)
     {
       moPSBase.decrText();
-      s_sleep(1);
+      YaComponent::sleep(1);
     }
   }
   // We never get here but clean up anyhow
