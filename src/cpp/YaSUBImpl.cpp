@@ -6,8 +6,6 @@
 #include <assert.h>
 #include <memory.h>
 
-#include "BasicInterface.pb.h"
-
 YaSUBImpl::YaSUBImpl(void * context)
   : mpSUBSocket(0)
   , mpReqRespSocket(0)

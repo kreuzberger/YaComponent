@@ -26,8 +26,8 @@ YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT_SRC TextExampleMPMT.xml)
 add_executable( textgenMPMT  ${GENERATED_LAYOUT_SRC} textgenMPMT.cpp  textgen/textgencomp.cpp ${GENERATED_IFC_GEN_SRC} ${GENERATED_COMP_GEN_SRC} ${ProtoSourcesTextGen})
 add_executable( textoutMPMT  ${GENERATED_LAYOUT_SRC} textoutMPMT.cpp  textout/textoutcomp.cpp ${GENERATED_IFC_OUT_SRC} ${GENERATED_COMP_OUT_SRC} ${GENERATED_IFC_GEN_SRC})
 
-target_link_libraries(textgenMPMT ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES})
-target_link_libraries(textoutMPMT ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES})
+target_link_libraries(textgenMPMT ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES} ${ZEROMQ_LIBRARIES} )
+target_link_libraries(textoutMPMT ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES} ${ZEROMQ_LIBRARIES} )
 
 
 

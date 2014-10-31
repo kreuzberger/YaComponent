@@ -2,6 +2,7 @@
 project(YaComponent_GENERATOR)
 
 macro (YACOMPONENT_IFC_GENERATE outfiles)
+  set( outfiles )
   foreach( it ${ARGN})
     get_filename_component( it ${it} ABSOLUTE )
     get_filename_component( component ${it} NAME_WE )
@@ -11,7 +12,6 @@ macro (YACOMPONENT_IFC_GENERATE outfiles)
                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h
                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.cpp
     )
-   # message(" adding outfile in if generation ${outfile}")
 
     add_custom_command( OUTPUT ${outfile}
       COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --rootpath=${CMAKE_SOURCE_DIR} --verbose
@@ -66,6 +66,25 @@ macro (YACOMPONENT_GENERATE outfiles)
     set( ${outfiles} ${${outfiles}} ${outfile})
     INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
   endforeach( it )
+
+  set(yacodefiles YaComponent.h
+                  YaComponent.cpp
+                  YaPUBImpl.h
+                  YaPUBImpl.cpp
+                  YaSUBImpl.h
+                  YaSUBImpl.cpp
+                  YaBuffer.h
+                  YaBuffer.cpp
+  )
+
+  foreach( file ${yacodefiles} )
+    add_custom_command(
+      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${file}
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/cpp/${file} ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${file}
+      DEPENDS ${CMAKE_SOURCE_DIR}/src/cpp/${file}
+    )
+    set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${file})
+  endforeach()
 endmacro( YACOMPONENT_GENERATE )
 
 

@@ -21,8 +21,8 @@ void *context = zmq_ctx_new ();
 assert (context);
 
 YaSUBImpl oSUB( context );
-//bool bConnect = oSUB.connect("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync");
-bool bConnect = oSUB.connect("tcp://localhost:42123","tcp://localhost:42124");
+bool bConnect = oSUB.connect("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync");
+//bool bConnect = oSUB.connect("tcp://localhost:42123","tcp://localhost:42124");
 
 assert( bConnect );
 
