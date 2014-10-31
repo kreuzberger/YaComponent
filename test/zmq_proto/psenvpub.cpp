@@ -5,6 +5,9 @@
 
 #include <unistd.h>
 
+#include "YaComponent.h"
+
+
 enum key
 {
     A = 0
@@ -17,7 +20,8 @@ int main (void)
 // Prepare our context and publisher
 void *context = zmq_ctx_new ();
 YaPUBImpl oPubImpl(context);
-oPubImpl.bind("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync");
+//oPubImpl.bind("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync");
+oPubImpl.bind("tcp://*:42123","tcp://*:42124");
 
 fprintf (stderr, "Waiting for subscribers\n");
 
@@ -29,13 +33,18 @@ while(!oPubImpl.checkSubscribers())
 fprintf(stderr, "All subscribers connected, start sending data\n");
 
 PSEnvBase moPSBase;
-
 while (moPSBase.hasNext())
 {
-  QByteArray oData = moPSBase.getText().toUtf8();
-  int rc = oPubImpl.send(B,oData.count(), oData.constData());
+ // txt2Send.set_text(qPrintable(moPSBase.getText()));
+//  moPSBase.getText();
+  int rc = oPubImpl.send(B,moPSBase.getText());
+  if( -1 == rc)
+  {
+    moPSBase.decrText();
+    YaComponent::sleep(1);
+  }
 }
-oPubImpl.send(END,0, 0);
+oPubImpl.send(END,0);
 oPubImpl.close();
 printf("now exiting, all %d messages are sent\n", moPSBase.getMaxTextCnt());
 zmq_ctx_destroy (context);

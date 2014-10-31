@@ -1,7 +1,7 @@
 #ifndef YASUBIMPL_H
 #define YASUBIMPL_H
 
-
+#include "YaBuffer.h"
 
 class YaSUBImpl
 {
@@ -14,19 +14,19 @@ class YaSUBImpl
     int clearNotification( int key);
     void close();
     int getMessageCnt() { return miMessageCnt; }
+    bool checkSync();
 
   private:
     YaSUBImpl();
     YaSUBImpl( const YaSUBImpl& );
     YaSUBImpl& operator=( const YaSUBImpl& );
-    bool checkSync();
 
     void* mpSUBSocket;
     void* mpReqRespSocket;
     bool mbConnected;
     char *mpcKey;
-    char *mpcMessageSize;
-    char* mpcMessage;
+    YaBuffer mMsgSizeBuffer;
+    YaBuffer mMsgBuffer;
     int miMessageCnt;
 };
 #endif // YASUBIMPL_H

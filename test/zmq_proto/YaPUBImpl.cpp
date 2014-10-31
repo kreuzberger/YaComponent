@@ -4,18 +4,26 @@
 #include <string.h>
 #include <assert.h>
 #include <malloc.h>
+#include <math.h>
 
 YaPUBImpl::YaPUBImpl(void * context)
   : mpPUBSocket(0)
   , mpReqRespSocket(0)
   , mbBound(false)
   , miSubscribersCnt(0)
+  , mMsgBuffer(YaComponent::MaxMessageSize)
 {
   assert( 0 != context );
   if( 0 != context )
   {
     mpPUBSocket = zmq_socket (context, ZMQ_PUB);
     mpReqRespSocket = zmq_socket (context, ZMQ_REP);
+    int hwm = 5000;
+    zmq_setsockopt(mpPUBSocket,ZMQ_SNDHWM,&hwm,sizeof(hwm));
+    int wait = 1;
+    zmq_setsockopt(mpPUBSocket,ZMQ_XPUB_NODROP,&wait,sizeof(wait));
+    int timeout = 0;
+    zmq_setsockopt (mpPUBSocket, ZMQ_SNDTIMEO, &timeout, 4);
   }
   else
   {
@@ -81,32 +89,49 @@ bool YaPUBImpl::bind( const char* address, const char* syncaddress)
 
 }
 
-int YaPUBImpl::send(int key, int iDataCnt, const char* pcData )
+int YaPUBImpl::send(int key, const ::google::protobuf::MessageLite* msg)
+{
+  int rc = -1;
+  int iSize = 0;
+  if( msg )
+  {
+    iSize = msg->GetCachedSize();
+    msg->SerializeToArray(mMsgBuffer.data(),iSize);
+  }
+  rc = send(key, iSize, mMsgBuffer.data());
+
+  return rc;
+}
+
+
+int YaPUBImpl::send(int key, int msgSize, const char* msgData)
 {
   char cKey[YaComponent::KeySize];
   char cSize[YaComponent::MessageSize];
   sprintf(cKey,YaComponent::KeyFmt,key);
-  sprintf(cSize,YaComponent::MessageSizeFmt,iDataCnt);
   int rc = -1;
   assert( 0 != mpPUBSocket  );
   if( 0 != mpPUBSocket)
   {
-    //printf("sending with key %s data %d\n",cKey,iDataCnt);
     rc = zmq_send(mpPUBSocket,cKey, YaComponent::KeySize , ZMQ_SNDMORE);
-    assert( YaComponent::KeySize == rc);
-    if( 0 < iDataCnt && 0 != pcData )
+    if( -1 != rc )
     {
-//      rc = zmq_send(mpPUBSocket, cSize, YaComponent::MessageSize , ZMQ_SNDMORE);
-//      assert( YaComponent::MessageSize == rc);
-      rc = zmq_send(mpPUBSocket, pcData, iDataCnt,0);
-      assert( iDataCnt == rc );
-    }
-    else
-    {
-      rc = zmq_send(mpPUBSocket, cSize, YaComponent::MessageSize , 0);
+      if( 0 != msgSize && 0 != msgData )
+      {
+        rc = zmq_send(mpPUBSocket, msgData, msgSize,0);
+      }
+      else
+      {
+        rc = zmq_send(mpPUBSocket, 0, 0,0);
+      }
     }
   }
 
+  if( -1 == rc )
+  {
+    assert( errno == EAGAIN );
+  }
 
   return rc;
 }
+

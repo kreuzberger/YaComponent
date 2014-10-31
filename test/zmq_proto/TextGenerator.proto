@@ -1,5 +1,7 @@
 option cc_generic_services = true;
 
+package TextGenerator;
+
 message Text {
   required string text = 1;
 }

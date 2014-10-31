@@ -1,26 +1,26 @@
 #ifndef PSENVBASE_H
 #define PSENVBASE_H
 
-#include <QtCore/QString>
 #include <math.h>
-
+#include "TextGenerator.pb.h"
 class PSEnvBase
 {
 public:
     PSEnvBase();
     virtual ~ PSEnvBase();
 
-    QString getText();
+    const ::google::protobuf::MessageLite* getText();
     void setMaxTextCnt(int iMax);
     int getMaxTextCnt() const { return miMaxTextCnt; }
     bool hasNext();
     void decrText() { miTextCnt--; }
 
 private:
-    QString moText;
+    char moText[4096];
     int miTextCnt;
     int miMaxTextCnt;
     int miPadding;
+    TextGenerator::Text moTextSend;
 };
 
 inline bool PSEnvBase::hasNext()

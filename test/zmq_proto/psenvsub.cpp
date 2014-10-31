@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include "YaComponent.h"
 
 enum key
 {
@@ -20,7 +21,8 @@ void *context = zmq_ctx_new ();
 assert (context);
 
 YaSUBImpl oSUB( context );
-bool bConnect = oSUB.connect("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync");
+//bool bConnect = oSUB.connect("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync");
+bool bConnect = oSUB.connect("tcp://localhost:42123","tcp://localhost:42124");
 
 assert( bConnect );
 
@@ -31,6 +33,14 @@ if( !bConnect )
 
 oSUB.setNotification(B);
 oSUB.setNotification(END);
+
+YaComponent::sleep(1);
+
+while(!oSUB.checkSync())
+{
+}
+
+
 double charmax=10E8;
 double charcnt=0;
 void* watch = zmq_stopwatch_start();

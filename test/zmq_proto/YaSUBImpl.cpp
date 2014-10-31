@@ -6,13 +6,14 @@
 #include <assert.h>
 #include <memory.h>
 
+#include "BasicInterface.pb.h"
+
 YaSUBImpl::YaSUBImpl(void * context)
   : mpSUBSocket(0)
   , mpReqRespSocket(0)
   , mbConnected(false)
-  , mpcKey(0)
-  , mpcMessageSize(0)
-  , mpcMessage(0)
+  , mMsgSizeBuffer(YaComponent::MessageSize)
+  , mMsgBuffer(YaComponent::MaxMessageSize)
   , miMessageCnt(0)
 {
   assert( 0 != context );
@@ -28,8 +29,6 @@ YaSUBImpl::YaSUBImpl(void * context)
   }
 
   mpcKey = new char[YaComponent::KeySize];
-  mpcMessageSize = new char[YaComponent::MessageSize];
-  mpcMessage = new char[YaComponent::MaxMessageSize];
 }
 
 void YaSUBImpl::close()
@@ -44,8 +43,6 @@ YaSUBImpl::~YaSUBImpl()
   zmq_close( mpReqRespSocket );
 
   delete [] mpcKey;
-  delete [] mpcMessageSize;
-  delete [] mpcMessage;
 }
 
 int YaSUBImpl::setNotification(int key)
@@ -66,7 +63,6 @@ bool YaSUBImpl::connect( const char* address, const char* syncaddress)
     {
       mbConnected = true;
       zmq_send (mpReqRespSocket, "SYNC_SYN", strlen("SYNC_SYN"), 0);
-      checkSync();
     }
     else
     {
@@ -121,7 +117,14 @@ int YaSUBImpl::receive(int& key, const  char* pcData )
 //    assert( iDataSize <= YaComponent::MaxMessageSize );
 //    if(0 < iDataSize)
     {
-      iBytes = zmq_recv (mpSUBSocket, mpcMessage, YaComponent::MaxMessageSize, 0);
+      iBytes = zmq_recv (mpSUBSocket, mMsgBuffer.data(), YaComponent::MaxMessageSize, 0);
+//      Text txtRcv;
+      if( 0 < iBytes )
+      {
+//        txtRcv.ParseFromArray(mpcMessage,iBytes);
+//        txtRcv.PrintDebugString();
+      }
+
     //  if( iBytes != iDataSize  )
     //  assert (iBytes == iDataSize);
     }

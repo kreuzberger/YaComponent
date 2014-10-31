@@ -29,7 +29,8 @@ include_directories(${PROTOBUF_INCLUDE_DIRS})
 
 
 #ADD_DEFINITIONS( ${QT_DEFINITIONS} )
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/cpp")
+
 add_subdirectory(doc)
 add_subdirectory(src)
 add_subdirectory(test)
-
