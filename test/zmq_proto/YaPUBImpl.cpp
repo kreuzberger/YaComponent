@@ -1,5 +1,4 @@
 #include "YaPUBImpl.h"
-#include "YaComponent.h"
 #include "zmq.h"
 #include <string.h>
 #include <assert.h>
@@ -106,14 +105,12 @@ int YaPUBImpl::send(int key, const ::google::protobuf::MessageLite* msg)
 
 int YaPUBImpl::send(int key, int msgSize, const char* msgData)
 {
-  char cKey[YaComponent::KeySize];
-  char cSize[YaComponent::MessageSize];
-  sprintf(cKey,YaComponent::KeyFmt,key);
+  sprintf(mcKey,YaComponent::KeyFmt,key);
   int rc = -1;
   assert( 0 != mpPUBSocket  );
   if( 0 != mpPUBSocket)
   {
-    rc = zmq_send(mpPUBSocket,cKey, YaComponent::KeySize , ZMQ_SNDMORE);
+    rc = zmq_send(mpPUBSocket,mcKey, YaComponent::KeySize , ZMQ_SNDMORE);
     if( -1 != rc )
     {
       if( 0 != msgSize && 0 != msgData )

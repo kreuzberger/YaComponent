@@ -3,6 +3,7 @@
 
 
 #include <google/protobuf/message_lite.h>
+#include "YaComponent.h"
 #include "YaBuffer.h"
 
 class YaPUBImpl
@@ -28,6 +29,9 @@ private:
   bool mbBound;
   int miSubscribersCnt;
   YaBuffer mMsgBuffer;
+  char mcKey[YaComponent::KeySize];
+//  char mcSize[YaComponent::MessageSize];
+
 };
 
 #endif // YAPUBIMPL_H
