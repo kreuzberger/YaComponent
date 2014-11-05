@@ -9,7 +9,7 @@ public:
     PSEnvBase();
     virtual ~ PSEnvBase();
 
-    const ::google::protobuf::MessageLite* getText();
+    const ::google::protobuf::MessageLite& getText();
     void setMaxTextCnt(int iMax);
     int getMaxTextCnt() const { return miMaxTextCnt; }
     bool hasNext();

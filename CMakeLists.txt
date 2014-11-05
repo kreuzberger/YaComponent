@@ -7,9 +7,12 @@ set( DESIRED_QT_VERSION 4)
 find_package(Qt4 REQUIRED)
 #find_package(Java REQUIRED)
 
-INCLUDE (cmake/FindZeroMQ.cmake)
-INCLUDE (cmake/FindPlantUML.cmake)
-INCLUDE (cmake/FindSphinxBuild.cmake)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake" )
+
+find_package( ZeroMQ REQUIRED )
+find_package( PlantUML )
+find_package( SphinxBuild )
 
 #INCLUDE_DIRECTORIES( ${QT_INCLUDE_DIR} )
 if( CMAKE_HOST_UNIX )

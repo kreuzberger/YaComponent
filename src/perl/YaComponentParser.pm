@@ -138,10 +138,15 @@ sub readComp
 
  #     print Dumper($comp) if $YaComponent::gVerbose;
       YaComponent::printDbg("parsing Component Definition");
-      parseCompDefinitions($comp);# if $YaComponent::gVerbose;
+      my($providedIfc,$usedIfc) = parseCompDefinitions($comp);# if $YaComponent::gVerbose;
+  #    print Dumper($providedIfc) if $YaComponent::gVerbose;
+  #    print Dumper($usedIfc) if $YaComponent::gVerbose;
+
       $comp->{name}=$compName;
-#      YaComponent::printDbg("Component after parsing");
-#      print Dumper($gComp) if $YaComponent::gVerbose;
+      $comp->{provided} = \@{$providedIfc};
+      $comp->{used} = \@{$usedIfc};
+     # YaComponent::printDbg("Component after parsing");
+     # print Dumper($comp) if $YaComponent::gVerbose;
       # write out code files
     }
 
@@ -237,6 +242,9 @@ sub parseCompDefinitions
 {
   my $currRef = shift;
 
+  my @ifcProvided;
+  my @ifcUsed;
+
   foreach my $ifc (@{$currRef->{provides}->{interface}})
   {
     if(!defined $ifc->{id} || !defined $ifc->{xml})
@@ -244,8 +252,25 @@ sub parseCompDefinitions
       YaComponent::printFatal("missing definition of interface id or xml file");
     }
     YaComponent::printDbg("if id: $ifc->{id}, xml = $ifc->{xml}");
-    parseIfc($ifc);
+    #parseIfc($ifc);
+    push(@ifcProvided, {id => $ifc->{id}, classname => basename("$ifc->{xml}",'.xml') });
+
   }
+
+
+  foreach my $ifc (@{$currRef->{uses}->{interface}})
+  {
+    if(!defined $ifc->{id} || !defined $ifc->{xml})
+    {
+      YaComponent::printFatal("missing definition of interface id or xml file");
+    }
+    YaComponent::printDbg("if id: $ifc->{id}, xml = $ifc->{xml}");
+    #parseIfc($ifc);
+    push(@ifcUsed, {id => $ifc->{id}, classname => basename("$ifc->{xml}",'.xml') });
+  }
+
+ return (\@ifcProvided, \@ifcUsed);
+
 #  print "component after parsing:\n" if $YaComponent::gVerbose;
 #  print Dumper($currRef) if $YaComponent::gVerbose;
 

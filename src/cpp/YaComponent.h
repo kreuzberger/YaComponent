@@ -14,6 +14,7 @@ namespace YaComponent {
   int socket_snd(void *socket, const char *string);
   int socket_snd_more(void *socket, const char *string);
   void sleep(int msecs);
+  void* context_new();
 }
 
 

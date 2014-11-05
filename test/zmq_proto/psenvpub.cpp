@@ -45,7 +45,7 @@ while (moPSBase.hasNext())
     YaComponent::sleep(1);
   }
 }
-oPubImpl.send(END,0);
+oPubImpl.send(END,0,0);
 oPubImpl.close();
 printf("now exiting, all %d messages are sent\n", moPSBase.getMaxTextCnt());
 zmq_ctx_destroy (context);

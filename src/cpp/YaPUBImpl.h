@@ -13,7 +13,7 @@ public:
   YaPUBImpl( void* context );
   virtual ~YaPUBImpl();
   bool bind( const char* address, const char* syncaddress);
-  int send(int key, const ::google::protobuf::MessageLite* msg );
+  int send(int key, const ::google::protobuf::MessageLite& msg );
   int send(int key, int msgSize, const char* msgData );
   bool checkSubscribers(int iNumExpectedSubscribers = 1);
   void close();

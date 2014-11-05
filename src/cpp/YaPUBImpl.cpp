@@ -88,15 +88,11 @@ bool YaPUBImpl::bind( const char* address, const char* syncaddress)
 
 }
 
-int YaPUBImpl::send(int key, const ::google::protobuf::MessageLite* msg)
+int YaPUBImpl::send(int key, const ::google::protobuf::MessageLite& msg)
 {
   int rc = -1;
-  int iSize = 0;
-  if( msg )
-  {
-    iSize = msg->GetCachedSize();
-    msg->SerializeToArray(mMsgBuffer.data(),iSize);
-  }
+  int iSize = msg.GetCachedSize();
+  msg.SerializeToArray(mMsgBuffer.data(),iSize);
   rc = send(key, iSize, mMsgBuffer.data());
 
   return rc;

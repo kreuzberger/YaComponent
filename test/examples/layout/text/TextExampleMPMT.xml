@@ -3,8 +3,19 @@
 <process name="TextGenProcess" id="GENPROCESS">
   <description></description>
   <thread name="TextGenThread" id="TEXTGENTHREAD">
-    <component name="TextGen1" id="TEXTGEN1" xml="textgen/TextGenComp.xml"/>
-    <component name="TextGen2" id="TEXTGEN2" xml="textgen/TextGenComp.xml"/>
+    <component name="TextGen1" id="TEXTGEN1" xml="textgen/TextGenComp.xml">
+      <provides>
+        <interface id="TextGenXml" address="inproc:///tmp/hurtmexml"/>
+        <interface id="TextGenPlain" address="inproc:///tmp/hurtmeplain"/>
+      </provides>
+    </component>
+    <component name="TextGen2" id="TEXTGEN2" xml="textgen/TextGenComp.xml">
+      <provides>
+        <interface id="TextGenXml" address="inproc:///tmp/hurtmexml2"/>
+        <interface id="TextGenPlain" address="inproc:///tmp/hurtmeplain2"/>
+      </provides>
+    </component>
+    
 <!--
       <provides>
         <if name="" id="" classname="" header="" xmldef=""/>
@@ -22,7 +33,7 @@
   <description></description>
   <component name="TextOut" id="TEXTOUT" xml="textgen/TextOutComp.xml">
     <uses>
-      <interface id="xml" provId="TextGen1.TextGenXml"/>
+      <interface id="Xml" provId="TextGen1.TextGenXml"/>
     </uses>
   </component>
 </process>

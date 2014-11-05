@@ -6,7 +6,7 @@
 class TextGenComp: public YaComponent::TextGenCompImpl
 {
 public:
-  TextGenComp();
+  TextGenComp(void* context);
 };
 
 #endif // TEXTGENCOMP_H

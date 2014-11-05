@@ -81,6 +81,8 @@ sub writeProcessMain
     #print $fhSource 'void ' . $process->{name} ."Start()\n";
     #print $fhSource '{' ."\n";
 
+    print $fhSource "  void* context = YaComponent::context_new();\n";
+
     foreach my $thread (@{$process->{thread}})
     {
       print $fhHeader " class YaThread" . $thread->{name} .": public QThread\n";
@@ -100,7 +102,7 @@ sub writeProcessMain
         my($xmlfilename, $directories, $suffix) = fileparse($comp->{xml}, qw(.xml));
 
         #print $fhSource "  #include \"" . $xmlfilename . "Impl.h\"\n";
-        print $fhSource "  " . $xmlfilename . " $comp->{name};\n";
+        print $fhSource "  " . $xmlfilename . " $comp->{name}(context);\n";
         print $fhSource "  $comp->{name}.moveToThread(&$thread->{name});\n";
         print $fhSource "  printf(\"calling move to thread\\n\");\n";
       }
@@ -111,7 +113,7 @@ sub writeProcessMain
     foreach my $comp (@{$process->{component}})
     {
       my($xmlfilename, $directories, $suffix) = fileparse($comp->{xml}, qw(.xml));
-      print $fhSource "  " . $xmlfilename ." $comp->{name};\n";
+      print $fhSource "  " . $xmlfilename ." $comp->{name}(context);\n";
     }
 
 

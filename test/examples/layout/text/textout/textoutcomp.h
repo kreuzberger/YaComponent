@@ -2,18 +2,22 @@
 #define TEXTOUTCOMP_H
 
 #include "TextOutCompImpl.h"
-#include "TextGenIfcProxy.h"
+#include "ITextGenIfcProxyHandler.h"
 
 class TextOutComp : public YaComponent::TextOutCompImpl
-                    , public YaComponent::TextGenIfcProxy
+                    , public ITextGenIfcProxyHandler
 {
 public:
-  TextOutComp();
+  TextOutComp( void* context);
 
-protected:
-  virtual void onProperty(const TextGen::Text&) {}
-  virtual void onResponse(const TextGen::startedText&) {};
-  virtual void onResponse(const TextGen::stoppedText&) {};
+  void onProperty( const YaProxyBase*, const TextGen::Text& ) {}
+
+  virtual void onResponse( const YaProxyBase*, const TextGen::startedText& ) {}
+  virtual void onResponse( const YaProxyBase*, const TextGen::stoppedText& ) {}
+
+private:
+
+  TextOutComp& self() { return *this; }
 };
 
 #endif // TEXTOUTCOMP_H

@@ -16,10 +16,10 @@ PSEnvBase::~PSEnvBase()
 }
 
 
-const ::google::protobuf::MessageLite* PSEnvBase::getText()
+const ::google::protobuf::MessageLite& PSEnvBase::getText()
 {
   miTextCnt++;
   sprintf(moText,"%08d: The quick brown fox jumps over the lazy dog 0123456789The quick brown fox jumps over the lazy dog 0123456789",miTextCnt);
   moTextSend.set_text(moText);
-  return &moTextSend;
+  return moTextSend;
 }

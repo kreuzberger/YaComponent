@@ -46,4 +46,9 @@ namespace YaComponent
   #endif
   }
 
+  void* context_new()
+  {
+    return zmq_ctx_new ();
+  }
+
 }
