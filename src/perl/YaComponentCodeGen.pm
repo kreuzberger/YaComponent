@@ -157,6 +157,11 @@ sub writeComponentImpl
     $strCtor .= ", I" . $className . "ProxyHandler& r$className";
   }
 
+  foreach my $className (sort ( keys ( %classNameStubHash )))
+  {
+    $strCtor .= ", I" . $className . "StubHandler& r$className";
+  }
+
   #chop($strCtor);
 
   print $fhHeader "$strCtor );\n";
@@ -182,7 +187,7 @@ sub writeComponentImpl
   foreach my $providedIfc (@{$comp->{provided}})
   {
     print $fhHeader "  " . $providedIfc->{classname} . "Stub m" . $providedIfc->{id} . ";\n";
-    $strCtorImpl .=  " m" . $providedIfc->{id} . "( context )\n";
+    $strCtorImpl .=  " m" . $providedIfc->{id} . "( context, r$providedIfc->{classname} )\n";
     $strCtorImpl .= ",";
   }
 
@@ -251,6 +256,7 @@ sub writeIfcStub
     print $fhHeader "#include \"$incFile\"\n";
   }
 #  print $fhHeader "#include <QtCore/QObject>\n";
+  print $fhHeader "#include \"I" . $IfcName . "StubHandler.h\"\n";
   print $fhHeader "#include \"YaStubBase.h\"\n";
   print $fhHeader "#include <stdio.h>\n";
 
@@ -262,8 +268,7 @@ sub writeIfcStub
   print $fhHeaderIfc "namespace YaComponent {\n";
   print $fhSource "namespace YaComponent {\n";
 
-#  print $fhSource $IfcName . "Stub::" . $IfcName . "Stub( void* context )\n";
-  print $fhSource $IfcName . "Stub::" . $IfcName . "Stub( )\n";
+  print $fhSource $IfcName . "Stub::" . $IfcName . "Stub( void* context, I" . $IfcName . "StubHandler& rCallbackHandler )\n";
 
   print $fhHeaderIfc "class I" . $IfcName ."StubHandler\n";
   print $fhHeaderIfc "{\n";
@@ -273,15 +278,12 @@ sub writeIfcStub
   print $fhHeader "  Q_OBJECT\n";
   print $fhHeader "  public:\n";
   print $fhHeaderIfc "  public:\n";
-#  print $fhHeader "    " . $IfcName . "Stub( void* context);\n";
-  print $fhHeader "    " . $IfcName . "Stub(  );\n";
+  print $fhHeader "    " . $IfcName . "Stub( void* context, I" . $IfcName . "StubHandler& );\n";
   print $fhHeader "    virtual ~" . $IfcName . "Stub();\n";
 
-  print $fhHeaderIfc "    I" . $IfcName . "StubHandler() {};\n";
-  print $fhHeaderIfc "    virtual ~I" . $IfcName . "StubHandler() {};\n";
+  print $fhHeaderIfc "    I" . $IfcName . "StubHandler() {}\n";
+  print $fhHeaderIfc "    virtual ~I" . $IfcName . "StubHandler() {}\n";
 
-
-  print $fhHeader "  protected:\n";
 
   if(0 <= @{$ifc->{properties}})
   {
@@ -307,7 +309,7 @@ sub writeIfcStub
 
   foreach my $req (@{$ifc->{requests}})
   {
-    print $fhHeaderIfc "    void onRequest". $req->{id};
+    print $fhHeaderIfc "    virtual void onRequest". $req->{id};
     print $fhHeaderIfc "( ";
     my $strPara;
     foreach my $para (@{$req->{para}})
@@ -316,8 +318,7 @@ sub writeIfcStub
       $strPara .= $para->{package} . "::" if ($para->{package});
       $strPara .= "$para->{id}&";
     }
-    chop($strPara);
-    print $fhHeaderIfc $strPara . ") = 0;\n";
+    print $fhHeaderIfc $strPara . " ) = 0;\n";
   }
 
   print $fhHeader "\n";
@@ -325,34 +326,52 @@ sub writeIfcStub
   foreach my $resp (@{$ifc->{responses}})
   {
 #  print $fhHeaderIfc "    virtual void response( const QObject*, const ";
-    print $fhHeader "    virtual void response( const ";
+    print $fhHeader "    virtual void response( const YaStubBase*, const ";
     print $fhHeader $resp->{package} . "::" if ($resp->{package});
     print $fhHeader $resp->{id}. "& ) {}\n";
   }
 
+  print $fhHeader "  protected:\n";
 
   print $fhSource " : YaStubBase()\n";
+  print $fhSource " , mCallbackHandler( rCallbackHandler )\n";
 
-  foreach my $prop (@{$ifc->{properties}})
-  {
-#    print $fhHeader "    void setNotification(PROP_" . uc($prop->{id}) . ");\n";
-    print $fhHeader "    YaPUBImpl m" . $prop->{id} . ";\n";
-    print $fhSource " , m" . $prop->{id} . "( 0 )\n";
-  }
+#  foreach my $prop (@{$ifc->{properties}})
+#  {
+#    print $fhHeader "    YaPUBImpl m" . $prop->{id} . ";\n";
+#    print $fhSource " , m" . $prop->{id} . "( 0 )\n";
+#  }
+
+  print $fhHeader "    YaPUBImpl mPublisher;\n";
+  print $fhSource " , mPublisher( context )\n";
+
+
   print $fhSource "{\n\n}\n\n";
 
 
   print $fhSource $IfcName . "Stub::~" . $IfcName . "Stub()\n";
   print $fhSource "{\n\n}\n\n";
 
-  print $fhHeader "};\n";
-  print $fhHeaderIfc "};\n";
+  foreach my $prop (@{$ifc->{properties}})
+  {
+    my $strMethod;
+    $strMethod .= $prop->{package} . "::" if ($prop->{package});
+    $strMethod .= $prop->{id};
+    print $fhSource "void " . $IfcName . "Stub::send(int key, const $strMethod& rMessage )\n{\n";
+    print $fhSource "  mPublisher.send(key, rMessage );\n";
+    print $fhSource "}\n";
+  }
 
-  print $fhHeader "}\n";
-  print $fhHeaderIfc "}\n";
+  print $fhHeader "    I" . $IfcName . "StubHandler& mCallbackHandler;\n";
+  print $fhHeader "\n};\n";
+  print $fhHeaderIfc "\n};\n";
+
+  print $fhHeader "\n}\n";
+  print $fhHeaderIfc "\n}\n";
   print $fhSource "}\n";
 
   print $fhHeader "\n#endif\n";
+  print $fhHeaderIfc "\n#endif\n";
 
   close( $fhHeader);
   close( $fhHeaderIfc);
