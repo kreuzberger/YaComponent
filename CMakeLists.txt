@@ -29,6 +29,8 @@ find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 
 
+include_directories(${ZEROMQ_INCLUDE_DIRS})
+
 
 
 #ADD_DEFINITIONS( ${QT_DEFINITIONS} )
