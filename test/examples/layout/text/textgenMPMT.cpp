@@ -1,5 +1,5 @@
 
-#include "TextExampleMPMT.h"
+#include "YaComponentThread.h"
 #include "YaComponent.h"
 #include <stdio.h>
 #include <QtGui/QApplication>

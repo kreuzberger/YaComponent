@@ -111,7 +111,7 @@ sub writeLayout
           my @interfaces = @{ $comp->{uses}->{interface} };
           foreach my $ifc (@interfaces )
           {
-            $fhLayoutStr .= "    $comp->{name} \"$ifc->{id}\" #-( $ifc->{provId} : use\n";
+            $fhLayoutStr .= "    $comp->{name} \"$ifc->{id}\" #-( $ifc->{sub} : use\n";
           }
         }
       }

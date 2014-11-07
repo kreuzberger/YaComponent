@@ -1,4 +1,4 @@
-#include "TextExampleMPMT.h"
+#include "YaComponentThread.h"
 #include "YaComponent.h"
 
 #include <QtCore/QCoreApplication>

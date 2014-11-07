@@ -3,15 +3,19 @@
 
 #include <QtCore/QObject>
 
+#include "YaPUBImpl.h"
 class YaStubBase : public QObject
 {
   Q_OBJECT
 public:
-  explicit YaStubBase(QObject *parent = 0);
+  YaStubBase(void* context, QObject *parent = 0);
 
-signals:
+  void send(int key, int size, const char* msg );
+//  int receive(int& key, int& size, const char* msg );
+  void setConnectionPara( const char* pub, const char* req, int hwm  );
 
-public slots:
+protected:
+  YaPUBImpl mPublisher;
 
 private:
   YaStubBase( const YaStubBase& );

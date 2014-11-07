@@ -5,14 +5,14 @@
   <thread name="TextGenThread" id="TEXTGENTHREAD">
     <component name="TextGen1" id="TEXTGEN1" xml="textgen/TextGenComp.xml">
       <provides>
-        <interface id="TextGenXml" address="inproc:///tmp/hurtmexml"/>
-        <interface id="TextGenPlain" address="inproc:///tmp/hurtmeplain"/>
+        <interface id="TextGenXml" pub="inproc:///tmp/hurtmexml" req="inproc:///tmp/hurtmexmlsync" hwm="5000"/>
+        <interface id="TextGenPlain" pub="inproc:///tmp/hurtmeplain" req="inproc:///tmp/hurtmeplansync" hwm="5000"/>
       </provides>
     </component>
     <component name="TextGen2" id="TEXTGEN2" xml="textgen/TextGenComp.xml">
       <provides>
-        <interface id="TextGenXml" address="inproc:///tmp/hurtmexml2"/>
-        <interface id="TextGenPlain" address="inproc:///tmp/hurtmeplain2"/>
+        <interface id="TextGenXml" pub="inproc:///tmp/hurtmexml2" req="inproc:///tmp/hurtmexml2sync"  hwm="2500"/>
+        <interface id="TextGenPlain" pub="inproc:///tmp/hurtmeplain2" req="inproc:///tmp/hurtmeplain2sync" hwm="2500"/>
       </provides>
     </component>
     
@@ -33,7 +33,7 @@
   <description></description>
   <component name="TextOut" id="TEXTOUT" xml="textgen/TextOutComp.xml">
     <uses>
-      <interface id="Xml" provId="TextGen1.TextGenXml"/>
+      <interface id="Xml" sub="TextGen1.TextGenXml"/>
     </uses>
   </component>
 </process>

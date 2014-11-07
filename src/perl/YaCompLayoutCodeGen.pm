@@ -48,6 +48,8 @@ our @EXPORT_OK;
 sub writeProcessMain
 {
   my $CompName = shift;
+  my $hashAdresses = shift;
+
   if($YaComponent::gVerbose)
   {
     eval "use Data::Dumper";
@@ -58,12 +60,12 @@ sub writeProcessMain
     }
   }
 
-  my $fhHeader;
-  open ( $fhHeader, "> $YaCompLayoutParser::gLayoutCodeOutPath" . '/' . "$CompName" . ".h") || YaComponent::printFatal("error creating outfile");
-  print $fhHeader '#ifndef ' . uc($CompName) ."_H\n";
-  print $fhHeader '#define ' . uc($CompName) ."_H\n\n";
-  print $fhHeader "#include <QtCore/QThread>\n";
-  print $fhHeader "#include <stdio.h>\n";
+#  my $fhHeader;
+#  open ( $fhHeader, "> $YaCompLayoutParser::gLayoutCodeOutPath" . '/' . "$CompName" . ".h") || YaComponent::printFatal("error creating outfile");
+#  print $fhHeader '#ifndef ' . uc($CompName) ."_H\n";
+#  print $fhHeader '#define ' . uc($CompName) ."_H\n\n";
+#  print $fhHeader "#include <QtCore/QThread>\n";
+#  print $fhHeader "#include <stdio.h>\n";
 
 
   foreach my $process (@YaCompLayoutParser::gLayoutProcesses)
@@ -85,24 +87,21 @@ sub writeProcessMain
 
     foreach my $thread (@{$process->{thread}})
     {
-      print $fhHeader " class YaThread" . $thread->{name} .": public QThread\n";
-      print $fhHeader "{\n";
-      print $fhHeader "  public:\n";
-      print $fhHeader "    YaThread" . $thread->{name} . "() {}\n";
-      print $fhHeader "    virtual ~YaThread" . $thread->{name} . "() {}\n";
-      print $fhHeader "  protected:\n";
-      print $fhHeader "    virtual void run() {printf(\"starting thread\\n\");exec();printf(\"exiting thread\\n\");}\n";
-      print $fhHeader "};\n";
+#      print $fhHeader " class YaThread" . $thread->{name} .": public QThread\n";
+#      print $fhHeader "{\n";
+#      print $fhHeader "  public:\n";
+#      print $fhHeader "    YaThread" . $thread->{name} . "() {}\n";
+#      print $fhHeader "    virtual ~YaThread" . $thread->{name} . "() {}\n";
+#      print $fhHeader "  protected:\n";
+#      print $fhHeader "    virtual void run() {printf(\"starting thread\\n\");exec();printf(\"exiting thread\\n\");}\n";
+#      print $fhHeader "};\n";
 
-      print $fhSource "  YaThread". $thread->{name} . " $thread->{name}" .";\n";
+      print $fhSource "  YaComponentThread" . " $thread->{name}" .";\n";
       print $fhSource "  printf(\"starting thread\\n\");\n";
       print $fhSource "  $thread->{name}.start();\n";
       foreach my $comp (@{$thread->{component}})
       {
-        my($xmlfilename, $directories, $suffix) = fileparse($comp->{xml}, qw(.xml));
-
-        #print $fhSource "  #include \"" . $xmlfilename . "Impl.h\"\n";
-        print $fhSource "  " . $xmlfilename . " $comp->{name}(context);\n";
+        writeComponentParts($fhSource, $comp, $hashAdresses);
         print $fhSource "  $comp->{name}.moveToThread(&$thread->{name});\n";
         print $fhSource "  printf(\"calling move to thread\\n\");\n";
       }
@@ -112,8 +111,7 @@ sub writeProcessMain
     # components associated with the main thread
     foreach my $comp (@{$process->{component}})
     {
-      my($xmlfilename, $directories, $suffix) = fileparse($comp->{xml}, qw(.xml));
-      print $fhSource "  " . $xmlfilename ." $comp->{name}(context);\n";
+      writeComponentParts($fhSource, $comp, $hashAdresses);
     }
 
 
@@ -121,9 +119,81 @@ sub writeProcessMain
 
     close( $fhSource);
   }
-  print $fhHeader "\n#endif\n";
-  close( $fhHeader);
+#  print $fhHeader "\n#endif\n";
+#  close( $fhHeader);
 
+}
+
+sub writeComponentParts
+{
+  my $fhSource = shift;
+  my $comp = shift;
+  my $adresses = shift;
+
+  my($xmlfilename, $directories, $suffix) = fileparse($comp->{xml}, qw(.xml));
+
+  #print $fhSource "  #include \"" . $xmlfilename . "Impl.h\"\n";
+  print $fhSource "  " . $xmlfilename . " $comp->{name}(context);\n";
+
+  foreach my $ifc (@{$comp->{provides}->{interface}})
+  {
+    print $fhSource "  $comp->{name}.setConnectionPara". $ifc->{id} . "( \"$ifc->{pub}\", \"$ifc->{req}\"";
+    if( $ifc->{hwm} )
+    {
+      print $fhSource ", $ifc->{hwm} );\n";
+    }
+    else
+    {
+      print $fhSource " );\n";
+    }
+  }
+
+  foreach my $ifc (@{$comp->{uses}->{interface}})
+  {
+    my $key =$ifc->{sub};
+    if( exists $adresses->{$key} )
+    {
+      print $fhSource "  $comp->{name}.setConnectionPara". $ifc->{id} . "( \"";
+      print $fhSource $adresses->{$key}{pub};
+      print $fhSource "\", \"";
+      print $fhSource $adresses->{$key}{req};
+      print $fhSource "\" );\n";
+    }
+  }
+
+  print $fhSource "  $comp->{name}.init();\n";
+
+}
+
+sub parseAdressInformations()
+{
+  my %hashAdresses;
+
+
+  foreach my $process (@YaCompLayoutParser::gLayoutProcesses)
+  {
+    foreach my $thread (@{$process->{thread}})
+    {
+      foreach my $comp (@{$thread->{component}})
+      {
+        foreach my $ifc (@{$comp->{provides}->{interface}})
+        {
+          $hashAdresses{$comp->{name} . "." . $ifc->{id}} = {pub => $ifc->{pub}, req => $ifc->{req}};
+        }
+      }
+    }
+
+    # components associated with the main thread
+    foreach my $comp (@{$process->{component}})
+    {
+      foreach my $ifc (@{$comp->{provides}->{interface}})
+      {
+        $hashAdresses{$comp->{name} . "." . $ifc->{id}} = {pub => "$ifc->{pub}", req => "$ifc->{req}"};
+      }
+    }
+  }
+
+  return %hashAdresses;
 }
 
 
@@ -136,7 +206,9 @@ sub writeCodeFiles
 #  open ( $fh, "> $YaCompLayoutParser::gLayoutCodeOutPath" . '/' . "I$CompName" . "CompLayout.h") || YaComponent::printFatal("error creating outfile");
 #  close( $fh);
 
-  writeProcessMain($CompName);
+  my %hashAdresses = parseAdressInformations();
+
+  writeProcessMain($CompName, \%hashAdresses);
 }
 
 

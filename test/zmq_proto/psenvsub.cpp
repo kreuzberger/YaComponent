@@ -21,15 +21,15 @@ void *context = zmq_ctx_new ();
 assert (context);
 
 YaSUBImpl oSUB( context );
-bool bConnect = oSUB.connect("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync");
+oSUB.setConnectionPara("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync",0);
 //bool bConnect = oSUB.connect("tcp://localhost:42123","tcp://localhost:42124");
 
-assert( bConnect );
+//assert( bConnect );
 
-if( !bConnect )
-{
-    return(1);
-}
+//if( !bConnect )
+//{
+//    return(1);
+//}
 
 oSUB.setNotification(B);
 oSUB.setNotification(END);
@@ -45,8 +45,9 @@ double charmax=10E8;
 double charcnt=0;
 void* watch = zmq_stopwatch_start();
 int iKey = INVALID;
+int iSize = 0;
 while (END != iKey) {
-  int nbytes = oSUB.receive(iKey,0);
+  int nbytes = oSUB.receive(iKey,iSize,0);
 
   if((int(charcnt/1000.0) % 1000) == 0) printf (".");
   charcnt += nbytes +1;

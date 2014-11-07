@@ -3,7 +3,7 @@ project(YaComponent_GENERATOR)
 
 macro (YACOMPONENT_IFC_GENERATE outfiles)
 
-  set( fileCode
+  set( fileCodeIfc
        YaPUBImpl.h
        YaPUBImpl.cpp
        YaSUBImpl.h
@@ -17,6 +17,7 @@ macro (YACOMPONENT_IFC_GENERATE outfiles)
        YaBuffer.cpp
        YaComponent.h
        YaComponent.cpp
+       IYaConnection.h
  )
 
   set( outfiles )
@@ -46,14 +47,14 @@ macro (YACOMPONENT_IFC_GENERATE outfiles)
     QT4_WRAP_CPP(outfile_component_mocs ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h )
     set( ${outfiles} ${${outfiles}} ${outfile_component_mocs} )
 
-    set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
+
 
     #message(" resulting outfiles in if generation ${${outfiles}}")
     INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
     INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR} )
   endforeach( it )
 
-  foreach ( file ${fileCode} )
+  foreach ( file ${fileCodeIfc} )
     add_custom_command(
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/code/${file}
       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/cpp/${file}  ${CMAKE_CURRENT_BINARY_DIR}/code/
@@ -65,12 +66,17 @@ macro (YACOMPONENT_IFC_GENERATE outfiles)
   QT4_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaProxyBase.h ${CMAKE_CURRENT_BINARY_DIR}/code/YaStubBase.h)
   set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
 
+  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
+
 endmacro( YACOMPONENT_IFC_GENERATE )
 
 
 
 macro (YACOMPONENT_GENERATE outfiles)
-
+  set( fileCodeComp
+       YaComponentBase.h
+       YaComponentBase.cpp
+  )
   foreach( it ${ARGN})
     get_filename_component( it ${it} ABSOLUTE )
     get_filename_component( component ${it} NAME_WE )
@@ -98,7 +104,19 @@ macro (YACOMPONENT_GENERATE outfiles)
     INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
   endforeach( it )
 
-  set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
+  foreach ( file ${fileCodeComp} )
+    add_custom_command(
+      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/code/${file}
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/cpp/${file}  ${CMAKE_CURRENT_BINARY_DIR}/code/
+      DEPENDS ${CMAKE_SOURCE_DIR}/src/cpp/${file}
+    )
+    set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/code/${file} )
+  endforeach( file )
+
+  QT4_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaComponentBase.h )
+  set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
+
+  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
 
 
 
@@ -107,11 +125,17 @@ endmacro( YACOMPONENT_GENERATE )
 
 
 macro (YACOMPONENT_LAYOUT_GENERATE outfiles)
+  set( fileCodeLayout
+       YaComponentThread.h
+       YaComponentThread.cpp
+  )
+
+
   foreach( it ${ARGN})
     get_filename_component( it ${it} ABSOLUTE )
     get_filename_component( layout ${it} NAME_WE )
 
-    set(outfile ${CMAKE_CURRENT_BINARY_DIR}/${layout}/code/${layout}.h
+    set(outfile ${CMAKE_CURRENT_BINARY_DIR}/${layout}/doc/${layout}.txt
     )
 
     get_property(inc_dirs DIRECTORY ${YaComponent_GENERATOR_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
@@ -128,7 +152,22 @@ macro (YACOMPONENT_LAYOUT_GENERATE outfiles)
    set( ${outfiles} ${${outfiles}} ${outfile})
    INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${layout}/code )
    #QT4_WRAP_CPP( GENERATED_COMPLAYOUT_SRC_MOC_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/YaComponent.h )
- endforeach( it )
+  endforeach( it )
+
+  foreach( file ${fileCodeLayout} )
+    add_custom_command(
+      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/code/${file}
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/cpp/${file}  ${CMAKE_CURRENT_BINARY_DIR}/code/
+      DEPENDS ${CMAKE_SOURCE_DIR}/src/cpp/${file}
+    )
+    set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/code/${file} )
+  endforeach( file )
+
+  QT4_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaComponentThread.h)
+  set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
+
+  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
+
 endmacro( YACOMPONENT_LAYOUT_GENERATE )
 
 

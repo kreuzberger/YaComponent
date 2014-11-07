@@ -1,17 +1,32 @@
 #ifndef YAPROXYBASE_H
 #define YAPROXYBASE_H
 
+#include "YaSUBImpl.h"
+
 #include <QtCore/QObject>
+
+
 
 class YaProxyBase : public QObject
 {
   Q_OBJECT
 public:
-  explicit YaProxyBase(QObject *parent = 0);
+  YaProxyBase(void* context,QObject *parent = 0);
+
+
+  void setNotification( int  );
+  void clearNotification( int );
+
+  void setConnectionPara( const char*, const char*, int hwm = 0 );
+
+  virtual int receive() = 0;
 
 signals:
 
 public slots:
+
+protected:
+  YaSUBImpl mSubscriber;
 
 private:
   YaProxyBase( const YaProxyBase& );

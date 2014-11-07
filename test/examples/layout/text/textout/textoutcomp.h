@@ -10,10 +10,12 @@ class TextOutComp : public YaComponent::TextOutCompImpl
 public:
   TextOutComp( void* context);
 
-  void onProperty( const YaProxyBase*, const TextGen::Text& ) {}
+  void onProperty( const YaProxyBase*, const TextGen::Text& );
 
   virtual void onResponse( const YaProxyBase*, const TextGen::startedText& ) {}
   virtual void onResponse( const YaProxyBase*, const TextGen::stoppedText& ) {}
+
+  virtual void init();
 
 private:
 

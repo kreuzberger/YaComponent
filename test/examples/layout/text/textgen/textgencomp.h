@@ -12,6 +12,7 @@ public:
 
   virtual void onRequestStartText(  const TextGen::Request& );
   virtual void onRequestStopText(  const TextGen::Request& );
+  virtual void init();
 
 private:
   TextGenComp& self() { return *this; }

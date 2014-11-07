@@ -2,16 +2,23 @@
 #define YASUBIMPL_H
 
 #include "YaBuffer.h"
+#include "YaComponent.h"
+#include <google/protobuf/message_lite.h>
 
 class YaSUBImpl
 {
   public:
     YaSUBImpl( void* context );
     virtual ~YaSUBImpl();
-    bool connect( const char*, const char*);
-    int receive(int& key, const char* pcData );
+    virtual void setConnectionPara(const char* sub, const char* req, int hwm = 0 );
+    virtual int receive(int& key, int& size, const char* pcData );
+    virtual int send( int key, int size, const char* );
+    virtual int send(int key, const ::google::protobuf::MessageLite& msg ) {}
+
+    int request( int key, const ::google::protobuf::MessageLite& msg );
     int setNotification(int key);
     int clearNotification( int key);
+
     void close();
     int getMessageCnt() { return miMessageCnt; }
     bool checkSync();
@@ -24,8 +31,9 @@ class YaSUBImpl
     void* mpSUBSocket;
     void* mpReqRespSocket;
     bool mbConnected;
-    char *mpcKey;
-    YaBuffer mMsgSizeBuffer;
+    char mcKey[YaComponent::KeySize];
+    char mcKeyReq[YaComponent::KeySize];
+    YaBuffer mMsgOutBuffer;
     YaBuffer mMsgBuffer;
     int miMessageCnt;
 };

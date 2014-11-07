@@ -17,12 +17,6 @@ YaPUBImpl::YaPUBImpl(void * context)
   {
     mpPUBSocket = zmq_socket (context, ZMQ_PUB);
     mpReqRespSocket = zmq_socket (context, ZMQ_REP);
-    int hwm = 5000;
-    zmq_setsockopt(mpPUBSocket,ZMQ_SNDHWM,&hwm,sizeof(hwm));
-    int wait = 1;
-    zmq_setsockopt(mpPUBSocket,ZMQ_XPUB_NODROP,&wait,sizeof(wait));
-    int timeout = 0;
-    zmq_setsockopt (mpPUBSocket, ZMQ_SNDTIMEO, &timeout, 4);
   }
   else
   {
@@ -57,19 +51,51 @@ bool YaPUBImpl::checkSubscribers(int iNumExpectedSubscribers)
   return (miSubscribersCnt == iNumExpectedSubscribers);
 }
 
-bool YaPUBImpl::bind( const char* address, const char* syncaddress)
+int YaPUBImpl::receive(int& key, int size, const  char* pcData )
 {
-  assert( 0 != mpPUBSocket && 0 != address );
-  assert( 0 != mpReqRespSocket && 0 != syncaddress );
+  int iBytes = 0;
+
+  if( 0 != mpReqRespSocket )
+  {
+    // receive key
+    iBytes = zmq_recv (mpReqRespSocket, mcKeyReq, YaComponent::KeySize, 0);
+    assert (iBytes == YaComponent::KeySize);
+    sscanf(mcKeyReq,YaComponent::KeyFmt,&key);
+    {
+      iBytes = zmq_recv (mpReqRespSocket, mMsgBufferReq.data(), YaComponent::MaxMessageSize, 0);
+      if( 0 < iBytes )
+      {
+        size = iBytes;
+        pcData = mMsgBufferReq.data();
+      }
+    }
+  }
+
+  return iBytes;
+}
+
+void YaPUBImpl::setConnectionPara(const char* pub, const char* req, int hwm)
+{
+  assert( 0 != mpPUBSocket && 0 != pub );
+  assert( 0 != mpReqRespSocket && 0 != req );
   if( mpPUBSocket && mpReqRespSocket && !mbBound )
   {
-    if( 0 == zmq_bind(mpPUBSocket,address) && 0 == zmq_bind(mpReqRespSocket,syncaddress))
+    if( 0 < hwm )
+    {
+      zmq_setsockopt(mpPUBSocket,ZMQ_SNDHWM,&hwm,sizeof(hwm));
+      int wait = 1;
+      zmq_setsockopt(mpPUBSocket,ZMQ_XPUB_NODROP,&wait,sizeof(wait));
+      int timeout = 0;
+      zmq_setsockopt (mpPUBSocket, ZMQ_SNDTIMEO, &timeout, 4);
+    }
+
+    if( 0 == zmq_bind(mpPUBSocket,pub) && 0 == zmq_bind(mpReqRespSocket,req))
     {
       mbBound = true;
     }
     else
     {
-      fprintf(stderr, "error: cannot bind to address %s or syncaddress %s\n",address,syncaddress);
+      fprintf(stderr, "error: cannot bind to address %s or syncaddress %s\n",pub,req);
     }
   }
   else
@@ -84,7 +110,7 @@ bool YaPUBImpl::bind( const char* address, const char* syncaddress)
     }
   }
 
-  return mbBound;
+ // return mbBound;
 
 }
 

@@ -20,7 +20,7 @@ int main (void)
 // Prepare our context and publisher
 void *context = zmq_ctx_new ();
 YaPUBImpl oPubImpl(context);
-oPubImpl.bind("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync");
+oPubImpl.setConnectionPara("ipc:///tmp/hardcore","ipc:///tmp/hardcoresync",5000);
 //oPubImpl.bind("tcp://*:42123","tcp://*:42124");
 
 fprintf (stderr, "Waiting for subscribers\n");
