@@ -12,7 +12,7 @@ void TextGenComp::init()
 }
 
 
-void TextGenComp::onRequestStartText(  const TextGen::Request& )
+void TextGenComp::onRequestStartText( int id, const TextGen::Request& )
 {
   fprintf(stderr, "received onRequestStartText, start sending text\n");
 
@@ -23,7 +23,7 @@ void TextGenComp::onRequestStartText(  const TextGen::Request& )
   mTextGenXml.send(YaComponent::TextGenIfcStub::PROP_TEXTGEN_TEXT, oText);
 }
 
-void TextGenComp::onRequestStopText(  const TextGen::Request& )
+void TextGenComp::onRequestStopText( int id, const TextGen::Request& )
 {
 
 }

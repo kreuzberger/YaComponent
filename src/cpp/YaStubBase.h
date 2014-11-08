@@ -8,7 +8,7 @@ class YaStubBase : public QObject
 {
   Q_OBJECT
 public:
-  YaStubBase(void* context, QObject *parent = 0);
+  YaStubBase(void* context, int id, QObject *parent = 0);
 
   void send(int key, int size, const char* msg );
 //  int receive(int& key, int& size, const char* msg );
@@ -16,6 +16,7 @@ public:
 
 protected:
   YaPUBImpl mPublisher;
+  int mId;
 
 private:
   YaStubBase( const YaStubBase& );

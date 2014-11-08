@@ -111,7 +111,7 @@ sub writeComponentImpl
 
   print $fhHeader '#ifndef ' . uc($CompName) ."IMPL_H\n";
   print $fhHeader '#define ' . uc($CompName) ."IMPL_H\n\n";
-  print $fhHeader "#include \"YaComponentBase.h\"\n";
+  #print $fhHeader "#include \"YaComponentBase.h\"\n";
 
   my %classNameProxyHash;
   my %classNameStubHash;
@@ -128,13 +128,13 @@ sub writeComponentImpl
 
   foreach my $className (sort ( keys ( %classNameProxyHash )))
   {
-    print "used xml $className\n";
+  #  print "used xml $className\n";
     print $fhHeader "#include\"" . $className . "Proxy.h\"\n";
   }
 
   foreach my $className (sort ( keys ( %classNameStubHash )))
   {
-    print "used xml $className\n";
+   # print "used xml $className\n";
     print $fhHeader "#include\"" . $className . "Stub.h\"\n";
   }
 
@@ -144,7 +144,7 @@ sub writeComponentImpl
 
   print $fhHeader "namespace YaComponent {\n";
 
-  print $fhHeader "class " . $CompName ."Impl: public YaComponentBase";
+  print $fhHeader "class " . $CompName ."Impl: public QObject";
   print $fhHeader "{\n";
   print $fhHeader "  Q_OBJECT\n";
   print $fhHeader "  public:\n";
@@ -186,20 +186,38 @@ sub writeComponentImpl
   print $fhHeader "  protected:\n";
   print $fhHeader "    virtual void timerEvent( QTimerEvent * event );\n";
 
+  print $fhHeader "    enum PROXY_IDS {\n";
+  print $fhHeader "      PROXY_INVALID = -1\n";
+
+  foreach my $usedIfc (@{$comp->{used}})
+  {
+    print $fhHeader "    , PROXY_" . uc($usedIfc->{id}) . "\n";
+  }
+
+  print $fhHeader "     };\n\n";
+
+  print $fhHeader "    enum STUB_IDS {\n";
+  print $fhHeader "      STUB_INVALID = -1\n";
+  foreach my $providedIfc (@{$comp->{provided}})
+  {
+    print $fhHeader "    , STUB_" . uc($providedIfc->{id}) . "\n";
+  }
+
+  print $fhHeader "     };\n\n";
   my $strCtorImpl="";
 
-  $strCtorImpl .= " :YaComponentBase()";
+  $strCtorImpl .= " :QObject()";
 
   foreach my $usedIfc (@{$comp->{used}})
   {
     print $fhHeader "  " . $usedIfc->{classname} . "Proxy m" . $usedIfc->{id} . ";\n";
-    $strCtorImpl .=  " , m" . $usedIfc->{id} . "( context, r$usedIfc->{classname} )\n";
+    $strCtorImpl .=  " , m" . $usedIfc->{id} . "( context, PROXY_" . uc($usedIfc->{id}) . ", r$usedIfc->{classname} )\n";
   }
 
   foreach my $providedIfc (@{$comp->{provided}})
   {
     print $fhHeader "  " . $providedIfc->{classname} . "Stub m" . $providedIfc->{id} . ";\n";
-    $strCtorImpl .=  " , m" . $providedIfc->{id} . "( context, r$providedIfc->{classname} )\n";
+    $strCtorImpl .=  " , m" . $providedIfc->{id} . "( context, STUB_" . uc($providedIfc->{id}) . ", r$providedIfc->{classname} )\n";
   }
 
   chop($strCtorImpl);
@@ -363,7 +381,7 @@ sub writeIfcStub
   print $fhHeaderIfc "namespace YaComponent {\n";
   print $fhSource "namespace YaComponent {\n";
 
-  print $fhSource $IfcName . "Stub::" . $IfcName . "Stub( void* context, I" . $IfcName . "StubHandler& rCallbackHandler )\n";
+  print $fhSource $IfcName . "Stub::" . $IfcName . "Stub( void* context, int id, I" . $IfcName . "StubHandler& rCallbackHandler )\n";
 
   print $fhHeaderIfc "class I" . $IfcName ."StubHandler\n";
   print $fhHeaderIfc "{\n";
@@ -373,7 +391,7 @@ sub writeIfcStub
   print $fhHeader "  Q_OBJECT\n";
   print $fhHeader "  public:\n";
   print $fhHeaderIfc "  public:\n";
-  print $fhHeader "    " . $IfcName . "Stub( void* context, I" . $IfcName . "StubHandler& );\n";
+  print $fhHeader "    " . $IfcName . "Stub( void* context, int id, I" . $IfcName . "StubHandler& );\n";
   print $fhHeader "    virtual ~" . $IfcName . "Stub();\n";
  # print $fhHeader "    void setConnectionPara( const char* pub, const char* req , int hwm = 0 );\n";
 
@@ -421,7 +439,7 @@ sub writeIfcStub
   foreach my $req (@{$ifc->{requests}})
   {
     print $fhHeaderIfc "    virtual void onRequest". $req->{id};
-    print $fhHeaderIfc "( ";
+    print $fhHeaderIfc "( int id, ";
     my $strPara;
     foreach my $para (@{$req->{para}})
     {
@@ -437,14 +455,16 @@ sub writeIfcStub
   foreach my $resp (@{$ifc->{responses}})
   {
 #  print $fhHeaderIfc "    virtual void response( const QObject*, const ";
-    print $fhHeader "    virtual void response( const YaStubBase*, const ";
+    print $fhHeader "    virtual void response( int id, const ";
     print $fhHeader $resp->{package} . "::" if ($resp->{package});
     print $fhHeader $resp->{id}. "& ) {}\n";
   }
 
+  print $fhHeader "    int receive();\n";
+
   print $fhHeader "  protected:\n";
 
-  print $fhSource " : YaStubBase( context )\n";
+  print $fhSource " : YaStubBase( context, id )\n";
   print $fhSource " , mCallbackHandler( rCallbackHandler )\n";
 
 #  foreach my $prop (@{$ifc->{properties}})
@@ -478,9 +498,80 @@ sub writeIfcStub
 #  print $fhSource "  mPublisher.setConnectionPara( pub, req, hwm );\n";
 #  print $fhSource "}\n";
 
+  print $fhSource "int " . $IfcName ."Stub::receive()\n";
+  print $fhSource "{\n";
+  print $fhSource "  int key = 0;\n";
+  print $fhSource "  int size = 0;\n";
+  print $fhSource "  const char* msgData = 0;\n";
+  print $fhSource "  int iMsgCnt = 0;\n";
+  print $fhSource "  bool bMsgAvailable = true;\n";
 
+  print $fhSource "  while( bMsgAvailable )\n";
+  print $fhSource "  {\n";
+  print $fhSource "    int iBytesTotal = 0;\n";
+
+  print $fhSource "    int iBytes = mPublisher.receive(key, size, msgData );\n";
+  print $fhSource "    iBytesTotal += iBytes;\n";
+  print $fhSource "    if( 0 < iBytes ) iMsgCnt++;\n";
+
+  print $fhSource "    switch( key )\n";
+  print $fhSource "    {\n";
+  foreach my $req (@{$ifc->{requests}})
+  {
+    my $strReq;
+    $strReq .= "REQ_";
+    $strReq .= uc($req->{package}) . "_" if ($req->{package});
+    $strReq .= uc($req->{id});
+    print $fhSource "    case $strReq:\n";
+    #print $fhSource "      m$req->{para}.ParseFromArray(msgData, size);\n";
+    print $fhSource "      mCallbackHandler.onRequest". $req->{id} ."( mId";
+    my $strPara;
+    foreach my $para (@{$req->{para}})
+    {
+    #  $strPara .= ", const ";
+    #  $strPara .= $para->{package} . "::" if ($para->{package});
+      $strPara .= ", m" . $req->{id} . "_" . $para->{id};
+    }
+    print $fhSource "$strPara );\n";
+
+    print $fhSource "      break;\n";
+  }
+
+#  foreach my $req (@{$ifc->{requests}})
+#  {
+#    print $fhHeaderIfc "    virtual void onRequest". $req->{id};
+#    print $fhHeaderIfc "( int id, ";
+#    my $strPara;
+#    foreach my $para (@{$req->{para}})
+#    {
+#      $strPara .= " const ";
+#      $strPara .= $para->{package} . "::" if ($para->{package});
+#      $strPara .= "$para->{id}&";
+#    }
+#    print $fhHeaderIfc $strPara . " ) = 0;\n";
+#  }
+
+  print $fhSource "    default:\n";
+  print $fhSource "      break;\n";
+  print $fhSource "    }\n";
+
+
+  print $fhSource "  }\n";
+
+  print $fhSource "}\n";
 
   print $fhHeader "    I" . $IfcName . "StubHandler& mCallbackHandler;\n";
+  foreach my $req (@{$ifc->{requests}})
+  {
+    my $strPara;
+    foreach my $para (@{$req->{para}})
+    {
+      $strPara .= "  " .$para->{package} . "::" if ($para->{package});
+      $strPara .= "$para->{id} m" . $req->{id} . "_" . "$para->{id}";
+    }
+    print $fhHeader "$strPara;\n";
+  }
+
   print $fhHeader "\n};\n";
   print $fhHeaderIfc "\n};\n";
 
@@ -524,8 +615,8 @@ sub writeIfcProxy
 
   print $fhSource "#include \"" . $IfcName . "Proxy.h\"\n";
   print $fhSource "namespace YaComponent {\n";
-  print $fhSource $IfcName . "Proxy::" . $IfcName . "Proxy( void* context, I" . $IfcName . "ProxyHandler& callbackHandler)\n";
-  print $fhSource ": YaProxyBase( context )\n";
+  print $fhSource $IfcName . "Proxy::" . $IfcName . "Proxy( void* context, int id, I" . $IfcName . "ProxyHandler& callbackHandler)\n";
+  print $fhSource ": YaProxyBase( context, id )\n";
   print $fhSource ", mCallbackHandler( callbackHandler )\n";
 #  foreach my $prop (@{$ifc->{properties}})
 #  {
@@ -564,12 +655,12 @@ sub writeIfcProxy
   print $fhHeader "{\n";
 #  print $fhHeader "  Q_OBJECT\n";
   print $fhHeader "  public:\n";
-  print $fhHeader "    " . $IfcName . "Proxy( void* context, I" . $IfcName . "ProxyHandler& );\n";
+  print $fhHeader "    " . $IfcName . "Proxy( void* context, int id, I" . $IfcName . "ProxyHandler& );\n";
   print $fhHeader "    virtual ~" . $IfcName . "Proxy();\n\n";
  # print $fhHeader "    void setConnectionPara( const char* sub, const char* req);\n";
   print $fhHeader "    virtual int receive();\n";
 
-  print $fhHeaderIfc "\nclass YaProxyBase;\n\n";
+  #print $fhHeaderIfc "\nclass YaProxyBase;\n\n";
 
   print $fhHeaderIfc "class I" . $IfcName ."ProxyHandler\n";
   print $fhHeaderIfc "{\n";
@@ -615,7 +706,8 @@ sub writeIfcProxy
 
   foreach my $prop (@{$ifc->{properties}})
   {
-    print $fhHeaderIfc "    virtual void onProperty( const YaProxyBase*, const ";
+   # print $fhHeaderIfc "    virtual void onProperty( const YaProxyBase*, const ";
+    print $fhHeaderIfc "    virtual void onProperty( int id, const ";
     print $fhHeaderIfc $prop->{package} . "::" if ($prop->{package});
     print $fhHeaderIfc $prop->{id} ."& ) = 0;\n";
 
@@ -700,7 +792,7 @@ sub writeIfcProxy
     $strResp .= uc($resp->{id});
     print $fhSource "    case $strResp:\n";
     print $fhSource "      m$resp->{id}.ParseFromArray(msgData, size);\n";
-    print $fhSource "      mCallbackHandler.onResponse( this, m$resp->{id} );\n";
+    print $fhSource "      mCallbackHandler.onResponse( mId, m$resp->{id} );\n";
     print $fhSource "      break;\n";
   }
 
@@ -727,7 +819,8 @@ sub writeIfcProxy
 
   foreach my $resp (@{$ifc->{responses}})
   {
-    print $fhHeaderIfc "    virtual void onResponse( const YaProxyBase*, const ";
+#    print $fhHeaderIfc "    virtual void onResponse( const YaProxyBase*, const ";
+    print $fhHeaderIfc "    virtual void onResponse( int id, const ";
     print $fhHeaderIfc $resp->{package} . "::" if ($resp->{package});
     print $fhHeaderIfc $resp->{id}. "& ) = 0;\n";
   }

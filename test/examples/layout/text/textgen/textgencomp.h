@@ -10,8 +10,8 @@ class TextGenComp: public YaComponent::TextGenCompImpl
 public:
   TextGenComp(void* context);
 
-  virtual void onRequestStartText(  const TextGen::Request& );
-  virtual void onRequestStopText(  const TextGen::Request& );
+  virtual void onRequestStartText( int id, const TextGen::Request& );
+  virtual void onRequestStopText(  int id, const TextGen::Request& );
   virtual void init();
 
 private:

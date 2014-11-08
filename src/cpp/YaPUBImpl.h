@@ -3,9 +3,9 @@
 
 #include "YaComponent.h"
 #include "YaBuffer.h"
-#include "IYaConnection.h"
+#include <google/protobuf/message_lite.h>
 
-class YaPUBImpl: public IYaConnection
+class YaPUBImpl
 {
 
 public:

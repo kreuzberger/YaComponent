@@ -18,7 +18,7 @@ void TextOutComp::init()
   mXml.requestStartText(oRequest);
 }
 
-void TextOutComp::onProperty( const YaProxyBase* sender, const TextGen::Text& text)
+void TextOutComp::onProperty( int, const TextGen::Text& text)
 {
   fprintf(stderr, "recevied property text %s\n", text.DebugString().c_str());
 }

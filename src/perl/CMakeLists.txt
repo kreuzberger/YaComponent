@@ -17,7 +17,7 @@ macro (YACOMPONENT_IFC_GENERATE outfiles)
        YaBuffer.cpp
        YaComponent.h
        YaComponent.cpp
-       IYaConnection.h
+#      IYaConnection.h
  )
 
   set( outfiles )
@@ -74,8 +74,8 @@ endmacro( YACOMPONENT_IFC_GENERATE )
 
 macro (YACOMPONENT_GENERATE outfiles)
   set( fileCodeComp
-       YaComponentBase.h
-       YaComponentBase.cpp
+ #      YaComponentBase.h
+ #      YaComponentBase.cpp
   )
   foreach( it ${ARGN})
     get_filename_component( it ${it} ABSOLUTE )
@@ -113,8 +113,8 @@ macro (YACOMPONENT_GENERATE outfiles)
     set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/code/${file} )
   endforeach( file )
 
-  QT4_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaComponentBase.h )
-  set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
+#  QT4_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaComponentBase.h )
+#  set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
 
   set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
 

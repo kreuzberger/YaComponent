@@ -1,8 +1,9 @@
 #include "YaProxyBase.h"
 
-YaProxyBase::YaProxyBase(void* context, QObject *parent)
+YaProxyBase::YaProxyBase(void* context, int id, QObject *parent)
   : QObject(parent)
   , mSubscriber( context )
+  , mId( id )
 {
 }
 

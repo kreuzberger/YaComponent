@@ -13,7 +13,6 @@ class YaSUBImpl
     virtual void setConnectionPara(const char* sub, const char* req, int hwm = 0 );
     virtual int receive(int& key, int& size, const char* pcData );
     virtual int send( int key, int size, const char* );
-    virtual int send(int key, const ::google::protobuf::MessageLite& msg ) {}
 
     int request( int key, const ::google::protobuf::MessageLite& msg );
     int setNotification(int key);

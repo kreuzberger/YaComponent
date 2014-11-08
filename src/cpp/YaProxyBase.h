@@ -11,7 +11,7 @@ class YaProxyBase : public QObject
 {
   Q_OBJECT
 public:
-  YaProxyBase(void* context,QObject *parent = 0);
+  YaProxyBase(void* context, int id, QObject *parent = 0);
 
 
   void setNotification( int  );
@@ -27,6 +27,7 @@ public slots:
 
 protected:
   YaSUBImpl mSubscriber;
+  int mId;
 
 private:
   YaProxyBase( const YaProxyBase& );

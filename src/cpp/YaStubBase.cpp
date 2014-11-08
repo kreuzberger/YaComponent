@@ -1,8 +1,9 @@
 #include "YaStubBase.h"
 
-YaStubBase::YaStubBase(void* context, QObject *parent)
+YaStubBase::YaStubBase(void* context, int id, QObject *parent)
   : QObject(parent)
   , mPublisher( context )
+  , mId( id )
 {
 }
 
