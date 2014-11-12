@@ -140,6 +140,7 @@ sub writeComponentImpl
 
 
   print $fhHeader "#include <QtCore/QObject>\n";
+  print $fhHeader "#include <QtCore/QTimer>\n";
   print $fhHeader "#include <stdio.h>\n";
 
   print $fhHeader "namespace YaComponent {\n";
@@ -168,7 +169,7 @@ sub writeComponentImpl
   print $fhHeader "$strCtor );\n";
   print $fhSource "$strCtor )\n";
 
-  print $fhHeader "    virtual ~" . $CompName . "Impl() {}\n";
+  print $fhHeader "    virtual ~" . $CompName . "Impl();\n";
 
   foreach my $providedIfc (@{$comp->{provided}})
   {
@@ -180,11 +181,20 @@ sub writeComponentImpl
     print $fhHeader "    void setConnectionPara" . $usedIfc->{id} . "( const char* sub, const char* req );\n";
   }
 
-  print $fhHeader "    /// called after setting connections\n";
-  print $fhHeader "    virtual void init() = 0;\n";
+  print $fhHeader "    /// called after setting connections and moveToThread\n";
+  print $fhHeader "    /// if overloaded base class implementation must be called!\n";
+  print $fhHeader "    virtual void init();\n";
+  print $fhHeader "    virtual void deInit();\n";
+
+  print $fhHeader "  public slots:\n";
+  print $fhHeader "    void onTimer();\n";
+  print $fhHeader "    void killTimer();\n";
+
+  print $fhHeader "  signals:\n";
+  print $fhHeader "    void startTimer( int iTimeOutMs );\n";
+  print $fhHeader "    void stopTimer( );\n";
 
   print $fhHeader "  protected:\n";
-  print $fhHeader "    virtual void timerEvent( QTimerEvent * event );\n";
 
   print $fhHeader "    enum PROXY_IDS {\n";
   print $fhHeader "      PROXY_INVALID = -1\n";
@@ -222,9 +232,34 @@ sub writeComponentImpl
 
   chop($strCtorImpl);
 
-  print $fhSource "$strCtorImpl";
-  print $fhSource "{\n\n}\n";
+  print $fhSource "$strCtorImpl\n";
+  print $fhSource "{\n";
+  print $fhSource "  mpoTimer = new QTimer( this );\n";
+  print $fhSource "}\n";
 
+  print $fhSource "$CompName" . "Impl::~" . $CompName . "Impl()\n";
+  print $fhSource "{\n";
+  print $fhSource "}\n";
+
+  print $fhSource "void $CompName" . "Impl::init()\n";
+  print $fhSource "{\n";
+  #  print $fhSource "  startTimer( YaComponent::TimeOut );\n";
+  print $fhSource "  connect( mpoTimer, SIGNAL(timeout()), this, SLOT(onTimer()));\n";
+  print $fhSource "  connect( this, SIGNAL(startTimer(int)), mpoTimer, SLOT(start(int)));\n";
+  print $fhSource "  connect( this, SIGNAL(stopTimer()), this, SLOT(killTimer()));\n";
+  print $fhSource "  emit startTimer( YaComponent::TimeOut );\n";
+  print $fhSource "}\n";
+
+  print $fhSource "void $CompName" . "Impl::deInit()\n";
+  print $fhSource "{\n";
+  print $fhSource "  emit stopTimer( );\n";
+  print $fhSource "}\n";
+
+  print $fhSource "void $CompName" . "Impl::killTimer()\n";
+  print $fhSource "{\n";
+  print $fhSource "  delete mpoTimer;\n";
+  print $fhSource "  mpoTimer = 0;\n";
+  print $fhSource "}\n";
 
   foreach my $providedIfc (@{$comp->{provided}})
   {
@@ -242,7 +277,7 @@ sub writeComponentImpl
     print $fhSource "}\n";
   }
 
-  print $fhSource "void " . $CompName . "Impl::timerEvent( QTimerEvent * event )\n";
+  print $fhSource "void " . $CompName . "Impl::onTimer()\n";
   print $fhSource "{\n";
 #  print $fhSource "  int key = 0;\n";
 #  print $fhSource "  int size = 0;\n";
@@ -264,6 +299,10 @@ sub writeComponentImpl
   foreach my $usedIfc (@{$comp->{used}})
   {
     print $fhSource "  m" . $usedIfc->{id} . ".receive();\n";
+  }
+  foreach my $providedIfc (@{$comp->{provided}})
+  {
+    print $fhSource "  m" . $providedIfc->{id} . ".receive();\n";
   }
 
 #  print $fhSource "    if( 0 == iBytesTotal ) bMsgAvailable = false;\n";
@@ -307,14 +346,11 @@ sub writeComponentImpl
 #    print $fhSource "  m" . $providedIfc->{id} . ".receive( key, size, msgData );\n";
 #  }
 
-
-
-
-
   print $fhHeader "\n  private:\n";
 #  print $fhHeader "    ". $CompName . "Impl ();\n";
   print $fhHeader "    ". $CompName. "Impl( const " . $CompName . "Impl& );\n";
   print $fhHeader "    ". $CompName. "Impl& operator= ( const " . $CompName . "Impl& );\n";
+  print $fhHeader "    QTimer* mpoTimer;\n";
 
 
   print $fhHeader "};\n";
@@ -447,6 +483,12 @@ sub writeIfcStub
       $strPara .= $para->{package} . "::" if ($para->{package});
       $strPara .= "$para->{id}&";
     }
+    foreach my $resp (@{$req->{resp}})
+    {
+      $strPara .= ", "; #this is not const reference to fill with response data
+      $strPara .= $resp->{package} . "::" if ($resp->{package});
+      $strPara .= "$resp->{id}&";
+    }
     print $fhHeaderIfc $strPara . " ) = 0;\n";
   }
 
@@ -500,19 +542,22 @@ sub writeIfcStub
 
   print $fhSource "int " . $IfcName ."Stub::receive()\n";
   print $fhSource "{\n";
-  print $fhSource "  int key = 0;\n";
-  print $fhSource "  int size = 0;\n";
-  print $fhSource "  const char* msgData = 0;\n";
   print $fhSource "  int iMsgCnt = 0;\n";
   print $fhSource "  bool bMsgAvailable = true;\n";
 
   print $fhSource "  while( bMsgAvailable )\n";
   print $fhSource "  {\n";
   print $fhSource "    int iBytesTotal = 0;\n";
+  print $fhSource "    int key = -1;\n";
+  print $fhSource "    int size = -1;\n";
+  print $fhSource "    const char* msgData = 0;\n";
 
   print $fhSource "    int iBytes = mPublisher.receive(key, size, msgData );\n";
-  print $fhSource "    iBytesTotal += iBytes;\n";
-  print $fhSource "    if( 0 < iBytes ) iMsgCnt++;\n";
+  print $fhSource "    if( 0 < iBytes )\n";
+  print $fhSource "    {\n";
+  print $fhSource "      iBytesTotal += iBytes;\n";
+  print $fhSource "      iMsgCnt++;\n";
+  print $fhSource "    }\n";
 
   print $fhSource "    switch( key )\n";
   print $fhSource "    {\n";
@@ -524,15 +569,30 @@ sub writeIfcStub
     $strReq .= uc($req->{id});
     print $fhSource "    case $strReq:\n";
     #print $fhSource "      m$req->{para}.ParseFromArray(msgData, size);\n";
+    foreach my $resp (@{$req->{resp}})
+    {
+      print $fhSource "      m" . $req->{id} . "_" . $resp->{id}. ".Clear();\n";
+    }
+
     print $fhSource "      mCallbackHandler.onRequest". $req->{id} ."( mId";
     my $strPara;
     foreach my $para (@{$req->{para}})
     {
-    #  $strPara .= ", const ";
-    #  $strPara .= $para->{package} . "::" if ($para->{package});
       $strPara .= ", m" . $req->{id} . "_" . $para->{id};
     }
+    foreach my $resp (@{$req->{resp}})
+    {
+      $strPara .= ", m" . $req->{id} . "_" . $resp->{id};
+    }
     print $fhSource "$strPara );\n";
+    foreach my $resp (@{$req->{resp}})
+    {
+      my $strResp;
+      $strResp .= "RESP_";
+      $strResp .= uc($resp->{package}) . "_" if ($resp->{package});
+      $strResp .= uc($resp->{id});
+      print $fhSource "     response( $strResp, m"  . $req->{id} . "_" . $resp->{id} . " );\n";
+    }
 
     print $fhSource "      break;\n";
   }
@@ -554,6 +614,7 @@ sub writeIfcStub
   print $fhSource "    default:\n";
   print $fhSource "      break;\n";
   print $fhSource "    }\n";
+  print $fhSource "    if( 0 >= iBytesTotal ) bMsgAvailable = false;\n";
 
 
   print $fhSource "  }\n";
@@ -566,9 +627,17 @@ sub writeIfcStub
     my $strPara;
     foreach my $para (@{$req->{para}})
     {
-      $strPara .= "  " .$para->{package} . "::" if ($para->{package});
-      $strPara .= "$para->{id} m" . $req->{id} . "_" . "$para->{id}";
+      $strPara .= "    ";
+      $strPara .= $para->{package} . "::" if ($para->{package});
+      $strPara .= "$para->{id} m" . $req->{id} . "_" . "$para->{id};\n";
     }
+    foreach my $resp (@{$req->{resp}})
+    {
+      $strPara .= "    ";
+      $strPara .= $resp->{package} . "::" if ($resp->{package});
+      $strPara .= "$resp->{id} m" . $req->{id} . "_" . "$resp->{id};\n";
+    }
+
     print $fhHeader "$strPara;\n";
   }
 
@@ -768,19 +837,22 @@ sub writeIfcProxy
 
   print $fhSource "int " . $IfcName ."Proxy::receive()\n";
   print $fhSource "{\n";
-  print $fhSource "  int key = 0;\n";
-  print $fhSource "  int size = 0;\n";
-  print $fhSource "  const char* msgData = 0;\n";
   print $fhSource "  int iMsgCnt = 0;\n";
   print $fhSource "  bool bMsgAvailable = true;\n";
 
   print $fhSource "  while( bMsgAvailable )\n";
   print $fhSource "  {\n";
   print $fhSource "    int iBytesTotal = 0;\n";
+  print $fhSource "    int key = -1;\n";
+  print $fhSource "    int size = -1;\n";
+  print $fhSource "    const char* msgData = 0;\n";
 
   print $fhSource "    int iBytes = mSubscriber.receive(key, size, msgData );\n";
-  print $fhSource "    iBytesTotal += iBytes;\n";
-  print $fhSource "    if( 0 < iBytes ) iMsgCnt++;\n";
+  print $fhSource "    if( 0 < iBytes )\n";
+  print $fhSource "    {\n";
+  print $fhSource "      iMsgCnt++;\n";
+  print $fhSource "      iBytesTotal += iBytes;\n";
+  print $fhSource "    }\n";
 
   print $fhSource "    switch( key )\n";
   print $fhSource "    {\n";
@@ -803,12 +875,14 @@ sub writeIfcProxy
     $strProp .= uc($prop->{package}) . "_" if ($prop->{package});
     $strProp .= uc($prop->{id});
     print $fhSource "    case $strProp:\n";
+    print $fhSource "      mCallbackHandler.onProperty( mId, m$prop->{id} );\n";
     print $fhSource "      break;\n";
   }
 
   print $fhSource "    default:\n";
   print $fhSource "      break;\n";
   print $fhSource "    }\n";
+  print $fhSource "    if( 0 >= iBytesTotal ) bMsgAvailable = false;\n";
 
 
   print $fhSource "  }\n";

@@ -1,4 +1,4 @@
-#include "textgencomp.h"
+#include "textgencompunittest.h"
 
 TextGenComp::TextGenComp(void* context)
   : YaComponent::TextGenCompImpl( context, static_cast<ITextGenIfcStubHandler&>(self()) )
@@ -8,6 +8,7 @@ TextGenComp::TextGenComp(void* context)
 
 void TextGenComp::init()
 {
+  TextGenCompImpl::init();
 
 }
 

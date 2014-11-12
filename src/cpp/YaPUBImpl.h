@@ -16,7 +16,7 @@ public:
   int send(int key, const ::google::protobuf::MessageLite& msg );
   int send(int key, int msgSize, const char* msgData );
   int receive(int& key, int size, const  char* pcData );
-  bool checkSubscribers(int iNumExpectedSubscribers = 1);
+//  bool checkSubscribers(int iNumExpectedSubscribers = 1);
   void close();
 
 private:

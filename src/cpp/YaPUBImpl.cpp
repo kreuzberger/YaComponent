@@ -28,28 +28,32 @@ YaPUBImpl::~YaPUBImpl()
 {
   zmq_close( mpPUBSocket );
   zmq_close( mpReqRespSocket );
+  mpPUBSocket = 0;
+  mpReqRespSocket = 0;
 }
 
 void YaPUBImpl::close()
 {
   zmq_close( mpPUBSocket );
   zmq_close( mpReqRespSocket );
+  mpPUBSocket = 0;
+  mpReqRespSocket = 0;
 }
 
-bool YaPUBImpl::checkSubscribers(int iNumExpectedSubscribers)
-{
-  char buffer [256];
-  while( miSubscribersCnt < iNumExpectedSubscribers)
-  {
-    char* str = YaComponent::socket_rcv(mpReqRespSocket);
-    free(str);
-      //  s_send (syncservice, "");
-    YaComponent::socket_snd(mpReqRespSocket, "SYNC_ACK");
-    miSubscribersCnt++;
-  }
+//bool YaPUBImpl::checkSubscribers(int iNumExpectedSubscribers)
+//{
+//  char buffer [256];
+//  while( miSubscribersCnt < iNumExpectedSubscribers)
+//  {
+//    char* str = YaComponent::socket_rcv(mpReqRespSocket);
+//    free(str);
+//      //  s_send (syncservice, "");
+//    YaComponent::socket_snd(mpReqRespSocket, "SYNC_ACK");
+//    miSubscribersCnt++;
+//  }
 
-  return (miSubscribersCnt == iNumExpectedSubscribers);
-}
+//  return (miSubscribersCnt == iNumExpectedSubscribers);
+//}
 
 int YaPUBImpl::receive(int& key, int size, const  char* pcData )
 {
@@ -58,15 +62,27 @@ int YaPUBImpl::receive(int& key, int size, const  char* pcData )
   if( 0 != mpReqRespSocket )
   {
     // receive key
-    iBytes = zmq_recv (mpReqRespSocket, mcKeyReq, YaComponent::KeySize, 0);
-    assert (iBytes == YaComponent::KeySize);
-    sscanf(mcKeyReq,YaComponent::KeyFmt,&key);
+    iBytes = zmq_recv (mpReqRespSocket, mcKeyReq, YaComponent::KeySize, ZMQ_NOBLOCK);
+    if( 0 < iBytes )
     {
-      iBytes = zmq_recv (mpReqRespSocket, mMsgBufferReq.data(), YaComponent::MaxMessageSize, 0);
-      if( 0 < iBytes )
+      assert (iBytes == YaComponent::KeySize);
+      sscanf(mcKeyReq,YaComponent::KeyFmt,&key);
       {
-        size = iBytes;
-        pcData = mMsgBufferReq.data();
+        if( 0 < key)
+        {
+          iBytes = zmq_recv (mpReqRespSocket, mMsgBufferReq.data(), YaComponent::MaxMessageSize, 0);
+          if( 0 < iBytes )
+          {
+            size = iBytes;
+            pcData = mMsgBufferReq.data();
+          }
+        }
+        else if( YaComponent::KeySync )
+        {
+            // internal used sync key!
+          zmq_send (mpReqRespSocket, YaComponent::SynAck, strlen (YaComponent::SynAck), 0);
+          iBytes = 0;
+        }
       }
     }
   }

@@ -7,9 +7,11 @@
   <requests>
     <req id="StartText" package="TextGen">
       <para id="Request" package="TextGen"/>
+      <resp id="startedText" package="TextGen"/>
     </req>
     <req id="StopText" package="TextGen">
       <para id="Request" package="TextGen"/>
+      <resp id="stoppedText" package="TextGen"/>
     </req>
   </requests>
   <responses>

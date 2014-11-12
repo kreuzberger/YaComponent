@@ -103,6 +103,7 @@ sub writeProcessMain
       {
         writeComponentParts($fhSource, $comp, $hashAdresses);
         print $fhSource "  $comp->{name}.moveToThread(&$thread->{name});\n";
+        #print $fhSource "  $comp->{name}.init();\n";
         print $fhSource "  printf(\"calling move to thread\\n\");\n";
       }
 

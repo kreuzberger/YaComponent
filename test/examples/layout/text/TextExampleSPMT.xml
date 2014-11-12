@@ -1,0 +1,22 @@
+<componentlayout>
+<processes>
+<process name="TestProcess">
+  <description></description>
+  <thread name="TextGenThread">
+    <component name="TextGen1" xml="textgen/TextGenComp.xml">
+      <provides>
+        <interface id="TextGenXml" pub="inproc://hurtmexml" req="inproc://hurtmexmlsync" hwm="5000"/>
+        <interface id="TextGenPlain" pub="inproc://hurtmeplain" req="inproc://hurtmeplansync" hwm="5000"/>
+      </provides>
+    </component>
+  </thread>
+  <thread name="TextOutThread">
+  <component name="TextOut" xml="textgen/TextOutComp.xml">
+    <uses>
+      <interface id="Xml" sub="TextGen1.TextGenXml"/>
+    </uses>
+  </component>
+  </thread>
+</process>
+</processes>
+</componentlayout>

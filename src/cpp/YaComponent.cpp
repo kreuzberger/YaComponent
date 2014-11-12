@@ -12,7 +12,7 @@ namespace YaComponent
   char* socket_rcv (void *socket)
   {
       char buffer [256];
-      int size = zmq_recv (socket, buffer, 255, 0);
+      int size = zmq_recv (socket, buffer, 255, ZMQ_NOBLOCK);
       if (size == -1)
           return NULL;
       if (size > 255)
