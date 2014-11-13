@@ -11,12 +11,13 @@ YaPUBImpl::YaPUBImpl(void * context)
   , mbBound(false)
   , miSubscribersCnt(0)
   , mMsgBuffer(YaComponent::MaxMessageSize)
+  , mMsgBufferReq(YaComponent::MaxMessageSize)
 {
   assert( 0 != context );
   if( 0 != context )
   {
     mpPUBSocket = zmq_socket (context, ZMQ_PUB);
-    mpReqRespSocket = zmq_socket (context, ZMQ_REP);
+    mpReqRespSocket = zmq_socket (context, ZMQ_ROUTER);
   }
   else
   {
@@ -55,33 +56,59 @@ void YaPUBImpl::close()
 //  return (miSubscribersCnt == iNumExpectedSubscribers);
 //}
 
-int YaPUBImpl::receive(int& key, int size, const  char* pcData )
+int YaPUBImpl::receive(int& key, int size, char** pcData, std::string& ident )
 {
   int iBytes = 0;
+  char address[YaComponent::MaxIdentSize];
+  int addressSize = 0;
+  int rc = -1;
 
   if( 0 != mpReqRespSocket )
   {
-    // receive key
-    iBytes = zmq_recv (mpReqRespSocket, mcKeyReq, YaComponent::KeySize, ZMQ_NOBLOCK);
-    if( 0 < iBytes )
+    int addressSize = zmq_recv( mpReqRespSocket, address, YaComponent::MaxIdentSize, ZMQ_NOBLOCK );
+    if( 0 < addressSize )
     {
-      assert (iBytes == YaComponent::KeySize);
-      sscanf(mcKeyReq,YaComponent::KeyFmt,&key);
+      ident = address;
+      // identifier or address received
+      assert( addressSize < YaComponent::MaxIdentSize);
+      // receive empty block
+      rc = zmq_recv( mpReqRespSocket, 0, 0, ZMQ_NOBLOCK );
+      assert( 0 == rc );
+
+      // receive key
+      iBytes = zmq_recv (mpReqRespSocket, mcKeyReq, YaComponent::KeySize, ZMQ_NOBLOCK);
+      if( 0 < iBytes )
       {
-        if( 0 < key)
+        assert (iBytes == YaComponent::KeySize);
+        sscanf(mcKeyReq,YaComponent::KeyFmt,&key);
         {
-          iBytes = zmq_recv (mpReqRespSocket, mMsgBufferReq.data(), YaComponent::MaxMessageSize, 0);
-          if( 0 < iBytes )
+          if( 0 < key)
           {
-            size = iBytes;
-            pcData = mMsgBufferReq.data();
+            iBytes = zmq_recv (mpReqRespSocket, mMsgBufferReq.data(), YaComponent::MaxMessageSize, ZMQ_NOBLOCK);
+            if( 0 < iBytes )
+            {
+              size = iBytes;
+              *pcData = mMsgBufferReq.data();
+            }
           }
-        }
-        else if( YaComponent::KeySync )
-        {
-            // internal used sync key!
-          zmq_send (mpReqRespSocket, YaComponent::SynAck, strlen (YaComponent::SynAck), 0);
-          iBytes = 0;
+          else if( YaComponent::KeySync )
+          {
+            mPeerMap[ident] = 1;
+              // internal used sync key!
+            zmq_send( mpReqRespSocket, address,addressSize, ZMQ_SNDMORE);
+            zmq_send( mpReqRespSocket, 0,0, ZMQ_SNDMORE);
+            zmq_send( mpReqRespSocket, mcKeyReq, YaComponent::KeySize, ZMQ_SNDMORE );
+            zmq_send (mpReqRespSocket, YaComponent::SynAck, strlen (YaComponent::SynAck), 0);
+            iBytes = 0;
+          }
+          else if( YaComponent::KeyEnd )
+          {
+            mPeerMap.erase(ident);
+          }
+          else
+          {
+            assert(0);
+          }
         }
       }
     }
@@ -133,9 +160,19 @@ void YaPUBImpl::setConnectionPara(const char* pub, const char* req, int hwm)
 int YaPUBImpl::send(int key, const ::google::protobuf::MessageLite& msg)
 {
   int rc = -1;
-  int iSize = msg.GetCachedSize();
+  int iSize = msg.ByteSize();
   msg.SerializeToArray(mMsgBuffer.data(),iSize);
   rc = send(key, iSize, mMsgBuffer.data());
+
+  return rc;
+}
+
+int YaPUBImpl::response(int key, const ::google::protobuf::MessageLite& msg, const std::string& ident)
+{
+  int rc = -1;
+  int iSize = msg.ByteSize();
+  msg.SerializeToArray(mMsgBuffer.data(),iSize);
+  rc = send(key, iSize, mMsgBuffer.data(), ident);
 
   return rc;
 }
@@ -167,6 +204,38 @@ int YaPUBImpl::send(int key, int msgSize, const char* msgData)
     assert( errno == EAGAIN );
   }
 
+  return rc;
+}
+
+int YaPUBImpl::send(int key, int msgSize, const char* msgData, const std::string& ident)
+{
+  char cKey[YaComponent::KeySize + 1];
+  int rc = -1;
+
+  assert( 0 != mpReqRespSocket  );
+  bool bResponseAll = ident.empty();
+
+  if( 0 != mpReqRespSocket)
+  {
+    if(!bResponseAll )
+    {
+      assert(1 == mPeerMap.count(ident));
+    }
+
+    sprintf(cKey,YaComponent::KeyFmt,key);
+      // internal used sync key!
+    zmq_send( mpReqRespSocket, ident.c_str(), ident.length(), ZMQ_SNDMORE);
+    zmq_send( mpReqRespSocket, 0,0, ZMQ_SNDMORE);
+    zmq_send( mpReqRespSocket, cKey, YaComponent::KeySize, ZMQ_SNDMORE );
+    if( 0 != msgSize && 0 != msgData )
+    {
+      rc = zmq_send(mpReqRespSocket, msgData, msgSize,0);
+    }
+    else
+    {
+      rc = zmq_send(mpReqRespSocket, 0, 0,0);
+    }
+  }
   return rc;
 }
 

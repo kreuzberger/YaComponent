@@ -5,19 +5,35 @@
     <xsd:sequence>
       <xsd:element name="version" type="tVersion" minOccurs="1" maxOccurs="1"/>
       <xsd:element name="description" type="xsd:string" minOccurs="0" maxOccurs="1"/>
-      <xsd:element name="provides" minOccurs="1" maxOccurs="1">
+      <xsd:element name="provides" minOccurs="0" maxOccurs="unbounded">
         <xsd:complexType>
           <xsd:sequence>
             <xsd:element name="interface" type="tInterface" minOccurs="0" maxOccurs="unbounded"/>
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
-      <xsd:element name="header" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-      <xsd:element name="source" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+      <xsd:element name="uses" minOccurs="0" maxOccurs="unbounded">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="interface" type="tInterface" minOccurs="0" maxOccurs="unbounded"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+<!--
+      <xsd:element name="source" type="tPath" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="header" type="tPath" minOccurs="0" maxOccurs="1"/>
+-->
     </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
 
+
+<!--
+  <xsd:complexType name="tPath">
+    <xsd:attribute name="path" type="xsd:string" use="required"/>
+  </xsd:complexType>
+-->
 
   <xsd:complexType name="tVersion">
     <xsd:attribute name="maj" type="xsd:integer" use="required"/>
@@ -27,157 +43,8 @@
 
 
   <xsd:complexType name="tInterface">
+    <xsd:attribute name="id" type="xsd:string" use="required"/>
     <xsd:attribute name="xml" type="xsd:string" use="required"/>
   </xsd:complexType>
 
 </xsd:schema>
-
-<!--
-<interface>
-  <version maj="" min="" rev=""/>
-  <include file=""/>
-  <properties>
-    <prop id="myName" onChange="1">
-      <type name="QString"/>
-    </prop>
-    <prop id="myCenterFreq" onChange="0">
-      <type name="double" />
-    </prop>
-    <prop id="myMoreCplxType">
-      <type name="int"/>
-      <type name="QString"/>
-      <type name="float"/>
-    </prop>
-  </property>
-  <requests>
-    <req action="Action1()"/>
-    <req action="Action2()" respId="ACTION1"/>
-  </requests>
-  <respones>
-    <resp id="ACTION1" sig="responseAction1()"/>
-    <resp id="SIGNAL" sig="responseSignal()"/>
-  </respones>
-</interface>
--->
-
-
-<!--
-  <xsd:element name="root">
-    <xsd:complexType>
-    <xsd:sequence>
-      <xsd:element name="definitions">
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element name="action" type="tAction" minOccurs="0" maxOccurs="unbounded" />
-            <xsd:element name="trigger" type="tTrigger" minOccurs="0" maxOccurs="unbounded" />
-            <xsd:element name="timer" type="tTimer" minOccurs="0"  maxOccurs="unbounded" />
-            <xsd:element name="event" type="tEvent" minOccurs="0" maxOccurs="unbounded" />
-            <xsd:element name="member" type="tMember" minOccurs="0" maxOccurs="unbounded" />
-            <xsd:element name="include" type="tInclude" minOccurs="0" maxOccurs="unbounded" />
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
-      <xsd:element name="fsm">
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element name="state" type="tState" maxOccurs="unbounded" />
-            <xsd:element name="transition" type="tTransition" maxOccurs="unbounded" />
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
-    </xsd:sequence>
-    </xsd:complexType>
-  </xsd:element>
-
-  <xsd:complexType name="tState">
-    <xsd:sequence>
-      <xsd:element name="state" type="tState" minOccurs="0" maxOccurs="unbounded"/>
-      <xsd:element name="transition" type="tTransition" minOccurs="0" maxOccurs="unbounded"/>
-    </xsd:sequence>
-    <xsd:attribute name="name" type="stringIdentifier" use="required"/>
-    <xsd:attribute name="type" type="stateType"/>
-    <xsd:attribute name="enter" type="methodList"/>
-    <xsd:attribute name="exit" type="methodList"/>
-    <xsd:attribute name="tstartenter" type="alphaNumList"/>
-    <xsd:attribute name="tstartexit" type="alphaNumList"/>
-    <xsd:attribute name="tstopenter" type="alphaNumList"/>
-    <xsd:attribute name="tstopexit" type="alphaNumList"/>
-    <xsd:attribute name="evententer" type="alphaNumList"/>
-    <xsd:attribute name="eventexit" type="alphaNumList"/>
-  </xsd:complexType>
-
-  <xsd:complexType name="tTransition">
-    <xsd:attribute name="trigger" type="stringIdentifier" use="required"/>
-    <xsd:attribute name="begin" type="stringIdentifier" use="required"/>
-    <xsd:attribute name="end" type="stringIdentifier" use="required"/>
-    <xsd:attribute name="action" type="methodList"/>
-    <xsd:attribute name="event" type="stringIdentifier"/>
-    <xsd:attribute name="condition" type="xsd:string"/>
-  </xsd:complexType>
-
-  <xsd:complexType name="tAction">
-    <xsd:attribute name="name" type="stringAlphaNum" use="required"/>
-    <xsd:attribute name="param" type="xsd:string"/>
-  </xsd:complexType>
-
-  <xsd:complexType name="tTrigger">
-    <xsd:attribute name="name" type="stringAlphaNum" use="required"/>
-    <xsd:attribute name="param" type="xsd:string"/>
-  </xsd:complexType>
-
-  <xsd:complexType name="tEvent">
-    <xsd:attribute name="name" type="stringAlphaNum" use="required"/>
-  </xsd:complexType>
-
-  <xsd:complexType name="tInclude">
-    <xsd:attribute name="file" type="xsd:string" use="required"/>
-  </xsd:complexType>
-
-  <xsd:complexType name="tMember">
-    <xsd:attribute name="name" type="stringAlphaNum" use="required"/>
-    <xsd:attribute name="type" type="xsd:string" use="required"/>
-    <xsd:attribute name="init" type="xsd:string" use="required"/>
-  </xsd:complexType>
-
-  <xsd:complexType name="tTimer">
-    <xsd:attribute name="name" type="stringAlphaNum" use="required"/>
-    <xsd:attribute name="ms" type="xsd:nonNegativeInteger" use="required"/>
-    <xsd:attribute name="cnt" type="xsd:integer"/>
-  </xsd:complexType>
-
-  <xsd:simpleType name="stringAlpha">
-    <xsd:restriction base="xsd:string">
-      <xsd:pattern value="[A-Za-z]+"/>
-    </xsd:restriction>
-  </xsd:simpleType>
-
-  <xsd:simpleType name="stringAlphaNum">
-    <xsd:restriction base="xsd:string">
-      <xsd:pattern value="[A-Za-z0-9]+"/>
-    </xsd:restriction>
-  </xsd:simpleType>
-
-  <xsd:simpleType name="alphaNumList">
-    <xsd:restriction base="xsd:string">
-      <xsd:pattern value="([A-Za-z0-9]+;*)*"/>
-    </xsd:restriction>
-  </xsd:simpleType>
-
-  <xsd:simpleType name="stringIdentifier">
-    <xsd:restriction base="xsd:string">
-      <xsd:pattern value="[A-Za-z_][A-Za-z_0-9]*"/>
-    </xsd:restriction>
-  </xsd:simpleType>
-
-  <xsd:simpleType name="methodList">
-    <xsd:restriction base="xsd:string">
-      <xsd:pattern value="(([A-Za-z][A-Za-z0-9]*\([A-Za-z0-9_:,]*\));*)*"/>
-    </xsd:restriction>
-  </xsd:simpleType>
-
-  <xsd:simpleType name="stateType">
-    <xsd:restriction base="xsd:string">
-      <xsd:enumeration value="entry"/>
-    </xsd:restriction>
-  </xsd:simpleType>
--->

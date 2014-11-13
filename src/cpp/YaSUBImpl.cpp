@@ -13,7 +13,8 @@ YaSUBImpl::YaSUBImpl(void * context)
   , mpReqRespSocket(0)
   , mbConnected(false)
   , mMsgOutBuffer(YaComponent::MessageSize)
-  , mMsgBuffer(YaComponent::MaxMessageSize)
+  , mMsgPropBuffer(YaComponent::MaxMessageSize)
+  , mMsgRespBuffer(YaComponent::MaxMessageSize)
   , miMessageCnt(0)
 {
   assert( 0 != context );
@@ -27,11 +28,13 @@ YaSUBImpl::YaSUBImpl(void * context)
   {
     fprintf(stderr, "error: invalid context\n");
   }
+  memset(mcIdent,0,YaComponent::MaxIdentSize);
 
 }
 
 void YaSUBImpl::close()
 {
+//  send( YaComponent::KeyEnd, 0, 0);
   zmq_close( mpSUBSocket );
   zmq_close( mpReqRespSocket );
 }
@@ -44,7 +47,7 @@ YaSUBImpl::~YaSUBImpl()
 
 int YaSUBImpl::setNotification(int key)
 {
-  char cKey[YaComponent::KeySize];
+  char cKey[YaComponent::KeySize + 1];
   sprintf(cKey,YaComponent::KeyFmt,key);
 
   zmq_setsockopt (mpSUBSocket, ZMQ_SUBSCRIBE, cKey, YaComponent::KeySize);
@@ -53,8 +56,9 @@ int YaSUBImpl::setNotification(int key)
 int YaSUBImpl::request(int key, const ::google::protobuf::MessageLite& msg )
 {
   int rc = -1;
-  int iSize = msg.GetCachedSize();
+  int iSize = msg.ByteSize();
   msg.SerializeToArray(mMsgOutBuffer.data(),iSize);
+  assert( iSize == msg.GetCachedSize());
   rc = send( key, iSize, mMsgOutBuffer.data());
   return rc;
 }
@@ -69,6 +73,8 @@ int YaSUBImpl::send( int key, int size, const char* data )
   if( 0 != size && 0 != data ) flags = ZMQ_SNDMORE;
   if( 0 != mpReqRespSocket)
   {
+//    rc = zmq_send( mpReqRespSocket, 0, 0, ZMQ_SNDMORE );
+//    assert( -1 != rc);
     rc = zmq_send(mpReqRespSocket,mcKey, YaComponent::KeySize , flags);
     assert( -1 != rc);
     if( 0 != size && 0 != data )
@@ -88,19 +94,27 @@ int YaSUBImpl::clearNotification(int key)
   zmq_setsockopt (mpSUBSocket, ZMQ_UNSUBSCRIBE, cKey, YaComponent::KeySize);
 }
 
-void YaSUBImpl::setConnectionPara( const char* address, const char* syncaddress, int )
+void YaSUBImpl::setConnectionPara( const char* address, const char* syncaddress, const char* ident )
 {
   assert( 0 != mpSUBSocket && 0 != address );
   assert( 0 != mpReqRespSocket && 0 != syncaddress );
+
+  assert(strlen(ident) < YaComponent::MaxIdentSize );
+  strcpy(mcIdent,ident);
+
   if( mpSUBSocket && mpReqRespSocket && !mbConnected )
   {
+    int rc = -1;
+    zmq_setsockopt( mpReqRespSocket, ZMQ_IDENTITY, mcIdent, strlen(mcIdent));
     if( 0 == zmq_connect(mpSUBSocket,address) && ( 0 == zmq_connect(mpReqRespSocket,syncaddress)))
     {
       mbConnected = true;
-      char cKey[YaComponent::KeySize];
+      char cKey[YaComponent::KeySize + 1];
       sprintf(cKey,YaComponent::KeyFmt,YaComponent::KeySync);
-      // this is a blocking call!
-      int rc = zmq_send (mpReqRespSocket, cKey, YaComponent::KeySize, 0);
+
+//      int rc = zmq_send( mpReqRespSocket, 0, 0, ZMQ_SNDMORE );
+//      assert( -1 != rc);
+      rc = zmq_send (mpReqRespSocket, cKey, YaComponent::KeySize, ZMQ_NOBLOCK);
       assert( -1 != rc);
       YaComponent::sleep(20);
       bool bSync = false;
@@ -134,36 +148,64 @@ void YaSUBImpl::setConnectionPara( const char* address, const char* syncaddress,
 bool YaSUBImpl::checkSync()
 {
   bool bRet = false;
-  int size = zmq_recv (mpReqRespSocket, mMsgBuffer.data(), YaComponent::MaxMessageSize, ZMQ_NOBLOCK);
+  int size = zmq_recv (mpReqRespSocket, mMsgPropBuffer.data(), YaComponent::MaxMessageSize, ZMQ_NOBLOCK);
   if ( 0 < size )
   {
-    bRet = ( 0 == strncmp(YaComponent::SynAck,mMsgBuffer.data(),strlen(YaComponent::SynAck))) ? true : false;
+    bRet = ( 0 == strncmp(YaComponent::SynAck,mMsgPropBuffer.data(),strlen(YaComponent::SynAck))) ? true : false;
   }
 
   return bRet;
 }
 
-int YaSUBImpl::receive(int& key, int& size, const  char* pcData )
+int YaSUBImpl::receive(int& key, int& size,  char** pcData )
 {
   int iBytes = 0;
+  char buffer[YaComponent::MaxIdentSize];
+  int rc = -1;
 
-  if( 0 != mpSUBSocket )
+  assert( 0 != mpSUBSocket && 0 != mpReqRespSocket);
+
+  if( 0 != mpSUBSocket && 0 != mpReqRespSocket)
   {
-    // receive key
-    iBytes = zmq_recv (mpSUBSocket, mcKey, YaComponent::KeySize, ZMQ_NOBLOCK);
+    // start receiving responses
+    iBytes = zmq_recv (mpReqRespSocket, mcKey, YaComponent::KeySize, ZMQ_NOBLOCK);
     if( 0 < iBytes )
     {
       assert (iBytes == YaComponent::KeySize);
       sscanf(mcKey,YaComponent::KeyFmt,&key);
+      if( 0 < key)
       {
-        iBytes = zmq_recv (mpSUBSocket, mMsgBuffer.data(), YaComponent::MaxMessageSize, ZMQ_NOBLOCK);
+        iBytes = zmq_recv (mpReqRespSocket, mMsgRespBuffer.data(), YaComponent::MaxMessageSize, ZMQ_NOBLOCK);
         if( 0 < iBytes )
         {
           size = iBytes;
-          pcData = mMsgBuffer.data();
+          *pcData = mMsgRespBuffer.data();
         }
       }
+      else if ( YaComponent::KeySync == key)
+      {
+        iBytes = 0;
+      }
       miMessageCnt++;
+    }
+    else // no response received, check for properties
+    {
+      // receive key
+      iBytes = zmq_recv (mpSUBSocket, mcKey, YaComponent::KeySize, ZMQ_NOBLOCK);
+      if( 0 < iBytes )
+      {
+        assert (iBytes == YaComponent::KeySize);
+        sscanf(mcKey,YaComponent::KeyFmt,&key);
+        {
+          iBytes = zmq_recv (mpSUBSocket, mMsgPropBuffer.data(), YaComponent::MaxMessageSize, ZMQ_NOBLOCK);
+          if( 0 < iBytes )
+          {
+            size = iBytes;
+            *pcData = mMsgPropBuffer.data();
+          }
+        }
+        miMessageCnt++;
+      }
     }
   }
 

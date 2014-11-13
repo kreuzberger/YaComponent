@@ -87,6 +87,15 @@ sub writeLayout
         $fhLayoutIncludes  .= "!include $xmlfilename/doc/$xmlfilename.txt\n";
         #$fhLayoutStr .= "!include $xmlfilename/doc/$xmlfilename.txt\n";
         $fhLayoutStr .= "    COMP_" . uc($xmlfilename) ."($comp->{name})\n";
+
+        if (defined $comp->{uses} && defined $comp->{uses}->{interface} )
+        {
+          my @interfaces = @{ $comp->{uses}->{interface} };
+          foreach my $ifc (@interfaces )
+          {
+            $fhLayoutStr .= "    $comp->{name} \"$ifc->{id}\" #-( $ifc->{sub} : use\n";
+          }
+        }
       }
 
       $fhLayoutStr .= "  }\n\n"; #close thread

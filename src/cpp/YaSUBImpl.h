@@ -10,8 +10,8 @@ class YaSUBImpl
   public:
     YaSUBImpl( void* context );
     virtual ~YaSUBImpl();
-    virtual void setConnectionPara(const char* sub, const char* req, int hwm = 0 );
-    virtual int receive(int& key, int& size, const char* pcData );
+    virtual void setConnectionPara(const char* sub, const char* req, const char* ident );
+    virtual int receive(int& key, int& size, char** pcData );
     virtual int send( int key, int size, const char* );
 
     int request( int key, const ::google::protobuf::MessageLite& msg );
@@ -30,10 +30,12 @@ class YaSUBImpl
     void* mpSUBSocket;
     void* mpReqRespSocket;
     bool mbConnected;
-    char mcKey[YaComponent::KeySize];
-    char mcKeyReq[YaComponent::KeySize];
+    char mcKey[YaComponent::KeySize + 1];
+    char mcKeyReq[YaComponent::KeySize + 1];
+    char mcIdent[YaComponent::MaxIdentSize];
     YaBuffer mMsgOutBuffer;
-    YaBuffer mMsgBuffer;
+    YaBuffer mMsgPropBuffer;
+    YaBuffer mMsgRespBuffer;
     int miMessageCnt;
 };
 #endif // YASUBIMPL_H

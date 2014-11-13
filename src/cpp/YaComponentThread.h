@@ -11,7 +11,7 @@ public:
   YaComponentThread();
   virtual ~YaComponentThread();
 protected:
-  virtual void run() {printf("starting thread\n");exec();printf("exiting thread\n");}
+  virtual void run() { exec(); }
 };
 
 #endif // YACOMPONENTTHREAD_H

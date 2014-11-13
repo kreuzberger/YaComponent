@@ -6,7 +6,5 @@
     <interface id="Xml" xml="TextGenIfc.xml"/>
     <interface id="Plain" xml="TextGenIfc.xml"/>
   </uses>
-  <source/>
-  <header/>
 </component>
 

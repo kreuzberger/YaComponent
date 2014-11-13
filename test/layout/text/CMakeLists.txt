@@ -21,13 +21,18 @@ YACOMPONENT_GENERATE(GENERATED_COMP_OUT_SRC textout/TextOutComp.xml)
 YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT_SRC TextExampleMPMT.xml)
 YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT_SRC_SPMT TextExampleSPMT.xml)
 
+QT4_WRAP_CPP( UNITTESTMPSUB_MOCS TextUnittestMP_SUB.h )
+QT4_WRAP_CPP( UNITTESTMPPUB_MOCS TextUnittestMP_PUB.h )
+
 set( textgen_SRCS
   ${GENERATED_IFC_SRC}
   ${GENERATED_COMP_GEN_SRC}
   ${ProtoSourcesTextGen}
   ${GENERATED_LAYOUT_SRC}
-  textgenMPMT.cpp
-  textgen/textgencomp.cpp
+  textgencompunittest.cpp
+  TextUnittestMP_PUB.cpp
+  TextUnittestMP_PUB.h
+  ${UNITTESTMPPUB_MOCS}
 )
 
 set( textout_SRCS
@@ -37,11 +42,13 @@ set( textout_SRCS
   ${GENERATED_COMP_OUT_SRC}
   ${ProtoSourcesTextGen}
   ${GENERATED_LAYOUT_SRC}
-  textoutMPMT.cpp
-  textout/textoutcomp.cpp
+  textoutcompunittest.cpp
+  TextUnittestMP_SUB.cpp
+  TextUnittestMP_SUB.h
+  ${UNITTESTMPSUB_MOCS}
 )
 
-QT4_WRAP_CPP( UNITTEST_MOCS unittest/TextUnittest.h )
+QT4_WRAP_CPP( UNITTEST_MOCS TextUnittest.h )
 
 set( textunittest_SRCS
   ${GENERATED_IFC_SRC}
@@ -50,30 +57,40 @@ set( textunittest_SRCS
   ${GENERATED_COMP_OUT_SRC}
   ${ProtoSourcesTextGen}
   ${GENERATED_LAYOUT_SRC_SPMT}
+  textoutcompunittest.cpp
+  textgencompunittest.cpp
+  TextUnittest.cpp
+  TextUnittest.h
   ${UNITTEST_MOCS}
-  unittest/textoutcompunittest.cpp
-  unittest/textgencompunittest.cpp
-  unittest/TextUnittest.cpp
-  unittest/TextUnittest.h
 )
+
+QT4_WRAP_CPP( UNITTESTMP_MOCS TextUnittestMP.h )
+
+set( textunittestmp_SRCS
+  TextUnittestMP.cpp
+  TextUnittestMP.h
+  ${UNITTESTMP_MOCS}
+)
+
+
+
 
 add_executable( textgenMPMT  ${textgen_SRCS} )
 add_executable( textoutMPMT  ${textout_SRCS} )
 add_executable( textunittest ${textunittest_SRCS} )
+add_executable( textunittestmp ${textunittestmp_SRCS} )
 
 
 target_link_libraries(textgenMPMT ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES} ${ZEROMQ_LIBRARIES})
 target_link_libraries(textoutMPMT ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES} ${ZEROMQ_LIBRARIES})
 target_link_libraries(textunittest ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES} ${ZEROMQ_LIBRARIES})
+target_link_libraries(textunittestmp ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES} ${ZEROMQ_LIBRARIES})
 
 
-install( TARGETS textgenMPMT textoutMPMT RUNTIME DESTINATION "examples/text" )
-install( TARGETS textunittest RUNTIME DESTINATION "examples/text/unittest" )
-#install( FILES ${QT_INSTALL_FILES} DESTINATION "examples/text" )
+install( TARGETS textgenMPMT textoutMPMT RUNTIME DESTINATION "unittest/text" )
+install( TARGETS textunittest RUNTIME DESTINATION "unittest/text" )
+install( TARGETS textunittestmp RUNTIME DESTINATION "unittest/text" )
 
-
-#add_test( NAME texttest
-#          COMMAND ${CMAKE_COMMAND} -DTEXTGEN_EXE=$<TARGET_FILE:textgenMPMT> -DTEXTOUT_EXE=$<TARGET_FILE:textoutMPMT> -DTESTDIR_PATH=${CMAKE_CURRENT_BINARY_PATH} -P ${CMAKE_CURRENT_LIST_DIR}/TextTest.cmake
-#          )
 
 add_test( NAME textunittest COMMAND textunittest )
+add_test( NAME textunittestmp COMMAND textunittestmp )

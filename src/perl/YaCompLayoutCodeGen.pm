@@ -158,6 +158,8 @@ sub writeComponentParts
       print $fhSource $adresses->{$key}{pub};
       print $fhSource "\", \"";
       print $fhSource $adresses->{$key}{req};
+      print $fhSource "\", \"";
+      print $fhSource $comp->{name};
       print $fhSource "\" );\n";
     }
   }

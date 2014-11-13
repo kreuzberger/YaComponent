@@ -9,10 +9,12 @@ class TextGenComp: public YaComponent::TextGenCompImpl
 {
 public:
   TextGenComp(void* context);
+  virtual ~TextGenComp() {}
 
   virtual void onRequestStartText( int id, const TextGen::Request&, TextGen::startedText& );
   virtual void onRequestStopText(  int id, const TextGen::Request&, TextGen::stoppedText& );
   virtual void init();
+  int miRequestStop;
 
 private:
   TextGenComp& self() { return *this; }

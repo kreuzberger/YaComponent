@@ -15,18 +15,6 @@
         <interface id="TextGenPlain" pub="inproc:///tmp/hurtmeplain2" req="inproc:///tmp/hurtmeplain2sync" hwm="2500"/>
       </provides>
     </component>
-    
-<!--
-      <provides>
-        <if name="" id="" classname="" header="" xmldef=""/>
-      </provides>
-      <uses>
-        <if id="" maj="" min="" rev=""/>
-        <if id="" maj="" min="" rev=""/>
-        <if id="" maj="" min="" rev=""/>
-        <if id="" maj="" min="" rev=""/>
-      </uses>
-      -->
   </thread>
 </process>
 <process name="TextOutProcess">

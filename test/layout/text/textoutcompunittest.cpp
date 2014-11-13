@@ -1,4 +1,5 @@
 #include "textoutcompunittest.h"
+#include "TextGenIfcProxy.h"
 
 TextOutComp::TextOutComp( void* context )
  : ITextGenIfcProxyHandler( self() )
@@ -27,23 +28,37 @@ void TextOutComp::requestStart()
 {
   TextGen::Request oRequest;
   oRequest.set_id(1);
+  int size = oRequest.ByteSize();
   mXml.requestStartText(oRequest);
-  mXml.receive();
-
 }
 
 void TextOutComp::requestStop()
 {
   TextGen::Request oRequest;
-  oRequest.set_id(1);
+  oRequest.set_id(2);
   mXml.requestStopText(oRequest);
-  mXml.receive();
-
 }
 
 
-void TextOutComp::onProperty( int, const TextGen::Text& text)
+void TextOutComp::onProperty( int proxyId, const TextGen::Text& text)
 {
-  fprintf(stderr, "recevied property text %s\n", text.DebugString().c_str());
+  fprintf(stderr, "received property text %s\n", text.DebugString().c_str());
+  assert( PROXY_XML == proxyId);
   miPropertiesCnt++;
+}
+
+void TextOutComp::onResponse( int proxyId, const TextGen::startedText& resp)
+{
+  assert( PROXY_XML == proxyId);
+  fprintf(stderr, "received onResponse startedText\n");
+  assert( 1 == resp.id().id());
+  miResponseStartCnt++;
+}
+
+void TextOutComp::onResponse( int proxyId, const TextGen::stoppedText& resp)
+{
+  fprintf(stderr, "received onResponse stoppedText\n");
+  assert( PROXY_XML == proxyId);
+  assert( 2 == resp.id().id());
+  miResponseStopCnt++;
 }

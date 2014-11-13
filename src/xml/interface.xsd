@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+
   <xsd:element name="interface">
     <xsd:complexType>
     <xsd:sequence>
@@ -45,24 +47,31 @@
     <xsd:attribute name="name" type="xsd:string" use="required"/>
   </xsd:complexType>
 
-
-  <xsd:complexType name="tProperty">
-    <xsd:sequence>
-      <xsd:element name="type" type="tType" minOccurs="1" maxOccurs="unbounded"/>
-    </xsd:sequence>
+  <xsd:complexType name="tPara">
     <xsd:attribute name="id" type="xsd:string" use="required"/>
-    <xsd:attribute name="onChange" type="xsd:integer"/>
-  </xsd:complexType>
-
-  <xsd:complexType name="tRequest">
-    <xsd:attribute name="action" type="xsd:string" use="required"/>
-    <xsd:attribute name="respid" type="xsd:string"/>
+    <xsd:attribute name="package" type="xsd:string" use="optional"/>
   </xsd:complexType>
 
   <xsd:complexType name="tResponse">
     <xsd:attribute name="id" type="xsd:string" use="required"/>
-    <xsd:attribute name="action" type="xsd:string" use="required"/>
+    <xsd:attribute name="package" type="xsd:string" use="optional"/>
   </xsd:complexType>
+
+  <xsd:complexType name="tProperty">
+    <xsd:attribute name="id" type="xsd:string" use="required"/>
+    <xsd:attribute name="package" type="xsd:string" use="optional"/>
+    <xsd:attribute name="onChange" type="xsd:integer"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="tRequest">
+    <xsd:sequence>
+    <xsd:element name="para" type="tPara" minOccurs="0" maxOccurs="unbounded" />
+    <xsd:element name="resp" type="tResponse" minOccurs="0" maxOccurs="unbounded" />
+    </xsd:sequence>
+    <xsd:attribute name="id" type="xsd:string" use="required"/>
+    <xsd:attribute name="package" type="xsd:string" use="optional"/>
+  </xsd:complexType>
+
 
 
 </xsd:schema>

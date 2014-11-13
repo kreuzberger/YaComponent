@@ -5,6 +5,4 @@
     <interface id="TextGenPlain" xml="TextGenIfc.xml"/>
     <interface id="TextGenXml" xml="TextGenIfc.xml"/>
   </provides>
-  <source path="textgencomp.cpp"/>
-  <header path="textgencomp.h"/>
 </component>

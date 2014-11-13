@@ -9,8 +9,10 @@ namespace YaComponent {
   static const char* KeyFmt = "%2d";
   static const char* MessageSizeFmt = "%8d";
   static const int MaxMessageSize = 20*1024;
+  static const int MaxIdentSize = 512;
   static const char* SynAck = "SYNC_ACK";
   static const int KeySync = -2;
+  static const int KeyEnd = -3;
   static const int  TimeOut = 20;
   char* socket_rcv (void *socket);
   int socket_snd(void *socket, const char *string);

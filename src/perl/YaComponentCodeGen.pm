@@ -178,13 +178,13 @@ sub writeComponentImpl
 
   foreach my $usedIfc (@{$comp->{used}})
   {
-    print $fhHeader "    void setConnectionPara" . $usedIfc->{id} . "( const char* sub, const char* req );\n";
+    print $fhHeader "    void setConnectionPara" . $usedIfc->{id} . "( const char* sub, const char* req, const char* ident );\n";
   }
 
   print $fhHeader "    /// called after setting connections and moveToThread\n";
   print $fhHeader "    /// if overloaded base class implementation must be called!\n";
   print $fhHeader "    virtual void init();\n";
-  print $fhHeader "    virtual void deInit();\n";
+  print $fhHeader "    virtual void close();\n";
 
   print $fhHeader "  public slots:\n";
   print $fhHeader "    void onTimer();\n";
@@ -250,9 +250,20 @@ sub writeComponentImpl
   print $fhSource "  emit startTimer( YaComponent::TimeOut );\n";
   print $fhSource "}\n";
 
-  print $fhSource "void $CompName" . "Impl::deInit()\n";
+  print $fhSource "void $CompName" . "Impl::close()\n";
   print $fhSource "{\n";
   print $fhSource "  emit stopTimer( );\n";
+
+  foreach my $providedIfc (@{$comp->{provided}})
+  {
+    print $fhSource "  m" . $providedIfc->{id} . ".close();\n";
+  }
+
+  foreach my $usedIfc (@{$comp->{used}})
+  {
+    print $fhSource "  m" . $usedIfc->{id} . ".close();\n";
+  }
+
   print $fhSource "}\n";
 
   print $fhSource "void $CompName" . "Impl::killTimer()\n";
@@ -271,9 +282,9 @@ sub writeComponentImpl
 
   foreach my $usedIfc (@{$comp->{used}})
   {
-    print $fhSource "void " . $CompName ."Impl::setConnectionPara" . $usedIfc->{id} . "( const char* sub, const char* req )\n";
+    print $fhSource "void " . $CompName ."Impl::setConnectionPara" . $usedIfc->{id} . "( const char* sub, const char* req, const char* ident )\n";
     print $fhSource "{\n";
-    print $fhSource "  m" . $usedIfc->{id} . ".setConnectionPara( sub, req );\n";
+    print $fhSource "  m" . $usedIfc->{id} . ".setConnectionPara( sub, req, ident );\n";
     print $fhSource "}\n";
   }
 
@@ -497,9 +508,9 @@ sub writeIfcStub
   foreach my $resp (@{$ifc->{responses}})
   {
 #  print $fhHeaderIfc "    virtual void response( const QObject*, const ";
-    print $fhHeader "    virtual void response( int id, const ";
+    print $fhHeader "    virtual void response( int key, const ";
     print $fhHeader $resp->{package} . "::" if ($resp->{package});
-    print $fhHeader $resp->{id}. "& ) {}\n";
+    print $fhHeader $resp->{id}. "&, const std::string& ident );\n";
   }
 
   print $fhHeader "    int receive();\n";
@@ -521,6 +532,17 @@ sub writeIfcStub
 
   print $fhSource "{\n\n}\n\n";
 
+
+  foreach my $resp (@{$ifc->{responses}})
+  {
+#  print $fhHeaderIfc "    virtual void response( const QObject*, const ";
+    print $fhSource "void $IfcName" . "Stub::response( int key, const ";
+    print $fhSource $resp->{package} . "::" if ($resp->{package});
+    print $fhSource $resp->{id}. "& msg, const std::string& ident )\n";
+    print $fhSource "{\n";
+    print $fhSource "  mPublisher.response(key, msg, ident);\n";
+    print $fhSource "}\n\n";
+  }
 
   print $fhSource $IfcName . "Stub::~" . $IfcName . "Stub()\n";
   print $fhSource "{\n\n}\n\n";
@@ -544,15 +566,17 @@ sub writeIfcStub
   print $fhSource "{\n";
   print $fhSource "  int iMsgCnt = 0;\n";
   print $fhSource "  bool bMsgAvailable = true;\n";
+  print $fhSource "  std::string ident;\n";
 
   print $fhSource "  while( bMsgAvailable )\n";
   print $fhSource "  {\n";
   print $fhSource "    int iBytesTotal = 0;\n";
   print $fhSource "    int key = -1;\n";
   print $fhSource "    int size = -1;\n";
-  print $fhSource "    const char* msgData = 0;\n";
+  print $fhSource "    char* msgData = 0;\n";
+  print $fhSource "    ident.clear();\n";
 
-  print $fhSource "    int iBytes = mPublisher.receive(key, size, msgData );\n";
+  print $fhSource "    int iBytes = mPublisher.receive(key, size, &msgData, ident );\n";
   print $fhSource "    if( 0 < iBytes )\n";
   print $fhSource "    {\n";
   print $fhSource "      iBytesTotal += iBytes;\n";
@@ -568,7 +592,13 @@ sub writeIfcStub
     $strReq .= uc($req->{package}) . "_" if ($req->{package});
     $strReq .= uc($req->{id});
     print $fhSource "    case $strReq:\n";
-    #print $fhSource "      m$req->{para}.ParseFromArray(msgData, size);\n";
+    my $strMember;
+    foreach my $para (@{$req->{para}})
+    {
+      $strMember .= "      m" . $req->{id} . "_" . $para->{id}. ".ParseFromArray(msgData, size);\n";
+    }
+    print $fhSource $strMember;
+
     foreach my $resp (@{$req->{resp}})
     {
       print $fhSource "      m" . $req->{id} . "_" . $resp->{id}. ".Clear();\n";
@@ -591,7 +621,7 @@ sub writeIfcStub
       $strResp .= "RESP_";
       $strResp .= uc($resp->{package}) . "_" if ($resp->{package});
       $strResp .= uc($resp->{id});
-      print $fhSource "     response( $strResp, m"  . $req->{id} . "_" . $resp->{id} . " );\n";
+      print $fhSource "      response( $strResp, m"  . $req->{id} . "_" . $resp->{id} . ", ident );\n";
     }
 
     print $fhSource "      break;\n";
@@ -747,7 +777,7 @@ sub writeIfcProxy
     $strProp .= "PROP_";
     $strProp .= uc($prop->{package}) . "_" if ($prop->{package});
     $strProp .= uc($prop->{id});
-    $strDtor .= "  clearNotification($strProp);\n";
+  #  $strDtor .= "  clearNotification($strProp);\n";
     print $fhHeader "      $strProp,\n";
   }
   foreach my $req (@{$ifc->{requests}})
@@ -845,9 +875,9 @@ sub writeIfcProxy
   print $fhSource "    int iBytesTotal = 0;\n";
   print $fhSource "    int key = -1;\n";
   print $fhSource "    int size = -1;\n";
-  print $fhSource "    const char* msgData = 0;\n";
+  print $fhSource "    char* msgData = 0;\n";
 
-  print $fhSource "    int iBytes = mSubscriber.receive(key, size, msgData );\n";
+  print $fhSource "    int iBytes = mSubscriber.receive(key, size, &msgData );\n";
   print $fhSource "    if( 0 < iBytes )\n";
   print $fhSource "    {\n";
   print $fhSource "      iMsgCnt++;\n";
@@ -893,8 +923,7 @@ sub writeIfcProxy
 
   foreach my $resp (@{$ifc->{responses}})
   {
-#    print $fhHeaderIfc "    virtual void onResponse( const YaProxyBase*, const ";
-    print $fhHeaderIfc "    virtual void onResponse( int id, const ";
+    print $fhHeaderIfc "    virtual void onResponse( int proxyId, const ";
     print $fhHeaderIfc $resp->{package} . "::" if ($resp->{package});
     print $fhHeaderIfc $resp->{id}. "& ) = 0;\n";
   }

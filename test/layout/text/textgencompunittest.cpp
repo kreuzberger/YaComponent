@@ -1,13 +1,15 @@
-#include "textgencomp.h"
+#include "textgencompunittest.h"
 
 TextGenComp::TextGenComp(void* context)
   : YaComponent::TextGenCompImpl( context, static_cast<ITextGenIfcStubHandler&>(self()) )
   , ITextGenIfcStubHandler( self() )
+  , miRequestStop( 0 )
 {
 }
 
 void TextGenComp::init()
 {
+  TextGenCompImpl::init();
 
 }
 
@@ -27,7 +29,8 @@ void TextGenComp::onRequestStartText( int id, const TextGen::Request& oRequest, 
 
 void TextGenComp::onRequestStopText( int id, const TextGen::Request& oRequest, TextGen::stoppedText& oResponse)
 {
+  fprintf(stderr, "received onRequestStopText\n");
   oResponse.mutable_id()->set_id(oRequest.id());
-
+  miRequestStop++;
 }
 

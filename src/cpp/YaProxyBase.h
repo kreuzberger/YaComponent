@@ -17,7 +17,8 @@ public:
   void setNotification( int  );
   void clearNotification( int );
 
-  void setConnectionPara( const char*, const char*, int hwm = 0 );
+  void setConnectionPara( const char*, const char*, const char* ident );
+  void close();
 
   virtual int receive() = 0;
 

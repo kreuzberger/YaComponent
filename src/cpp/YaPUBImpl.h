@@ -5,6 +5,8 @@
 #include "YaBuffer.h"
 #include <google/protobuf/message_lite.h>
 
+#include <map>
+
 class YaPUBImpl
 {
 
@@ -14,8 +16,10 @@ public:
 //  bool bind( const char* address, const char* syncaddress) { setConnectionPara(address,syncaddress,5000); }
   void setConnectionPara(const char* pub, const char* req, int hwm = 0);
   int send(int key, const ::google::protobuf::MessageLite& msg );
+  int response(int key, const ::google::protobuf::MessageLite& msg, const std::string& ident );
   int send(int key, int msgSize, const char* msgData );
-  int receive(int& key, int size, const  char* pcData );
+  int send(int key, int msgSize, const char* msgData, const std::string& ident );
+  int receive(int& key, int size, char** pcData, std::string& ident );
 //  bool checkSubscribers(int iNumExpectedSubscribers = 1);
   void close();
 
@@ -31,8 +35,9 @@ private:
   int miSubscribersCnt;
   YaBuffer mMsgBuffer;
   YaBuffer mMsgBufferReq;
-  char mcKey[YaComponent::KeySize];
-  char mcKeyReq[YaComponent::KeySize];
+  char mcKey[YaComponent::KeySize + 1];
+  char mcKeyReq[YaComponent::KeySize + 1];
+  std::map<std::string, int> mPeerMap;
 //  char mcSize[YaComponent::MessageSize];
 
 };

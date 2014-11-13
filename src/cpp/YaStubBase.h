@@ -13,6 +13,7 @@ public:
   void send(int key, int size, const char* msg );
 //  int receive(int& key, int& size, const char* msg );
   void setConnectionPara( const char* pub, const char* req, int hwm  );
+  void close();
 
 protected:
   YaPUBImpl mPublisher;

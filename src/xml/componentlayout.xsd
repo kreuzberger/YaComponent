@@ -53,7 +53,6 @@
       <xsd:element name="thread" type="tThread" minOccurs="0" maxOccurs="unbounded"/>
       <xsd:element name="component" type="tComponent" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
-    <xsd:attribute name="id" type="xsd:string" use="required"/>
     <xsd:attribute name="name" type="xsd:string" use="required"/>
   </xsd:complexType>
 
@@ -61,17 +60,33 @@
     <xsd:sequence>
       <xsd:element name="component" type="tComponent" minOccurs="1" maxOccurs="unbounded"/>
     </xsd:sequence>
-    <xsd:attribute name="id" type="xsd:string" use="required"/>
-    <xsd:attribute name="name" type="xsd:string" use="required"/>
+   <xsd:attribute name="name" type="xsd:string" use="required"/>
   </xsd:complexType>
 
   <xsd:complexType name="tComponent">
-    <xsd:attribute name="id" type="xsd:string" use="required"/>
     <xsd:attribute name="name" type="xsd:string" use="required"/>
     <xsd:attribute name="xml" type="xsd:string" use="required"/>
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="provides" type="tInterfaceProvide" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      <xsd:sequence>
+        <xsd:element name="uses" type="tInterfaceUse" minOccurs="0" maxOccurs="unbounded"/>
+      </xsd:sequence>
+      </xsd:complexType>
   </xsd:complexType>
 
+  <xsd:complexType name="tInterfaceProvide">
+    <xsd:attribute name="id" type="xsd:string" use="required"/>
+    <xsd:attribute name="pub" type="xsd:string" use="required"/>
+    <xsd:attribute name="req" type="xsd:string" use="required"/>
+    <xsd:attribute name="hwm" type="xsd:int" use="required"/>
+  </xsd:complexType>
 
+  <xsd:complexType name="tInterfaceUse">
+    <xsd:attribute name="id" type="xsd:string" use="required"/>
+    <xsd:attribute name="sub" type="xsd:string" use="required"/>
+  </xsd:complexType>
 
 
 </xsd:schema>

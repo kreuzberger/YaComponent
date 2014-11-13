@@ -22,16 +22,23 @@ private slots:
 
     void initTestCase() {}
     void cleanupTestCase();
-    void testInit();
-    void testNotification();
+    void testSPST();
+    void testSPMT();
+    void testSPMTGui();
 
 private:
-    void* mContext;
-    YaComponentThread mTextGenThread;
-    TextGenComp mTextGen1;
-    YaComponentThread mTextOutThread;
-    void* mContext2;
-    TextOutComp mTextOut;
+    void initComponentsSPST();
+    void initComponentsSPMT();
+    void initComponentsSPMTGui();
+    void cleanupComponents();
+    void testRoutine();
+
+    void* mpContext;
+    YaComponentThread* mpTextGenThread;
+    TextGenComp* mpTextGen1;
+    YaComponentThread* mpTextOutThread;
+    void* mpContext2;
+    TextOutComp* mpTextOut;
 };
 
 #endif // TEXTUNITTEST_H
