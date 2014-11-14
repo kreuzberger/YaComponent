@@ -21,7 +21,7 @@ void TextOutComp::init()
 void TextOutComp::setNotifications()
 {
   mXml.setNotification(YaComponent::TextGenIfcProxy::PROP_TEXTGEN_TEXT);
-  mPlain.setNotification(YaComponent::TextGenIfcProxy::PROP_TEXTGEN_TEXT);
+//  mPlain.setNotification(YaComponent::TextGenIfcProxy::PROP_TEXTGEN_TEXT);
 }
 
 void TextOutComp::requestStart()
@@ -42,7 +42,7 @@ void TextOutComp::requestStop()
 
 void TextOutComp::onProperty( int proxyId, const TextGen::Text& text)
 {
-  fprintf(stderr, "received property text %s\n", text.DebugString().c_str());
+ // fprintf(stderr, "received property text %s\n", text.DebugString().c_str());
   assert( PROXY_XML == proxyId);
   miPropertiesCnt++;
 }
@@ -59,6 +59,6 @@ void TextOutComp::onResponse( int proxyId, const TextGen::stoppedText& resp)
 {
   fprintf(stderr, "received onResponse stoppedText\n");
   assert( PROXY_XML == proxyId);
-  assert( 2 == resp.id().id());
+  assert( 2 == resp.id().id() ||  4242 == resp.id().id());
   miResponseStopCnt++;
 }

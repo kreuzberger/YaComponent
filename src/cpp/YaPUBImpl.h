@@ -19,7 +19,7 @@ public:
   int response(int key, const ::google::protobuf::MessageLite& msg, const std::string& ident );
   int send(int key, int msgSize, const char* msgData );
   int send(int key, int msgSize, const char* msgData, const std::string& ident );
-  int receive(int& key, int size, char** pcData, std::string& ident );
+  int receive(int& key, int& size, char** pcData, std::string& ident );
 //  bool checkSubscribers(int iNumExpectedSubscribers = 1);
   void close();
 
@@ -37,7 +37,7 @@ private:
   YaBuffer mMsgBufferReq;
   char mcKey[YaComponent::KeySize + 1];
   char mcKeyReq[YaComponent::KeySize + 1];
-  std::map<std::string, int> mPeerMap;
+  std::map<std::string, std::map<int, int> > mPeerMap;
 //  char mcSize[YaComponent::MessageSize];
 
 };

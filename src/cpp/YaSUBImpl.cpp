@@ -22,7 +22,7 @@ YaSUBImpl::YaSUBImpl(void * context)
   {
     mpSUBSocket = zmq_socket (context, ZMQ_SUB);
     YaComponent::sleep(1);
-    mpReqRespSocket = zmq_socket (context, ZMQ_REQ);
+    mpReqRespSocket = zmq_socket (context, ZMQ_DEALER);
   }
   else
   {
@@ -51,6 +51,7 @@ int YaSUBImpl::setNotification(int key)
   sprintf(cKey,YaComponent::KeyFmt,key);
 
   zmq_setsockopt (mpSUBSocket, ZMQ_SUBSCRIBE, cKey, YaComponent::KeySize);
+  send(YaComponent::KeySetNotification,YaComponent::KeySize,cKey);
 }
 
 int YaSUBImpl::request(int key, const ::google::protobuf::MessageLite& msg )
@@ -69,8 +70,7 @@ int YaSUBImpl::send( int key, int size, const char* data )
   sprintf(mcKey,YaComponent::KeyFmt,key);
   int rc = -1;
   assert( 0 != mpReqRespSocket  );
-  int flags = 0;
-  if( 0 != size && 0 != data ) flags = ZMQ_SNDMORE;
+  int flags = ( 0 != size && 0 != data ) ? ZMQ_SNDMORE : 0;
   if( 0 != mpReqRespSocket)
   {
 //    rc = zmq_send( mpReqRespSocket, 0, 0, ZMQ_SNDMORE );
@@ -92,6 +92,8 @@ int YaSUBImpl::clearNotification(int key)
   sprintf(cKey,YaComponent::KeyFmt,key);
 
   zmq_setsockopt (mpSUBSocket, ZMQ_UNSUBSCRIBE, cKey, YaComponent::KeySize);
+  send(YaComponent::KeyClearNotification,YaComponent::KeySize,cKey);
+
 }
 
 void YaSUBImpl::setConnectionPara( const char* address, const char* syncaddress, const char* ident )

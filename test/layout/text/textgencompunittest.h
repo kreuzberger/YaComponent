@@ -15,9 +15,19 @@ public:
   virtual void onRequestStopText(  int id, const TextGen::Request&, TextGen::stoppedText& );
   virtual void init();
   int miRequestStop;
+  int miTimerID;
+  int miMessageCnt;
+  int miMaxMessageCnt;
+  bool mbSendAutoStop;
+
+  void sendResponseStop();
+protected:
+  virtual void timerEvent( QTimerEvent* );
 
 private:
   TextGenComp& self() { return *this; }
+  TextGen::Text moText;
+
 };
 
 #endif // TEXTGENCOMP_H

@@ -480,7 +480,7 @@ sub writeIfcStub
     my $strMethod;
     $strMethod .= $prop->{package} . "::" if ($prop->{package});
     $strMethod .= $prop->{id};
-    print $fhHeader "    void send(int key, const $strMethod&);\n";
+    print $fhHeader "    int send(int key, const $strMethod&);\n";
   }
 
   foreach my $req (@{$ifc->{requests}})
@@ -552,8 +552,8 @@ sub writeIfcStub
     my $strMethod;
     $strMethod .= $prop->{package} . "::" if ($prop->{package});
     $strMethod .= $prop->{id};
-    print $fhSource "void " . $IfcName . "Stub::send(int key, const $strMethod& rMessage )\n{\n";
-    print $fhSource "  mPublisher.send(key, rMessage );\n";
+    print $fhSource "int " . $IfcName . "Stub::send(int key, const $strMethod& rMessage )\n{\n";
+    print $fhSource "  return mPublisher.send(key, rMessage );\n";
     print $fhSource "}\n";
   }
 

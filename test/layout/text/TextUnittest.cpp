@@ -129,6 +129,23 @@ void TextUnittest::testSPMTGui()
   cleanupComponents();
 }
 
+void TextUnittest::testSPMTResponse()
+{
+  initComponentsSPMT();
+  mpTextOut->setNotifications();
+  mpTextGen1->sendResponseStop();
+
+  for( int i=1;i<3;i++)
+  {
+    QTest::qWait(YaComponent::TimeOut);
+  }
+
+  QCOMPARE(mpTextOut->miResponseStopCnt,1);
+
+
+  cleanupComponents();
+
+}
 
 void TextUnittest::testRoutine()
 {
@@ -142,12 +159,34 @@ void TextUnittest::testRoutine()
 
   mpTextOut->requestStop();
 
-  for( int i=1;i<3;i++)
+  for( int i=1;i<20;i++)
   {
     QTest::qWait(YaComponent::TimeOut);
   }
 
-  QCOMPARE(mpTextOut->miPropertiesCnt,1);
+  QVERIFY(1 <= mpTextOut->miPropertiesCnt);
   QCOMPARE(mpTextOut->miResponseStartCnt,1);
   QCOMPARE(mpTextOut->miResponseStopCnt,1);
+}
+
+
+void TextUnittest::testSPMTAllMessages()
+{
+  initComponentsSPMT();
+  mpTextGen1->miMaxMessageCnt = 100000;
+  mpTextGen1->mbSendAutoStop = true;
+
+  mpTextOut->setNotifications();
+  mpTextOut->requestStart();
+
+  do
+  {
+    QTest::qWait(1);
+  } while( 0 == mpTextOut->miResponseStopCnt );
+
+  QCOMPARE(mpTextOut->miPropertiesCnt,mpTextGen1->miMaxMessageCnt);
+
+
+  cleanupComponents();
+
 }
