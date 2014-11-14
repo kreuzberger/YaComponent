@@ -42,7 +42,7 @@ void TextOutComp::requestStop()
 
 void TextOutComp::onProperty( int proxyId, const TextGen::Text& text)
 {
- // fprintf(stderr, "received property text %s\n", text.DebugString().c_str());
+//  fprintf(stderr, "received property text %s\n", text.DebugString().c_str());
   assert( PROXY_XML == proxyId);
   miPropertiesCnt++;
 }

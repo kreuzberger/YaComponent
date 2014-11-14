@@ -173,7 +173,8 @@ void TextUnittest::testRoutine()
 void TextUnittest::testSPMTAllMessages()
 {
   initComponentsSPMT();
-  mpTextGen1->miMaxMessageCnt = 100000;
+//  mpTextGen1->miMaxMessageCnt = 100000;
+  mpTextGen1->miMaxMessageCnt = 1000;
   mpTextGen1->mbSendAutoStop = true;
 
   mpTextOut->setNotifications();
