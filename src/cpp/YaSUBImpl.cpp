@@ -110,8 +110,8 @@ void YaSUBImpl::setConnectionPara( const char* address, const char* syncaddress,
     zmq_setsockopt( mpReqRespSocket, ZMQ_IDENTITY, mcIdent, strlen(mcIdent));
     int timeout = 0;
     zmq_setsockopt( mpReqRespSocket, ZMQ_RCVTIMEO, &timeout, sizeof( timeout ));
-    int hwm = 5000;
-    zmq_setsockopt( mpReqRespSocket, ZMQ_RCVHWM, &hwm, sizeof( hwm ));
+//    int hwm = 5000;
+//    zmq_setsockopt( mpReqRespSocket, ZMQ_RCVHWM, &hwm, sizeof( hwm ));
     if( 0 == zmq_connect(mpSUBSocket,address) && ( 0 == zmq_connect(mpReqRespSocket,syncaddress)))
     {
       mbConnected = true;
@@ -173,13 +173,31 @@ int YaSUBImpl::receive(int& key, int& size,  char** pcData )
 
   if( 0 != mpSUBSocket && 0 != mpReqRespSocket)
   {
+
+    zmq_pollitem_t items [2];
+    /* First item refers to ØMQ socket 'socket' */
+    items[0].socket = mpReqRespSocket;
+    items[0].events = ZMQ_POLLIN;
+    /* Second item refers to standard socket 'fd' */
+    items[1].socket = mpSUBSocket;
+    items[1].events = ZMQ_POLLIN;
+    /* Poll for events indefinitely */
+    rc = zmq_poll (items, 2, 0);
+//    assert( -1 != rc);
+//    if( 0 < items[0].revents )
+//    {
+//      fprintf(stderr, "%d items to receive on ReqRespSocket\n",items[0].revents );
+//    }
     // start receiving responses
 //    do
 //    {
+    iBytes = zmq_recv (mpReqRespSocket, 0, 0, ZMQ_NOBLOCK);
     iBytes = zmq_recv (mpReqRespSocket, mcKey, YaComponent::KeySize, ZMQ_NOBLOCK);
     if( 0 < iBytes )
     {
-      assert (iBytes == YaComponent::KeySize);
+      // iBytes could be more due to multipart messages. i.E.
+      // keysize bytes are received, but more available.
+      //assert (iBytes == YaComponent::KeySize);
       sscanf(mcKey,YaComponent::KeyFmt,&key);
       if( 0 <= key)
       {
