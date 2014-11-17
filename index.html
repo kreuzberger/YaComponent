@@ -39,24 +39,27 @@
         </div>
 
         <h1>
-<a name="yacomponent" class="anchor" href="#yacomponent"><span class="octicon octicon-link"></span></a>YaComponent</h1>
+<a id="yacomponent" class="anchor" href="#yacomponent" aria-hidden="true"><span class="octicon octicon-link"></span></a>YaComponent</h1>
 
 <p>YaComponent is a framework for handling components and the interfaces of components.
 YaComponent includes</p>
 
 <ul>
-<li>XML description to define components, deployment and interfaces</li>
+<li>XML description to define interfaces, components and deployment</li>
 <li>Interface definition is done with google protobuf</li>
 <li>perl base generator for c++ code for components and interfaces</li>
-<li>implementation of the publish/subscriper pattern by using <a href="http://www.crossroads.io/">crossroads-io</a>
+<li>implementation of the publish/subscriper and request/response pattern by using <a href="http://zeromq.org//">libzmq</a>
 </li>
-</ul><h2>
-<a name="status" class="anchor" href="#status"><span class="octicon octicon-link"></span></a>Status</h2>
+</ul>
 
-<p>Currently development of the generator started, but still not usable. The documentation growed by adding some
-simple PlantUML design views.</p>
+<h2>
+<a id="status" class="anchor" href="#status" aria-hidden="true"><span class="octicon octicon-link"></span></a>Status</h2>
 
-<p><a href="https://github.com/kreuzberger/YaTraceTool/blob/master/doc/Usage.md">Main Concepts</a></p>
+<p>First working example provided with tests.
+The documentation growed by adding some simple PlantUML design views.
+Currently evaluating using only one port for both patterns with ZMQ_ROUTER/ZMQ_DEALER</p>
+
+<p><a href="doc/Concept.md">Main Concepts</a></p>
       </section>
 
     </div>
