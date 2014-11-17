@@ -13,6 +13,7 @@ Status
 
 First working example provided with tests.
 The documentation growed by adding some simple PlantUML design views.
+Currently evaluating using only one port for both patterns with ZMQ_ROUTER/ZMQ_DEALER
 
 
 [Main Concepts](doc/Concept.md)
