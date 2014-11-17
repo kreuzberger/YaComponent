@@ -138,7 +138,7 @@ sub writeComponentParts
 
   foreach my $ifc (@{$comp->{provides}->{interface}})
   {
-    print $fhSource "  $comp->{name}.setConnectionPara". $ifc->{id} . "( \"$ifc->{pub}\", \"$ifc->{req}\"";
+    print $fhSource "  $comp->{name}.setConnectionPara". $ifc->{id} . "( \"$ifc->{address}\"";
     if( $ifc->{hwm} )
     {
       print $fhSource ", $ifc->{hwm} );\n";
@@ -155,9 +155,7 @@ sub writeComponentParts
     if( exists $adresses->{$key} )
     {
       print $fhSource "  $comp->{name}.setConnectionPara". $ifc->{id} . "( \"";
-      print $fhSource $adresses->{$key}{pub};
-      print $fhSource "\", \"";
-      print $fhSource $adresses->{$key}{req};
+      print $fhSource $adresses->{$key}{address};
       print $fhSource "\", \"";
       print $fhSource $comp->{name};
       print $fhSource "\" );\n";

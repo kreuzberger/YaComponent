@@ -78,8 +78,7 @@
 
   <xsd:complexType name="tInterfaceProvide">
     <xsd:attribute name="id" type="xsd:string" use="required"/>
-    <xsd:attribute name="pub" type="xsd:string" use="required"/>
-    <xsd:attribute name="req" type="xsd:string" use="required"/>
+    <xsd:attribute name="address" type="xsd:string" use="required"/>
     <xsd:attribute name="hwm" type="xsd:int" use="required"/>
   </xsd:complexType>
 

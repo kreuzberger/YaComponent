@@ -22,8 +22,8 @@ void TextUnittestMPPub::initComponentsMPMT()
   mpTextGenThread->start();
 
   mpTextGen1->init();
-  mpTextGen1->setConnectionParaTextGenXml( "tcp://*:42163", "tcp://*:42164", 5000 );
-  mpTextGen1->setConnectionParaTextGenPlain( "tcp://*:42263", "tcp://*:42264", 5000 );
+  mpTextGen1->setConnectionParaTextGenXml( "tcp://*:42163", 5000 );
+  mpTextGen1->setConnectionParaTextGenPlain( "tcp://*:42263", 5000 );
   mpTextGen1->moveToThread(mpTextGenThread);
 
 }

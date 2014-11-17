@@ -12,9 +12,9 @@ void YaStubBase::send(int key, int size, const char* msg )
   mPublisher.send(key, size, msg );
 }
 
-void YaStubBase::setConnectionPara( const char* pub, const char* req, int hwm  )
+void YaStubBase::setConnectionPara( const char* address,  int hwm  )
 {
-  mPublisher.setConnectionPara( pub, req, hwm );
+  mPublisher.setConnectionPara( address, hwm );
 }
 
 void YaStubBase::close()

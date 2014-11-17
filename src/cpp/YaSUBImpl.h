@@ -10,7 +10,7 @@ class YaSUBImpl
   public:
     YaSUBImpl( void* context );
     virtual ~YaSUBImpl();
-    virtual void setConnectionPara(const char* sub, const char* req, const char* ident );
+    virtual void setConnectionPara(const char* address, const char* ident );
     virtual int receive(int& key, int& size, char** pcData );
     virtual int send( int key, int size, const char* );
 
@@ -27,14 +27,12 @@ class YaSUBImpl
     YaSUBImpl( const YaSUBImpl& );
     YaSUBImpl& operator=( const YaSUBImpl& );
 
-    void* mpSUBSocket;
     void* mpReqRespSocket;
     bool mbConnected;
     char mcKey[YaComponent::KeySize + 1];
     char mcKeyReq[YaComponent::KeySize + 1];
     char mcIdent[YaComponent::MaxIdentSize];
     YaBuffer mMsgOutBuffer;
-    YaBuffer mMsgPropBuffer;
     YaBuffer mMsgRespBuffer;
     int miMessageCnt;
 };

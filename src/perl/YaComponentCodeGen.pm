@@ -173,12 +173,12 @@ sub writeComponentImpl
 
   foreach my $providedIfc (@{$comp->{provided}})
   {
-    print $fhHeader "    void setConnectionPara" . $providedIfc->{id} . "( const char* pub, const char* req , int hwm = 0 );\n";
+    print $fhHeader "    void setConnectionPara" . $providedIfc->{id} . "( const char* address, int hwm = 0 );\n";
   }
 
   foreach my $usedIfc (@{$comp->{used}})
   {
-    print $fhHeader "    void setConnectionPara" . $usedIfc->{id} . "( const char* sub, const char* req, const char* ident );\n";
+    print $fhHeader "    void setConnectionPara" . $usedIfc->{id} . "( const char* address, const char* ident );\n";
   }
 
   print $fhHeader "    /// called after setting connections and moveToThread\n";
@@ -274,17 +274,17 @@ sub writeComponentImpl
 
   foreach my $providedIfc (@{$comp->{provided}})
   {
-    print $fhSource "void " . $CompName ."Impl::setConnectionPara" . $providedIfc->{id} . "( const char* pub, const char* req, int hwm )\n";
+    print $fhSource "void " . $CompName ."Impl::setConnectionPara" . $providedIfc->{id} . "( const char* address, int hwm )\n";
     print $fhSource "{\n";
-    print $fhSource "  m" . $providedIfc->{id} . ".setConnectionPara( pub, req, hwm );\n";
+    print $fhSource "  m" . $providedIfc->{id} . ".setConnectionPara( address, hwm );\n";
     print $fhSource "}\n";
   }
 
   foreach my $usedIfc (@{$comp->{used}})
   {
-    print $fhSource "void " . $CompName ."Impl::setConnectionPara" . $usedIfc->{id} . "( const char* sub, const char* req, const char* ident )\n";
+    print $fhSource "void " . $CompName ."Impl::setConnectionPara" . $usedIfc->{id} . "( const char* address, const char* ident )\n";
     print $fhSource "{\n";
-    print $fhSource "  m" . $usedIfc->{id} . ".setConnectionPara( sub, req, ident );\n";
+    print $fhSource "  m" . $usedIfc->{id} . ".setConnectionPara( address, ident );\n";
     print $fhSource "}\n";
   }
 
@@ -440,7 +440,7 @@ sub writeIfcStub
   print $fhHeaderIfc "  public:\n";
   print $fhHeader "    " . $IfcName . "Stub( void* context, int id, I" . $IfcName . "StubHandler& );\n";
   print $fhHeader "    virtual ~" . $IfcName . "Stub();\n";
- # print $fhHeader "    void setConnectionPara( const char* pub, const char* req , int hwm = 0 );\n";
+ # print $fhHeader "    void setConnectionPara( const char* address, int hwm = 0 );\n";
 
   print $fhHeaderIfc "    I" . $IfcName . "StubHandler() {}\n";
   print $fhHeaderIfc "    virtual ~I" . $IfcName . "StubHandler() {}\n";
@@ -557,9 +557,9 @@ sub writeIfcStub
     print $fhSource "}\n";
   }
 
-#  print $fhSource "void " . $IfcName . "Stub::setConnectionPara( const char* pub, const char* req, int hwm  )\n";
+#  print $fhSource "void " . $IfcName . "Stub::setConnectionPara( const char* address, int hwm  )\n";
 #  print $fhSource "{\n";
-#  print $fhSource "  mPublisher.setConnectionPara( pub, req, hwm );\n";
+#  print $fhSource "  mPublisher.setConnectionPara( address, hwm );\n";
 #  print $fhSource "}\n";
 
   print $fhSource "int " . $IfcName ."Stub::receive()\n";
@@ -756,7 +756,6 @@ sub writeIfcProxy
   print $fhHeader "  public:\n";
   print $fhHeader "    " . $IfcName . "Proxy( void* context, int id, I" . $IfcName . "ProxyHandler& );\n";
   print $fhHeader "    virtual ~" . $IfcName . "Proxy();\n\n";
- # print $fhHeader "    void setConnectionPara( const char* sub, const char* req);\n";
   print $fhHeader "    virtual int receive();\n";
 
   #print $fhHeaderIfc "\nclass YaProxyBase;\n\n";
@@ -820,28 +819,6 @@ sub writeIfcProxy
   print $fhHeader "\n";
   print $fhHeaderIfc "\n";
   print $fhSource "$strDtor\n}\n\n";
-
-  # write notification section
-
-  #print $fhSource "void " . $IfcName ."Proxy::setNotification( " . $IfcName ."Proxy::tProperty prop )\n";
-#  print $fhSource "void " . $IfcName ."Proxy::setNotification( int key )\n";
-#  print $fhSource "{\n";
-#  print $fhSource "  mSubscriber.setNotification( key );\n";
-#  print $fhSource "}\n\n";
-
-
-#  print $fhSource "void " . $IfcName ."Proxy::clearNotification( " . $IfcName ."Proxy::tProperty prop )\n";
-#  print $fhSource "void " . $IfcName ."Proxy::clearNotification( int key )\n";
-#  print $fhSource "{\n";
-#  print $fhSource "  mSubscriber.clearNotification( key );\n";
-#  print $fhSource "}\n\n";
-
- # print $fhSource "void " . $IfcName ."Proxy::setConnectionPara( const char* sub, const char* req )\n";
- # print $fhSource "{\n";
- # print $fhSource "  mSubscriber.setConnectionPara( sub, req );\n";
- # print $fhSource "}\n\n";
-
-
 
   foreach my $req (@{$ifc->{requests}})
   {

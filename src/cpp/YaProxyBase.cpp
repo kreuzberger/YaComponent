@@ -24,9 +24,9 @@ void YaProxyBase::clearNotification( int key )
 //}
 
 
-void YaProxyBase::setConnectionPara(const char * sub, const char *req, const char* ident)
+void YaProxyBase::setConnectionPara(const char * address, const char* ident)
 {
-  mSubscriber.setConnectionPara(sub,req, ident);
+  mSubscriber.setConnectionPara(address, ident);
 }
 
 void YaProxyBase::close()

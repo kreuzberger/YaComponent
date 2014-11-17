@@ -14,7 +14,7 @@ public:
   YaPUBImpl( void* context );
   virtual ~YaPUBImpl();
 //  bool bind( const char* address, const char* syncaddress) { setConnectionPara(address,syncaddress,5000); }
-  void setConnectionPara(const char* pub, const char* req, int hwm = 0);
+  void setConnectionPara(const char* address, int hwm = 0);
   int send(int key, const ::google::protobuf::MessageLite& msg );
   int response(int key, const ::google::protobuf::MessageLite& msg, const std::string& ident );
   int send(int key, int msgSize, const char* msgData );
@@ -29,7 +29,6 @@ private:
   YaPUBImpl& operator=( const YaPUBImpl& );
   void resizeBuffer(int iLength);
 
-  void* mpPUBSocket;
   void* mpReqRespSocket;
   bool mbBound;
   int miSubscribersCnt;

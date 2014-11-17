@@ -20,10 +20,10 @@ void TextUnittest::initComponentsSPST()
   mpTextOut = new TextOutComp( mpContext );
 
   mpTextGen1->init();
-  mpTextGen1->setConnectionParaTextGenXml( "inproc:///tmp/hurtmexml", "inproc:///tmp/hurtmexmlsync", 5000 );
-  mpTextGen1->setConnectionParaTextGenPlain( "inproc:///tmp/hurtmeplain", "inproc:///tmp/hurtmeplainsync", 5000 );
+  mpTextGen1->setConnectionParaTextGenXml( "inproc:///tmp/hurtmexml", 5000 );
+  mpTextGen1->setConnectionParaTextGenPlain( "inproc:///tmp/hurtmeplain",  5000 );
   mpTextOut->init();
-  mpTextOut->setConnectionParaXml( "inproc:///tmp/hurtmexml", "inproc:///tmp/hurtmexmlsync","TextOut" );
+  mpTextOut->setConnectionParaXml( "inproc:///tmp/hurtmexml", "TextOut" );
 }
 
 void TextUnittest::initComponentsSPMT()
@@ -37,12 +37,12 @@ void TextUnittest::initComponentsSPMT()
 
   mpTextGenThread->start();
   mpTextGen1->init();
-  mpTextGen1->setConnectionParaTextGenXml( "inproc:///tmp/hurtmexml", "inproc:///tmp/hurtmexmlsync", 5000 );
-  mpTextGen1->setConnectionParaTextGenPlain( "inproc:///tmp/hurtmeplain", "inproc:///tmp/hurtmeplainsync", 5000 );
+  mpTextGen1->setConnectionParaTextGenXml( "inproc:///tmp/hurtmexml", 5000 );
+  mpTextGen1->setConnectionParaTextGenPlain( "inproc:///tmp/hurtmeplain", 5000 );
   mpTextGen1->moveToThread(mpTextGenThread);
   mpTextOutThread->start();
   mpTextOut->init();
-  mpTextOut->setConnectionParaXml( "inproc:///tmp/hurtmexml", "inproc:///tmp/hurtmexmlsync","TextOut" );
+  mpTextOut->setConnectionParaXml( "inproc:///tmp/hurtmexml", "TextOut" );
   mpTextOut->moveToThread(mpTextOutThread);
 }
 
@@ -58,12 +58,12 @@ void TextUnittest::initComponentsSPMTGui()
 
   mpTextGenThread->start();
   mpTextGen1->init();
-  mpTextGen1->setConnectionParaTextGenXml( "inproc:///tmp/hurtmexml", "inproc:///tmp/hurtmexmlsync", 5000 );
-  mpTextGen1->setConnectionParaTextGenPlain( "inproc:///tmp/hurtmeplain", "inproc:///tmp/hurtmeplainsync", 5000 );
+  mpTextGen1->setConnectionParaTextGenXml( "inproc:///tmp/hurtmexml", 5000 );
+  mpTextGen1->setConnectionParaTextGenPlain( "inproc:///tmp/hurtmeplain", 5000 );
   mpTextGen1->moveToThread(mpTextGenThread);
   mpTextOutThread->start();
   mpTextOut->init();
-  mpTextOut->setConnectionParaXml( "inproc:///tmp/hurtmexml", "inproc:///tmp/hurtmexmlsync","TextOut" );
+  mpTextOut->setConnectionParaXml( "inproc:///tmp/hurtmexml", "TextOut" );
 }
 
 void TextUnittest::cleanupTestCase()

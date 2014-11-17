@@ -6,8 +6,7 @@
 #include <math.h>
 
 YaPUBImpl::YaPUBImpl(void * context)
-  : mpPUBSocket(0)
-  , mpReqRespSocket(0)
+  : mpReqRespSocket(0)
   , mbBound(false)
   , miSubscribersCnt(0)
   , mMsgBuffer(YaComponent::MaxMessageSize)
@@ -16,7 +15,6 @@ YaPUBImpl::YaPUBImpl(void * context)
   assert( 0 != context );
   if( 0 != context )
   {
-    mpPUBSocket = zmq_socket (context, ZMQ_PUB);
     mpReqRespSocket = zmq_socket (context, ZMQ_ROUTER);
   }
   else
@@ -27,34 +25,16 @@ YaPUBImpl::YaPUBImpl(void * context)
 
 YaPUBImpl::~YaPUBImpl()
 {
-  zmq_close( mpPUBSocket );
   zmq_close( mpReqRespSocket );
-  mpPUBSocket = 0;
   mpReqRespSocket = 0;
 }
 
 void YaPUBImpl::close()
 {
-  zmq_close( mpPUBSocket );
   zmq_close( mpReqRespSocket );
-  mpPUBSocket = 0;
   mpReqRespSocket = 0;
 }
 
-//bool YaPUBImpl::checkSubscribers(int iNumExpectedSubscribers)
-//{
-//  char buffer [256];
-//  while( miSubscribersCnt < iNumExpectedSubscribers)
-//  {
-//    char* str = YaComponent::socket_rcv(mpReqRespSocket);
-//    free(str);
-//      //  s_send (syncservice, "");
-//    YaComponent::socket_snd(mpReqRespSocket, "SYNC_ACK");
-//    miSubscribersCnt++;
-//  }
-
-//  return (miSubscribersCnt == iNumExpectedSubscribers);
-//}
 
 int YaPUBImpl::receive(int& key, int& size, char** pcData, std::string& ident )
 {
@@ -137,33 +117,29 @@ int YaPUBImpl::receive(int& key, int& size, char** pcData, std::string& ident )
   return iBytes;
 }
 
-void YaPUBImpl::setConnectionPara(const char* pub, const char* req, int hwm)
+void YaPUBImpl::setConnectionPara(const char* address, int hwm)
 {
-  assert( 0 != mpPUBSocket && 0 != pub );
-  assert( 0 != mpReqRespSocket && 0 != req );
-  if( mpPUBSocket && mpReqRespSocket && !mbBound )
+  assert( 0 != mpReqRespSocket && 0 != address );
+  if( mpReqRespSocket && !mbBound )
   {
     if( 0 < hwm )
     {
-      zmq_setsockopt(mpPUBSocket,ZMQ_SNDHWM,&hwm,sizeof(hwm));
       zmq_setsockopt(mpReqRespSocket,ZMQ_SNDHWM,&hwm,sizeof(hwm));
       int wait = 1;
-      zmq_setsockopt(mpPUBSocket,ZMQ_XPUB_NODROP,&wait,sizeof(wait));
       int timeout = 0;
-      zmq_setsockopt (mpPUBSocket, ZMQ_SNDTIMEO, &timeout, 4);
       zmq_setsockopt (mpReqRespSocket, ZMQ_SNDTIMEO, &timeout, 4);
     }
 
     int mandatory = 1;
     zmq_setsockopt( mpReqRespSocket, ZMQ_ROUTER_MANDATORY, &mandatory,sizeof(mandatory));
 
-    if( 0 == zmq_bind(mpPUBSocket,pub) && 0 == zmq_bind(mpReqRespSocket,req))
+    if( 0 == zmq_bind(mpReqRespSocket,address))
     {
       mbBound = true;
     }
     else
     {
-      fprintf(stderr, "error: cannot bind to address %s or syncaddress %s\n",pub,req);
+      fprintf(stderr, "error: cannot bind to address %s\n",address);
     }
   }
   else
@@ -172,7 +148,7 @@ void YaPUBImpl::setConnectionPara(const char* pub, const char* req, int hwm)
     {
       fprintf(stderr, "error: already bound!\n");
     }
-    if( !mpPUBSocket || !mpReqRespSocket)
+    if( !mpReqRespSocket )
     {
       fprintf(stderr, "error: no socket!\n");
     }
@@ -207,16 +183,6 @@ int YaPUBImpl::send(int key, int msgSize, const char* msgData)
 {
   sprintf(mcKey,YaComponent::KeyFmt,key);
   int rc = -1;
-  assert( 0 != mpPUBSocket  );
-  if( 0 != mpPUBSocket)
-  {
-    int flags = (0 != msgSize && 0 != msgData) ? ZMQ_SNDMORE :  0;
-    rc = zmq_send(mpPUBSocket,mcKey, YaComponent::KeySize , flags);
-    if( -1 != rc && ( 0 != msgSize && 0 != msgData ) )
-    {
-      rc = zmq_send(mpPUBSocket, msgData, msgSize,0);
-    }
-  }
 
   if( 0 != mpReqRespSocket )
   {
@@ -225,7 +191,10 @@ int YaPUBImpl::send(int key, int msgSize, const char* msgData)
       if( 1 == mPeerMap[it->first][key])
       {
         rc = zmq_send( mpReqRespSocket, it->first.c_str(), it->first.length(), ZMQ_SNDMORE);
-        if( -1 == rc ) break;
+        if( -1 == rc )
+        {
+          break;
+        }
         assert( it->first.length() == rc );
         rc = zmq_send( mpReqRespSocket, 0,0, ZMQ_SNDMORE);
         assert( -1 != rc );
@@ -283,7 +252,10 @@ int YaPUBImpl::send(int key, int msgSize, const char* msgData, const std::string
       sprintf(cKey,YaComponent::KeyFmt,key);
         // internal used sync key!
       rc = zmq_send( mpReqRespSocket, it->first.c_str(), it->first.length(), ZMQ_SNDMORE);
-      if( -1 == rc ) break;
+      if( -1 == rc )
+      {
+        break;
+      }
       assert( it->first.length() == rc );
       rc = zmq_send( mpReqRespSocket, 0,0, ZMQ_SNDMORE);
       assert( -1 != rc );
@@ -294,6 +266,10 @@ int YaPUBImpl::send(int key, int msgSize, const char* msgData, const std::string
       {
         rc = zmq_send(mpReqRespSocket, msgData, msgSize,0);
         assert( msgSize == rc );
+      }
+      else
+      {
+        assert(0);
       }
     }
   }

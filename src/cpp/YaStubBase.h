@@ -11,8 +11,7 @@ public:
   YaStubBase(void* context, int id, QObject *parent = 0);
 
   void send(int key, int size, const char* msg );
-//  int receive(int& key, int& size, const char* msg );
-  void setConnectionPara( const char* pub, const char* req, int hwm  );
+  void setConnectionPara( const char* address, int hwm  );
   void close();
 
 protected:

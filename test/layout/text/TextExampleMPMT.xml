@@ -5,14 +5,14 @@
   <thread name="TextGenThread">
     <component name="TextGen1" xml="textgen/TextGenComp.xml">
       <provides>
-        <interface id="TextGenXml" pub="inproc:///tmp/hurtmexml" req="inproc:///tmp/hurtmexmlsync" hwm="5000"/>
-        <interface id="TextGenPlain" pub="inproc:///tmp/hurtmeplain" req="inproc:///tmp/hurtmeplansync" hwm="5000"/>
+        <interface id="TextGenXml" address="inproc:///tmp/hurtmexml" hwm="5000"/>
+        <interface id="TextGenPlain" address="inproc:///tmp/hurtmeplain" hwm="5000"/>
       </provides>
     </component>
     <component name="TextGen2" xml="textgen/TextGenComp.xml">
       <provides>
-        <interface id="TextGenXml" pub="inproc:///tmp/hurtmexml2" req="inproc:///tmp/hurtmexml2sync"  hwm="2500"/>
-        <interface id="TextGenPlain" pub="inproc:///tmp/hurtmeplain2" req="inproc:///tmp/hurtmeplain2sync" hwm="2500"/>
+        <interface id="TextGenXml" address="inproc:///tmp/hurtmexml2" hwm="2500"/>
+        <interface id="TextGenPlain" address="inproc:///tmp/hurtmeplain2" hwm="2500"/>
       </provides>
     </component>
   </thread>

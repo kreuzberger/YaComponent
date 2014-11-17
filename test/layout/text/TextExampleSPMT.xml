@@ -5,8 +5,8 @@
   <thread name="TextGenThread">
     <component name="TextGen1" xml="textgen/TextGenComp.xml">
       <provides>
-        <interface id="TextGenXml" pub="inproc://hurtmexml" req="inproc://hurtmexmlsync" hwm="5000"/>
-        <interface id="TextGenPlain" pub="inproc://hurtmeplain" req="inproc://hurtmeplansync" hwm="5000"/>
+        <interface id="TextGenXml" address="inproc://hurtmexml" hwm="5000"/>
+        <interface id="TextGenPlain" address="inproc://hurtmeplain" hwm="5000"/>
       </provides>
     </component>
   </thread>
