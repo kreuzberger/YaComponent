@@ -15,6 +15,7 @@ class YaSUBImpl
     virtual int send( int key, int size, const char* );
 
     int request( int key, const ::google::protobuf::MessageLite& msg );
+    int request( int key );
     int setNotification(int key);
     int clearNotification( int key);
 
@@ -35,5 +36,6 @@ class YaSUBImpl
     YaBuffer mMsgOutBuffer;
     YaBuffer mMsgRespBuffer;
     int miMessageCnt;
+    bool mbSync;
 };
 #endif // YASUBIMPL_H

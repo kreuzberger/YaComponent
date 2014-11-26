@@ -179,7 +179,7 @@ sub parseAdressInformations()
       {
         foreach my $ifc (@{$comp->{provides}->{interface}})
         {
-          $hashAdresses{$comp->{name} . "." . $ifc->{id}} = {pub => $ifc->{pub}, req => $ifc->{req}};
+          $hashAdresses{$comp->{name} . "." . $ifc->{id}} = {address => $ifc->{address}};
         }
       }
     }
@@ -189,7 +189,7 @@ sub parseAdressInformations()
     {
       foreach my $ifc (@{$comp->{provides}->{interface}})
       {
-        $hashAdresses{$comp->{name} . "." . $ifc->{id}} = {pub => "$ifc->{pub}", req => "$ifc->{req}"};
+        $hashAdresses{$comp->{name} . "." . $ifc->{id}} = {address => $ifc->{address}};
       }
     }
   }

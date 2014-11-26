@@ -4,7 +4,7 @@
 #include "YaSUBImpl.h"
 
 #include <QtCore/QObject>
-
+#include <QtCore/QtDebug>
 
 
 class YaProxyBase : public QObject
@@ -14,8 +14,8 @@ public:
   YaProxyBase(void* context, int id, QObject *parent = 0);
 
 
-  void setNotification( int  );
-  void clearNotification( int );
+  int setNotification( int  );
+  int clearNotification( int );
 
   void setConnectionPara( const char*, const char* ident );
   void close();

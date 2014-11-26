@@ -322,41 +322,6 @@ sub writeComponentImpl
 
 
 
-
-#  print $fhSource "      {\n";
-#  print $fhSource "        switch( key )\n";
-#  print $fhSource "        {\n";
-#  print Dumper($comp);
-#  foreach my $usedIfc (@{$comp->{used}})
-#  {
-
-#    foreach my $resp (@{$usedIfc->{responses}})
-#    {
-#      my $strResp;
-#      $strResp .= "RESP_";
-#      $strResp .= uc($resp->{package}) . "_" if ($resp->{package});
-#      $strResp .= uc($resp->{id});
-#      print $fhSource "          case YaComponent::$usedIfc->{name}Proxy::$strResp:\n";
-#      print $fhSource "          break;\n";
-#    }
-#
-#  }
-#
-#  print $fhSource "          default:\n";
-#  print $fhSource "            break;\n";
-#  print $fhSource "        }\n";
-
-
-#  foreach my $usedIfc (@{$comp->{used}})
-#  {
-#    print $fhSource "  m" . $usedIfc->{id} . ".receive( key, size, msgData );\n";
-#  }
-
-#  foreach my $providedIfc (@{$comp->{provided}})
-#  {
-#    print $fhSource "  m" . $providedIfc->{id} . ".receive( key, size, msgData );\n";
-#  }
-
   print $fhHeader "\n  private:\n";
 #  print $fhHeader "    ". $CompName . "Impl ();\n";
   print $fhHeader "    ". $CompName. "Impl( const " . $CompName . "Impl& );\n";
@@ -486,11 +451,11 @@ sub writeIfcStub
   foreach my $req (@{$ifc->{requests}})
   {
     print $fhHeaderIfc "    virtual void onRequest". $req->{id};
-    print $fhHeaderIfc "( int id, ";
+    print $fhHeaderIfc "( int id ";
     my $strPara;
     foreach my $para (@{$req->{para}})
     {
-      $strPara .= " const ";
+      $strPara .= ", const ";
       $strPara .= $para->{package} . "::" if ($para->{package});
       $strPara .= "$para->{id}&";
     }
@@ -500,15 +465,21 @@ sub writeIfcStub
       $strPara .= $resp->{package} . "::" if ($resp->{package});
       $strPara .= "$resp->{id}&";
     }
-    print $fhHeaderIfc $strPara . " ) = 0;\n";
+    if( defined $strPara)
+    {
+      print $fhHeaderIfc $strPara . " ) = 0;\n";
+    }
+    else
+    {
+      print $fhHeaderIfc " ) = 0;\n";
+    }
   }
 
   print $fhHeader "\n";
 
   foreach my $resp (@{$ifc->{responses}})
   {
-#  print $fhHeaderIfc "    virtual void response( const QObject*, const ";
-    print $fhHeader "    virtual void response( int key, const ";
+    print $fhHeader "    int response( int key, const ";
     print $fhHeader $resp->{package} . "::" if ($resp->{package});
     print $fhHeader $resp->{id}. "&, const std::string& ident );\n";
   }
@@ -535,12 +506,11 @@ sub writeIfcStub
 
   foreach my $resp (@{$ifc->{responses}})
   {
-#  print $fhHeaderIfc "    virtual void response( const QObject*, const ";
-    print $fhSource "void $IfcName" . "Stub::response( int key, const ";
+    print $fhSource "int $IfcName" . "Stub::response( int key, const ";
     print $fhSource $resp->{package} . "::" if ($resp->{package});
     print $fhSource $resp->{id}. "& msg, const std::string& ident )\n";
     print $fhSource "{\n";
-    print $fhSource "  mPublisher.response(key, msg, ident);\n";
+    print $fhSource "  return mPublisher.response(key, msg, ident);\n";
     print $fhSource "}\n\n";
   }
 
@@ -597,7 +567,8 @@ sub writeIfcStub
     {
       $strMember .= "      m" . $req->{id} . "_" . $para->{id}. ".ParseFromArray(msgData, size);\n";
     }
-    print $fhSource $strMember;
+
+    print $fhSource $strMember if (defined $strMember);
 
     foreach my $resp (@{$req->{resp}})
     {
@@ -614,7 +585,15 @@ sub writeIfcStub
     {
       $strPara .= ", m" . $req->{id} . "_" . $resp->{id};
     }
-    print $fhSource "$strPara );\n";
+    if( defined $strPara)
+    {
+      print $fhSource "$strPara );\n";
+    }
+    else
+    {
+      print $fhSource " );\n";
+    }
+
     foreach my $resp (@{$req->{resp}})
     {
       my $strResp;
@@ -627,21 +606,12 @@ sub writeIfcStub
     print $fhSource "      break;\n";
   }
 
-#  foreach my $req (@{$ifc->{requests}})
-#  {
-#    print $fhHeaderIfc "    virtual void onRequest". $req->{id};
-#    print $fhHeaderIfc "( int id, ";
-#    my $strPara;
-#    foreach my $para (@{$req->{para}})
-#    {
-#      $strPara .= " const ";
-#      $strPara .= $para->{package} . "::" if ($para->{package});
-#      $strPara .= "$para->{id}&";
-#    }
-#    print $fhHeaderIfc $strPara . " ) = 0;\n";
-#  }
-
   print $fhSource "    default:\n";
+  print $fhSource "      if( -1 < key)\n";
+  print $fhSource "      {\n";
+  print $fhSource "        qDebug() << \"unknown key \" << key;";
+  print $fhSource "        assert(0);";
+  print $fhSource "      }\n";
   print $fhSource "      break;\n";
   print $fhSource "    }\n";
   print $fhSource "    if( 0 >= iBytesTotal ) bMsgAvailable = false;\n";
@@ -668,7 +638,10 @@ sub writeIfcStub
       $strPara .= "$resp->{id} m" . $req->{id} . "_" . "$resp->{id};\n";
     }
 
-    print $fhHeader "$strPara;\n";
+    if( defined $strPara)
+    {
+      print $fhHeader "$strPara\n";
+    }
   }
 
   print $fhHeader "\n};\n";
@@ -822,8 +795,8 @@ sub writeIfcProxy
 
   foreach my $req (@{$ifc->{requests}})
   {
-    print $fhHeader "    void request". $req->{id};
-    print $fhSource "void " . $IfcName ."Proxy::request". $req->{id};
+    print $fhHeader "    int request". $req->{id};
+    print $fhSource "int " . $IfcName ."Proxy::request". $req->{id};
     print $fhHeader "( ";
     print $fhSource "( ";
     my $strPara;
@@ -833,12 +806,22 @@ sub writeIfcProxy
       $strPara .= $para->{package} . "::" if ($para->{package});
       $strPara .= "$para->{id}&,";
     }
-    chop($strPara);
-    print $fhHeader $strPara . ");\n";
-    print $fhSource $strPara . " msg )\n{\n";
-    print $fhSource "  mSubscriber.request( REQ_";
+    if( defined $strPara)
+    {
+      chop($strPara);
+      print $fhHeader $strPara . ");\n";
+      print $fhSource $strPara . " msg )\n{\n";
+    }
+    else
+    {
+      print $fhHeader " );\n";
+      print $fhSource " )\n{\n";
+    }
+    print $fhSource "  return mSubscriber.request( REQ_";
     print $fhSource uc($req->{package}) . "_" if ($req->{package});
-    print $fhSource uc($req->{id}) . ", msg );\n";
+    print $fhSource uc($req->{id});
+    print $fhSource ", msg" if( defined $strPara );
+    print $fhSource " );\n";
     print $fhSource "}\n";
   }
 
@@ -887,6 +870,11 @@ sub writeIfcProxy
   }
 
   print $fhSource "    default:\n";
+  print $fhSource "      if( -1 < key)\n";
+  print $fhSource "      {\n";
+  print $fhSource "        qDebug() << \"unknown key \" << key;";
+  print $fhSource "        assert(0);";
+  print $fhSource "      }\n";
   print $fhSource "      break;\n";
   print $fhSource "    }\n";
   print $fhSource "    if( 0 >= iBytesTotal ) bMsgAvailable = false;\n";

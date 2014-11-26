@@ -1,0 +1,16 @@
+
+message Data {
+  required int64 timeSeconds = 1;
+  required double timeFraction = 2;
+  required int32  counter = 3;
+  repeated float samples = 4 [packed=true];
+}
+
+message StartData {
+}
+
+message StopData {
+}
+
+
+

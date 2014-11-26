@@ -1,0 +1,15 @@
+<interface>
+  <version maj="1" min="1" rev="0"/>
+  <include file="PublisherIfc.pb.h"/>
+  <properties>
+    <prop id="Data" package=""/>
+  </properties>
+  <requests>
+    <req id="StartData" package="">
+    </req>
+    <req id="StopData" package="">
+    </req>
+  </requests>
+  <responses>
+  </responses>
+</interface>

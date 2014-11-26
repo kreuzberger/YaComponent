@@ -22,7 +22,3 @@ void YaStubBase::close()
   mPublisher.close();
 }
 
-//int YaStubBase::receive(int& key, int& size, const char* msg )
-//{
-//  return mPublisher.receive(key, size, msg );
-//}

@@ -8,21 +8,19 @@ YaProxyBase::YaProxyBase(void* context, int id, QObject *parent)
 }
 
 
-void YaProxyBase::setNotification( int key  )
+int YaProxyBase::setNotification( int key  )
 {
-  mSubscriber.setNotification( key );
+  int rc = -1;
+  rc = mSubscriber.setNotification( key );
+  return rc;
 }
 
-void YaProxyBase::clearNotification( int key )
+int YaProxyBase::clearNotification( int key )
 {
-  mSubscriber.clearNotification( key );
+  int rc = -1;
+  rc = mSubscriber.clearNotification( key );
+  return rc;
 }
-
-//int YaProxyBase::receive( int& key, int& size, const char* data)
-//{
-//  return mSubscriber.receive(key, size, data);
-//}
-
 
 void YaProxyBase::setConnectionPara(const char * address, const char* ident)
 {

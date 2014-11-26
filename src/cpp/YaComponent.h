@@ -4,9 +4,9 @@
 #include <string.h>
 
 namespace YaComponent {
-  static const int KeySize = 2;
+  static const int KeySize = 4;
   static const int MessageSize = 8;
-  static const char* KeyFmt = "%2d";
+  static const char* KeyFmt = "%4d";
   static const char* MessageSizeFmt = "%8d";
   static const int MaxMessageSize = 20*1024;
   static const int MaxIdentSize = 512;

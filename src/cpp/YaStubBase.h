@@ -2,6 +2,7 @@
 #define YASTUBBASE_H
 
 #include <QtCore/QObject>
+#include <QtCore/QtDebug>
 
 #include "YaPUBImpl.h"
 class YaStubBase : public QObject
