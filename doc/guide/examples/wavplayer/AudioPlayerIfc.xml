@@ -1,0 +1,21 @@
+<interface>
+  <version maj="1" min="1" rev="0"/>
+  <include file="AudioPlayerIfc.pb.h"/>
+  <properties>
+    <prop id="AudioData" package=""/>
+  </properties>
+  <requests>
+    <req id="StartData" package="">
+      <!--<para/>-->
+    <resp id="StartedData" package=""/>
+    </req>
+    <req id="StopData" package="">
+    <!--<para/>-->
+    <resp id="StoppedData" package=""/>
+    </req>
+  </requests>
+  <responses>
+    <resp id="StartedData" package=""/>
+    <resp id="StoppedData" package=""/>
+  </responses>
+</interface>

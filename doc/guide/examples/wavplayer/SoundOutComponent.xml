@@ -1,0 +1,8 @@
+<component>
+  <version maj="1" min="1" rev="0"/>
+  <description/>
+  <provides/>
+  <uses>
+    <interface id="AudioPlayer" xml="AudioPlayerIfc.xml"/>
+  </uses>
+</component>

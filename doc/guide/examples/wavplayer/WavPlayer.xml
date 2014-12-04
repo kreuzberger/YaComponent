@@ -1,0 +1,19 @@
+<componentlayout>
+<processes>
+<process name="WavPlayer">
+  <description></description>
+  <thread name="WavPlayerThread">
+    <component name="WavFilePlayer" xml="WavFilePlayerComponent.xml">
+      <provides>
+        <interface id="AudioPlayer" address="inproc:///tmp/audioprovider" hwm="5000"/>
+      </provides>
+    </component>
+  </thread>
+  <component name="SoundOut" xml="SoundOutComponent.xml">
+    <uses>
+      <interface id="AudioPlayer" sub="WavFilePlayer.AudioPlayer"/>
+    </uses>
+  </component>
+</process>
+</processes>
+</componentlayout> 

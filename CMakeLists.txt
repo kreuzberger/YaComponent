@@ -41,6 +41,6 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/cpp")
 set( CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE STRING "" FORCE)
 
 
-add_subdirectory(doc)
 add_subdirectory(src)
+add_subdirectory(doc)
 add_subdirectory(test)

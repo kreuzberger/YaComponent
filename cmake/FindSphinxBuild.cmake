@@ -14,11 +14,23 @@ endif()
 
 if (USE_DOC_SPHINX)
   macro (SPHINX_SLIDE_GENERATE outtarget)
+    set( SPHINX_CLEAN_FILES  "${CMAKE_CURRENT_BINARY_DIR}/slides ${CMAKE_CURRENT_BINARY_DIR}/doctrees")
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/slides ${CMAKE_CURRENT_BINARY_DIR}/doctrees
       COMMAND ${SPHINX_BUILD_EXECUTABLE} -b slides  -d ${CMAKE_CURRENT_BINARY_DIR}/doctrees ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/slides
       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}
       COMMENT "Built sphinx documentation for ${CMAKE_CURRENT_SOURCE_DIR}")
-
     add_custom_target( doc_${outtarget} ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/slides)
-  endmacro( SPHINX_SLIDE_GENERATE )
+    set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${SPHINX_CLEAN_FILES}" )
+  endmacro( )
+
+  macro (SPHINX_DOC_GENERATE outtarget)
+    set( SPHINX_CLEAN_FILES  "${CMAKE_CURRENT_BINARY_DIR}/html ${CMAKE_CURRENT_BINARY_DIR}/doctrees-html")
+    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html ${CMAKE_CURRENT_BINARY_DIR}/doctrees-html
+      COMMAND ${SPHINX_BUILD_EXECUTABLE} -b html  -d ${CMAKE_CURRENT_BINARY_DIR}/doctrees-html ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/html
+      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMENT "Built sphinx documentation for ${CMAKE_CURRENT_SOURCE_DIR}")
+
+    add_custom_target( doc_${outtarget} ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html)
+    set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${SPHINX_CLEAN_FILES}" )
+  endmacro( )
 endif()
