@@ -192,9 +192,9 @@ As you can see, the two concrete classes WavFilePlayerComponent and SoundOutComp
   
   
   class SoundOutComponent {
-      virtual void onProperty( int id, const AudioData& );
-      virtual void onResponse( int proxyId, const StartedData& );
-          virtual void onResponse( int proxyId, const StoppedData& );
+    virtual void onProperty( int id, const AudioData& );
+    virtual void onResponse( int proxyId, const StartedData& );
+    virtual void onResponse( int proxyId, const StoppedData& );
   }
 
 
@@ -206,7 +206,7 @@ For the SoundOutComponent theres now an active part to implmement
  
 Its also up to the developer to decide which file is played. This could be part of an additional method in WavFilePlayer to set the filename e.g. from commandline arguments.
 
-
+The Id's provided in the generated interfaces are useful if there is a multiple use of the same interface or same message types in different interfaces. So you can handle the request properly depending on the interface you received them. In our example, the id's could be ignored.
 
 
 Contents:
