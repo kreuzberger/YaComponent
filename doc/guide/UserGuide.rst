@@ -6,6 +6,156 @@
 Welcome to YaComponent UserGuide's documentation!
 =================================================
 
+
+This is YaComponent UserGuide which may help you in planning, create and use the YaComponent
+Framework for building your software with components, which can be integrated in different
+process and thread contexts.
+
+Main focus of the project is to help you to focus on the implementation of software components
+and help you with the exchange of data and rpc calls between these components.
+
+The use of the components and the code must be independent from how your component is used in thread
+and application context.
+
+With the used technologies it should also not matter if your component interacts with other components
+written in different programming languages. This is the main reason for focusing on 0MQ and google
+protocol buffers.
+
+
+Basic Introduction
+==================
+
+Writing a component in the YaComponent means implementing a class where your special handling is
+programmed. This class is derived from the generated component implementation, responsible for
+data exchange and rpc calls from and to your component.
+
+The YaComponent framework consists of three parts:
+
+  - Interface
+  - Component
+  - Layout
+
+A basic example will show you the meanings in the next chapter. In this example we have one interface
+called AudioPlayer, and two components callee WavFileReader and SoundOut
+
+.. uml::
+
+  interface AudioPlayer
+  package WavFileReader
+  WavFileReader - AudioPlayer
+
+  package SoundOut
+  SoundOut  -left-> AudioPlayer
+
+
+Interface
+---------
+
+And interface describes three parts of the component communication:
+
+  - Properties
+  - Requests
+  - Responses
+
+These three parts could be used to communicate with your component.
+And interface could be 
+
+  - Provided by a component for use on other components
+  - Used by a component to get data or control an other component
+
+
+Properties
+^^^^^^^^^^
+
+Properties should be used to deliver data to another component.
+These Properties are delivered as classes, described in your interface.
+An interface can define several properties which could used by other components.
+
+A component interested in these properties must notify itself for these properties.
+So even if a component uses an interface of an other component, no data is delivered
+if no notification (or subscription) is done.
+
+This handling equals the publish-subscripe pattern.
+
+Examples:
+
+Component WavFileReader reads data from a file (e.g. wav data) and has a property called
+AudioData for to send the audio data to other components. The class could countain
+information like samplerate, number of channels and at least the audio data itself.
+
+
+Requests
+^^^^^^^^
+
+Requests are used by a component which uses an interface from an other component to trigger
+some action in this component. This is something like an rpc call.
+Requests could have arguments.
+
+Examples:
+
+Component SoundOut would like to have audio data from WavFileReader. WavFileReader
+provides an interface with an Request "StartData()". If the request is called,
+WavFileReader starts sending data. 
+
+
+Responses
+^^^^^^^^^
+
+Responses are also rpc calls, which are called from the component receiving a request to the
+component starting the request.
+This is useful to have feedback if the action request could be performed.
+Unlike you may expect responses could also be send from the component without a previous request.
+To receive responses, no notification or subscription is required. It is up to your component implementation
+to handle it.
+
+Examples:
+
+Component WavFileReader provides a response "StartedData()" and "StoppedData()".
+Response "StartedData()" is send as answer to the request "StartData()". Response "StoppedData()" is send
+e.g. and end of file
+
+
+Component
+---------
+
+A component ist defined by its provided or used interfaces. This is essential for what kind of data your
+component could receive. 
+
+A component could provide zero or more interfaces. Top level components just use interfaces from other
+components.
+
+A component could use use zero or mor interfaces. Low level components just provide interfaces for other
+components.
+
+The reusability of your component depends on the number of interfaces and the data formats defined in your interfaces.
+
+The main goal of the YaComponent framework is to hide any thread and process dependencies from your code.
+This does not mean that the usage of Threads inbetween the components is not allowed, but should be safely considered.
+
+
+Layout
+------
+
+A YaComponent Layout describes which components are used by which applications (processes), how the components
+are organized in threads inbetween the processes and which kind of communication between the components is used.
+
+There is code generated during the component build also for layouts, but this code could not be used directly.
+It is just an example, how you should code it in your main() function.
+
+Currently there is no intention to fully generate code for processes, cause many things must be done here
+depending on your applications definition
+ 
+  - command line argument handling
+  - printing copyright informations or other company dependend stuff
+  - implementing signalhandler and other stuff.
+
+
+Introduction by Example
+=======================
+
+In this chapter we will look at an example to show the basis ideas of the framework. The example is the same like
+in the first chapter, same components and interfaces.
+
 .. uml::
 
   interface AudioPlayer
@@ -53,7 +203,7 @@ The code for the interface is a simple google protocol buffer file, save with ex
 For later reuse of the message type AudioData independent form the messages for request or response, it is usefull to save the message type AudioData in a seperate .proto file and import it in the AudioPlayerIfc.proto file.
 
 
-The interace definition for the Interface is no quite simple defined in the xml file::
+The interace definition for the Interface is defined in an xml file, e.g. AudioPlayerIfc.xml::
 
   <interface>
     <version maj="1" min="1" rev="0"/>
@@ -75,7 +225,9 @@ The interace definition for the Interface is no quite simple defined in the xml 
     </responses>
   </interface>
   
-The interace describes now the properties send of type AudioData, the request to start and stop data delivery and the repsonsed to the requests.
+The interface describes now the properties of type AudioData, the request to start and stop data delivery
+and the repsonsed to the requests. The id given to the properties must match the message name in the proto file.
+The package information could also be defined in the proto file and is similar to a namespace in c++.
 
 
 To define the components, we use another xml file.
