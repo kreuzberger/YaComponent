@@ -41,7 +41,8 @@ void YaPUBImpl::close()
 int YaPUBImpl::receive(int& key, int& size, char** pcData, std::string& ident )
 {
   int iBytes = 0;
-  char address[YaComponent::MaxIdentSize];
+  char address[YaComponent::MaxIdentSize+1];
+  memset(address,0,YaComponent::MaxIdentSize+1);
   int addressSize = 0;
   int rc = -1;
   int more = -1;
