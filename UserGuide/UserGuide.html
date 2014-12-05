@@ -1,0 +1,536 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to YaComponent UserGuide’s documentation! &mdash; YaComponent UserGuide 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="YaComponent UserGuide 1.0 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="#">YaComponent UserGuide 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="welcome-to-yacomponent-userguide-s-documentation">
+<h1>Welcome to YaComponent UserGuide&#8217;s documentation!<a class="headerlink" href="#welcome-to-yacomponent-userguide-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>This is YaComponent UserGuide which may help you in planning, create and use the YaComponent
+Framework for building your software with components, which can be integrated in different
+process and thread contexts.</p>
+<p>Main focus of the project is to help you to focus on the implementation of software components
+and help you with the exchange of data and rpc calls between these components.</p>
+<p>The use of the components and the code must be independent from how your component is used in thread
+and application context.</p>
+<p>With the used technologies it should also not matter if your component interacts with other components
+written in different programming languages. This is the main reason for focusing on <a class="reference external" href="http://www.zeromq.org">0MQ</a> and <a class="reference external" href="https://developers.google.com/protocol-buffers">Google protocol buffers</a>.</p>
+</div>
+<div class="section" id="basic-introduction">
+<h1>Basic Introduction<a class="headerlink" href="#basic-introduction" title="Permalink to this headline">¶</a></h1>
+<p>Writing a component in the YaComponent means implementing a class where your special handling is
+programmed. This class is derived from the generated component implementation, responsible for
+data exchange and rpc calls from and to your component.</p>
+<p>The YaComponent framework consists of three parts:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Interface</li>
+<li>Component</li>
+<li>Layout</li>
+</ul>
+</div></blockquote>
+<p>A basic example will show you the meanings in the next chapter. In this example we have one interface
+called AudioPlayer, and two components callee WavFileReader and SoundOut</p>
+<p class="plantuml">
+<img src="_images/plantuml-43eb49408cd43609c3fdd24b3680c5a4aa73609d.png" alt="interface AudioPlayer
+package WavFileReader
+WavFileReader - AudioPlayer
+
+package SoundOut
+SoundOut  -left-&gt; AudioPlayer" />
+</p>
+<div class="section" id="interface">
+<h2>Interface<a class="headerlink" href="#interface" title="Permalink to this headline">¶</a></h2>
+<p>And interface describes three parts of the component communication:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Properties</li>
+<li>Requests</li>
+<li>Responses</li>
+</ul>
+</div></blockquote>
+<p>These three parts could be used to communicate with your component.
+And interface could be</p>
+<blockquote>
+<div><ul class="simple">
+<li>Provided by a component for use on other components</li>
+<li>Used by a component to get data or control an other component</li>
+</ul>
+</div></blockquote>
+<div class="section" id="properties">
+<h3>Properties<a class="headerlink" href="#properties" title="Permalink to this headline">¶</a></h3>
+<p>Properties should be used to deliver data to another component.
+These Properties are delivered as classes, described in your interface.
+An interface can define several properties which could used by other components.</p>
+<p>A component interested in these properties must notify itself for these properties.
+So even if a component uses an interface of an other component, no data is delivered
+if no notification (or subscription) is done.</p>
+<p>This handling equals the publish-subscripe pattern.</p>
+<p>Examples:</p>
+<p>Component WavFileReader reads data from a file (e.g. wav data) and has a property called
+AudioData for to send the audio data to other components. The class could countain
+information like samplerate, number of channels and at least the audio data itself.</p>
+</div>
+<div class="section" id="requests">
+<h3>Requests<a class="headerlink" href="#requests" title="Permalink to this headline">¶</a></h3>
+<p>Requests are used by a component which uses an interface from an other component to trigger
+some action in this component. This is something like an rpc call.
+Requests could have arguments.</p>
+<p>Examples:</p>
+<p>Component SoundOut would like to have audio data from WavFileReader. WavFileReader
+provides an interface with an Request &#8220;StartData()&#8221;. If the request is called,
+WavFileReader starts sending data.</p>
+</div>
+<div class="section" id="responses">
+<h3>Responses<a class="headerlink" href="#responses" title="Permalink to this headline">¶</a></h3>
+<p>Responses are also rpc calls, which are called from the component receiving a request to the
+component starting the request.
+This is useful to have feedback if the action request could be performed.
+Unlike you may expect responses could also be send from the component without a previous request.
+To receive responses, no notification or subscription is required. It is up to your component implementation
+to handle it.</p>
+<p>Examples:</p>
+<p>Component WavFileReader provides a response &#8220;StartedData()&#8221; and &#8220;StoppedData()&#8221;.
+Response &#8220;StartedData()&#8221; is send as answer to the request &#8220;StartData()&#8221;. Response &#8220;StoppedData()&#8221; is send
+e.g. and end of file</p>
+</div>
+</div>
+<div class="section" id="component">
+<h2>Component<a class="headerlink" href="#component" title="Permalink to this headline">¶</a></h2>
+<p>A component ist defined by its provided or used interfaces. This is essential for what kind of data your
+component could receive.</p>
+<p>A component could provide zero or more interfaces. Top level components just use interfaces from other
+components.</p>
+<p>A component could use use zero or mor interfaces. Low level components just provide interfaces for other
+components.</p>
+<p>The reusability of your component depends on the number of interfaces and the data formats defined in your interfaces.</p>
+<p>The main goal of the YaComponent framework is to hide any thread and process dependencies from your code.
+This does not mean that the usage of Threads inbetween the components is not allowed, but should be safely considered.</p>
+</div>
+<div class="section" id="layout">
+<h2>Layout<a class="headerlink" href="#layout" title="Permalink to this headline">¶</a></h2>
+<p>A YaComponent Layout describes which components are used by which applications (processes), how the components
+are organized in threads inbetween the processes and which kind of communication between the components is used.</p>
+<p>There is code generated during the component build also for layouts, but this code could not be used directly.
+It is just an example, how you should code it in your main() function.</p>
+<p>Currently there is no intention to fully generate code for processes, cause many things must be done here
+depending on your applications definition</p>
+<blockquote>
+<div><ul class="simple">
+<li>command line argument handling</li>
+<li>printing copyright informations or other company dependend stuff</li>
+<li>implementing signalhandler and other stuff.</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="introduction-by-example">
+<h1>Introduction by Example<a class="headerlink" href="#introduction-by-example" title="Permalink to this headline">¶</a></h1>
+<p>In this chapter we will look at an example to show the basis ideas of the framework. The example is the same like
+in the first chapter, same components and interfaces.</p>
+<p class="plantuml">
+<img src="_images/plantuml-43eb49408cd43609c3fdd24b3680c5a4aa73609d.png" alt="interface AudioPlayer
+package WavFileReader
+WavFileReader - AudioPlayer
+
+package SoundOut
+SoundOut  -left-&gt; AudioPlayer" />
+</p>
+<div class="section" id="id1">
+<h2>Interface<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>The code for the interface is a simple <a class="reference external" href="https://developers.google.com/protocol-buffers">Google protocol buffers</a> file, save with extension proto e.g. to AudioPlayerIfc.proto:</p>
+<div class="highlight-python"><div class="highlight"><pre>message AudioData {
+  required double samplerate = 1;
+  required int32 samplecount = 2;
+  required int32 channels = 3;
+  required bool complex = 4;
+  required bool interleaved = 5;
+
+  enum Format {
+    INTEGER_SIGNED_16_BIT = 0;
+    INTEGER_SIGNED_8_BIT = 1;
+    FLOAT_LITTLE_ENDIAN = 2;
+    DOUBLE_LITTLE_ENDIAN = 3;
+  }
+
+  required Format format = 6;
+  required bytes data = 7;
+}
+
+
+message StartData {
+}
+
+message StopData {
+}
+
+message StoppedData {
+}
+
+message StartedData {
+}
+</pre></div>
+</div>
+<p>For later reuse of the message type AudioData independent form the messages for request or response, it is usefull to save the message type AudioData in a seperate .proto file and import it in the AudioPlayerIfc.proto file.</p>
+<p>The interace definition for the Interface is defined in an xml file, e.g. AudioPlayerIfc.xml:</p>
+<div class="highlight-python"><div class="highlight"><pre>&lt;interface&gt;
+  &lt;version maj=&quot;1&quot; min=&quot;1&quot; rev=&quot;0&quot;/&gt;
+  &lt;include file=&quot;AudioPlayerIfc.pb.h&quot;/&gt;
+  &lt;properties&gt;
+    &lt;prop id=&quot;AudioData&quot; package=&quot;&quot;/&gt;
+  &lt;/properties&gt;
+  &lt;requests&gt;
+    &lt;req id=&quot;StartData&quot; package=&quot;&quot;&gt;
+    &lt;resp id=&quot;StartedData&quot; package=&quot;&quot;/&gt;
+    &lt;/req&gt;
+    &lt;req id=&quot;StopData&quot; package=&quot;&quot;&gt;
+    &lt;resp id=&quot;StoppedData&quot; package=&quot;&quot;/&gt;
+    &lt;/req&gt;
+  &lt;/requests&gt;
+  &lt;responses&gt;
+    &lt;resp id=&quot;StartedData&quot; package=&quot;&quot;/&gt;
+    &lt;resp id=&quot;StoppedData&quot; package=&quot;&quot;/&gt;
+  &lt;/responses&gt;
+&lt;/interface&gt;
+</pre></div>
+</div>
+<p>The interface describes now the properties of type AudioData, the request to start and stop data delivery
+and the repsonsed to the requests. The id given to the properties must match the message name in the proto file.
+The package information could also be defined in the proto file and is similar to a namespace in c++.</p>
+</div>
+<div class="section" id="components">
+<h2>Components<a class="headerlink" href="#components" title="Permalink to this headline">¶</a></h2>
+<p>To define the components, we use another xml file.
+First we try to define the data providing component WavFileReader. This is also done with an xml file, defining the components provided and used interfaces.
+E.g. content of WavFilePlayerComponent.xml:</p>
+<div class="highlight-python"><div class="highlight"><pre>&lt;component&gt;
+  &lt;version maj=&quot;1&quot; min=&quot;1&quot; rev=&quot;0&quot;/&gt;
+  &lt;description/&gt;
+  &lt;provides&gt;
+    &lt;interface id=&quot;AudioPlayer&quot;   xml=&quot;AudioPlayerIfc.xml&quot;/&gt;
+  &lt;/provides&gt;
+  &lt;uses/&gt;
+&lt;/component&gt;
+</pre></div>
+</div>
+<p>The provided interface is defined by giving it an id, from with the code implemenation takes the later attribute name for the interface. The interface definition itself is referened via the location of the xml file.</p>
+<p>If the component does not use any other components, leave the uses seciton empty or omit.</p>
+<p>To define the SoundOut component, we just add another xml file, defining the component and its used interface, e.g. in file SoundOutComponent.xml:</p>
+<div class="highlight-python"><div class="highlight"><pre>&lt;component&gt;
+  &lt;version maj=&quot;1&quot; min=&quot;1&quot; rev=&quot;0&quot;/&gt;
+  &lt;description/&gt;
+  &lt;provides/&gt;
+  &lt;uses&gt;
+    &lt;interface id=&quot;AudioPlayer&quot; xml=&quot;AudioPlayerIfc.xml&quot;/&gt;
+  &lt;/uses&gt;
+&lt;/component&gt;
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>Layout<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>But how are the components linked together? This is a question of your application and process layout. Do you want to have both components in one process/application? Or do you want to seperate them?
+In our example we decide to intergrate them into a single application and generate a layout descpriont xml file, e.g. called WavPlayer.xml:</p>
+<div class="highlight-python"><div class="highlight"><pre>&lt;componentlayout&gt;
+&lt;processes&gt;
+&lt;process name=&quot;WavPlayer&quot;&gt;
+  &lt;description&gt;&lt;/description&gt;
+  &lt;thread name=&quot;WavPlayerThread&quot;&gt;
+    &lt;component name=&quot;WavFilePlayer&quot; xml=&quot;WavFilePlayerComponent.xml&quot;&gt;
+      &lt;provides&gt;
+        &lt;interface id=&quot;AudioPlayer&quot; address=&quot;inproc:///tmp/audioprovider&quot; hwm=&quot;5000&quot;/&gt;
+      &lt;/provides&gt;
+    &lt;/component&gt;
+  &lt;/thread&gt;
+  &lt;component name=&quot;SoundOut&quot; xml=&quot;SoundOutComponent.xml&quot;&gt;
+    &lt;uses&gt;
+      &lt;interface id=&quot;AudioPlayer&quot; sub=&quot;WavFilePlayer.AudioPlayer&quot;/&gt;
+    &lt;/uses&gt;
+  &lt;/component&gt;
+&lt;/process&gt;
+&lt;/processes&gt;
+&lt;/componentlayout&gt;
+</pre></div>
+</div>
+<p>The component overview gives you and hint how the components are now connected. An overview like this
+is also generated by the YaComponent framework if plantuml is available.</p>
+<p class="plantuml">
+<img src="_images/plantuml-d388b329a000ce5c90859aefcdb9938c386b6eda.png" alt="package WavPlayer {
+  package WavPlayerThread {
+    frame WavFileReader
+    WavFileReader - AudioPlayer :   inproc://tmp/audioprovider
+  }
+
+  package mainThread {
+    frame SoundOut
+    SoundOut  -left-&gt; AudioPlayer
+  }
+}" />
+</p>
+</div>
+<div class="section" id="integration-with-cmake">
+<h2>Integration with CMake<a class="headerlink" href="#integration-with-cmake" title="Permalink to this headline">¶</a></h2>
+<p>After all definitions, the code generation parts now dow their jobs. To start code generation, you must use the perl scripts provided with the project or use the predefined cmake makros to generate your code from the xml file and proto files.</p>
+<p>A snipped from a CMakeLists.txt used to build the examples files contains the macro calls:</p>
+<div class="highlight-python"><div class="highlight"><pre>PROTOBUF_GENERATE_CPP(ProtoSourcesAudioPlayer ProtoHeadersAudioPlayer AudioPlayerIfc.proto)
+
+YACOMPONENT_IFC_GENERATE(GENERATED_IFC_AUDIOPLAYER AudioPlayerIfc.xml )
+
+
+YACOMPONENT_GENERATE(GENERATED_COMP_WAV_SRC WavFilePlayerComponent.xml)
+YACOMPONENT_GENERATE(GENERATED_COMP_SOUND_SRC SoundOutComponent.xml)
+
+YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT WavPlayer.xml)
+</pre></div>
+</div>
+<p>The generated code from the layout could then be used in your main application:</p>
+<div class="highlight-python"><div class="highlight"><pre>void* context = YaComponent::context_new();
+YaComponentThread WavPlayerThread;
+WavPlayerThread.start();
+WavFilePlayerComponent WavFilePlayer(context);
+WavFilePlayer.setConnectionParaAudioPlayer( &quot;inproc:///tmp/audioprovider&quot;, 5000 );
+WavFilePlayer.init();
+WavFilePlayer.moveToThread(&amp;WavPlayerThread);
+SoundOutComponent SoundOut(context);
+SoundOut.setConnectionParaAudioPlayer( &quot;inproc:///tmp/audioprovider&quot;, &quot;SoundOut&quot; );
+SoundOut.init();
+</pre></div>
+</div>
+</div>
+<div class="section" id="component-implementation">
+<h2>Component Implementation<a class="headerlink" href="#component-implementation" title="Permalink to this headline">¶</a></h2>
+<p>As you can see, the two concrete classes WavFilePlayerComponent and SoundOutComponent must be used. This is now the developers part to create this classes and define their behaviour. There are classes derived from the generated classes WavFileReaderComponentImpl and SoundOutComponentImpl with handlers for the pure virtual functions to handle properties, requests and responses.</p>
+<p class="plantuml">
+<img src="_images/plantuml-676d43c2da090c981eceab7c8002825cad380774.png" alt="class WavFilePlayerComponent -up--|&gt; WavFilePlayerComponentImpl
+
+class SoundOutComponent -up--|&gt; SoundOutComponentImpl
+
+class WavFilePlayerComponent {
+  onRequestStartData( int id , StartedData&amp; )
+  onRequestStopData( int id , StoppedData&amp; )
+}
+
+
+class SoundOutComponent {
+  virtual void onProperty( int id, const AudioData&amp; );
+  virtual void onResponse( int proxyId, const StartedData&amp; );
+  virtual void onResponse( int proxyId, const StoppedData&amp; );
+}" />
+</p>
+<p>For the SoundOutComponent theres now an active part to implmement</p>
+<blockquote>
+<div><ul class="simple">
+<li>set notifications for AudioData properties</li>
+<li>start data by calling StartData request</li>
+<li>wait for end of data or call StopData request</li>
+</ul>
+</div></blockquote>
+<p>Its also up to the developer to decide which file is played. This could be part of an additional method in WavFilePlayer to set the filename e.g. from commandline arguments.</p>
+<p>The Id&#8217;s provided in the generated interfaces are useful if there is a multiple use of the same interface or same message types in different interfaces. So you can handle the request properly depending on the interface you received them. In our example, the id&#8217;s could be ignored.</p>
+</div>
+</div>
+<div class="section" id="message-handling">
+<h1>Message Handling<a class="headerlink" href="#message-handling" title="Permalink to this headline">¶</a></h1>
+<p>Lets now have a closer look about the magic in the message transport.</p>
+<blockquote>
+<div><ul class="simple">
+<li>How are messages transmitted</li>
+<li>How are connections made</li>
+<li>How is message send / receive triggered</li>
+</ul>
+</div></blockquote>
+<div class="section" id="message-transmission">
+<h2>Message transmission<a class="headerlink" href="#message-transmission" title="Permalink to this headline">¶</a></h2>
+<p>Message a transmitted by using two opensource libraries very popular and also quite good for this handling
+due to their software licensings. These are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.zeromq.org">0MQ</a></li>
+<li><a class="reference external" href="https://developers.google.com/protocol-buffers">Google protocol buffers</a></li>
+</ul>
+</div></blockquote>
+<div class="section" id="id3">
+<h3>0MQ<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://www.zeromq.org">0MQ</a> is a message based communication library, that fokuses on the fast message exchange without a central
+broker. This is why they have the 0 in their name. Most of all it allows message transport with tcp, udp,
+ipc and inproc via shared memory. So it fits our purpose to exchange data between applications, threads and for
+inner-thread communication</p>
+<p>Another benefit is that there are language bindings in java and python. This would allow to extend YaComponent
+usage as communication framework between java and c++ applications or to control your c++ applications via python
+scripting.</p>
+</div>
+<div class="section" id="id4">
+<h3>Google Protocol Buffers<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://developers.google.com/protocol-buffers">Google protocol buffers</a> focus on message definition via an IDL and generation of code in c++, java and python.
+This fits very well together with <a class="reference external" href="http://www.zeromq.org">0MQ</a>. Its a little overheaded in c++ only communication, so there will be an
+YaComponent serialize ifc also available, if you want to do c++ only communication and reuse the classes in your code
+later.</p>
+<p>To avoid usage of <a class="reference external" href="https://developers.google.com/protocol-buffers">Google protocol buffers</a> in your whole code, its also a quite good solution to serialize your classes
+into an Google Protocol Buffer class.</p>
+</div>
+</div>
+<div class="section" id="connection-handling">
+<h2>Connection Handling<a class="headerlink" href="#connection-handling" title="Permalink to this headline">¶</a></h2>
+<p>Connections are handling with the <a class="reference external" href="http://www.zeromq.org">0MQ</a> mechanism, the <a class="reference external" href="http://www.zeromq.org">0MQ</a> protocol parameter is part of the layout definition, so that you
+can define the used protocol for your communication.
+Its a fact that the framework must support dynamic connection changes, but this is part of future versions.
+Currently all connections are static.</p>
+<p>It was a quite good idea to handle the properties and request / responses with direct <a class="reference external" href="http://www.zeromq.org">0MQ</a> functions like
+PUB/SUB and REQ/RESP. But this had same disadvantages:</p>
+<blockquote>
+<div><ul class="simple">
+<li>You need two sockets peer connection</li>
+<li>REQ/RESP were not indepently callable</li>
+</ul>
+</div></blockquote>
+<p>So the decision was to implement the DEALER/ROUTER pattern to have the full flexiblity for the
+YaComponent framework</p>
+<blockquote>
+<div><ul class="simple">
+<li>Requests could be queued without repsonses received</li>
+<li>Responses could be broadcasted to all connected peers without requests</li>
+</ul>
+</div></blockquote>
+<p>Current limitations are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>maximum fixed message size: Could be too small, must be enlared in future</li>
+<li>no real experiance with heavy traffic, especially with the loss of properties</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="trigger-message-send-receive">
+<h2>Trigger Message Send / Receive<a class="headerlink" href="#trigger-message-send-receive" title="Permalink to this headline">¶</a></h2>
+<p>The message send and receive is done in the generated component implementation in two ways:</p>
+<blockquote>
+<div><ul class="simple">
+<li>send is done immediately with <a class="reference external" href="http://www.zeromq.org">0MQ</a></li>
+<li>receive is triggered via timer</li>
+</ul>
+</div></blockquote>
+<p>So in the timer loop the <a class="reference external" href="http://www.zeromq.org">0MQ</a> socket is checked for messages received. If there are
+messages available, the messages are read from the socket and the appropriate callbacks for
+properties, requests and responses are send.</p>
+<p>This ensures that your component is not blocked the whole time by calling the blocking
+functions for zmq_recv, it ensures that your component could process other events (e.g. gui events).</p>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to YaComponent UserGuide&#8217;s documentation!</a></li>
+<li><a class="reference internal" href="#basic-introduction">Basic Introduction</a><ul>
+<li><a class="reference internal" href="#interface">Interface</a><ul>
+<li><a class="reference internal" href="#properties">Properties</a></li>
+<li><a class="reference internal" href="#requests">Requests</a></li>
+<li><a class="reference internal" href="#responses">Responses</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#component">Component</a></li>
+<li><a class="reference internal" href="#layout">Layout</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#introduction-by-example">Introduction by Example</a><ul>
+<li><a class="reference internal" href="#id1">Interface</a></li>
+<li><a class="reference internal" href="#components">Components</a></li>
+<li><a class="reference internal" href="#id2">Layout</a></li>
+<li><a class="reference internal" href="#integration-with-cmake">Integration with CMake</a></li>
+<li><a class="reference internal" href="#component-implementation">Component Implementation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#message-handling">Message Handling</a><ul>
+<li><a class="reference internal" href="#message-transmission">Message transmission</a><ul>
+<li><a class="reference internal" href="#id3">0MQ</a></li>
+<li><a class="reference internal" href="#id4">Google Protocol Buffers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#connection-handling">Connection Handling</a></li>
+<li><a class="reference internal" href="#trigger-message-send-receive">Trigger Message Send / Receive</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/UserGuide.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="#">YaComponent UserGuide 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Joerg Kreuzberger.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
