@@ -275,6 +275,10 @@ int YaPUBImpl::send(int key, int msgSize, const char* msgData)
 
   if( -1 == rc )
   {
+	if( errno != EAGAIN )
+	{
+	  fprintf(stderr, "received error %s, exiting with error\n", zmq_strerror(errno));
+	}
     assert( errno == EAGAIN );
   }
 
