@@ -17,5 +17,6 @@ Currently evaluating using only one port for both patterns with ZMQ_ROUTER/ZMQ_D
 
 
 ![Main Concepts](doc/Concept.md)
+[User Guide](http://kreuzberger.github.io/YaComponent/UserGuide.html)
 
 
