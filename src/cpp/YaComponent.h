@@ -16,9 +16,6 @@ namespace YaComponent {
   static const int KeySetNotification = -4;
   static const int KeyClearNotification = -5;
   static const int  TimeOut = 20;
-  char* socket_rcv (void *socket);
-  int socket_snd(void *socket, const char *string);
-  int socket_snd_more(void *socket, const char *string);
   void sleep(int msecs);
   void* context_new();
 }

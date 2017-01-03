@@ -32,8 +32,10 @@ add_library( YaComponentLib ${YaComponentLib_SRCS} ${YaComponentLib_HDRS} ${YaCo
 
 if( WITH_ZMQ )
   add_dependencies( YaComponentLib zeromq)
+  target_link_libraries( YaComponentLib ${ZEROMQ_LIBRARIES} )
 endif()
 
 if( WITH_PROTOBUF )
   add_dependencies( YaComponentLib protobuf )
+  target_link_libraries( YaComponentLib ${PROTOBUF_LIBRARIES} )
 endif()

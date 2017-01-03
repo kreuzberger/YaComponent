@@ -49,10 +49,10 @@ find_package( SphinxBuild REQUIRED)
 find_package( InstallQt REQUIRED)
 
 #INCLUDE_DIRECTORIES( ${QT_INCLUDE_DIR} )
-if( CMAKE_HOST_UNIX )
+if( UNIX )
   include_directories(/usr/include)
-else( CMAKE_HOST_UNIX )
-endif( CMAKE_HOST_UNIX )
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+endif( )
 
 
 enable_testing()
