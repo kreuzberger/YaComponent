@@ -29,3 +29,11 @@ qt4_wrap_cpp( YaComponentLib_MOCS
 
 
 add_library( YaComponentLib ${YaComponentLib_SRCS} ${YaComponentLib_HDRS} ${YaComponentLib_MOCS} )
+
+if( WITH_ZMQ )
+  add_dependencies( YaComponentLib zeromq)
+endif()
+
+if( WITH_PROTOBUF )
+  add_dependencies( YaComponentLib protobuf )
+endif()

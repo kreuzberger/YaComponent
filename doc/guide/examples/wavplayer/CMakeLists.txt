@@ -7,7 +7,6 @@ include(${INSTALL_QT_USE_FILE})
 
 include_directories( ${QT_INCLUDE_DIR} )
 
-
 PROTOBUF_GENERATE_CPP(ProtoSourcesAudioPlayer ProtoHeadersAudioPlayer AudioPlayerIfc.proto)
 
 YACOMPONENT_IFC_GENERATE(GENERATED_IFC_AUDIOPLAYER AudioPlayerIfc.xml )
