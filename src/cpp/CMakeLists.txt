@@ -21,7 +21,7 @@ set( YaComponentLib_HDRS
   YaSUBImpl.h
 )
 
-qt4_wrap_cpp( YaComponentLib_MOCS
+qt5_wrap_cpp( YaComponentLib_MOCS
   YaStubBase.h
   YaComponentThread.h
   YaProxyBase.h
@@ -30,10 +30,7 @@ qt4_wrap_cpp( YaComponentLib_MOCS
 
 add_library( YaComponentLib ${YaComponentLib_SRCS} ${YaComponentLib_HDRS} ${YaComponentLib_MOCS} )
 
-if( WITH_ZMQ )
-  add_dependencies( YaComponentLib zeromq)
-  target_link_libraries( YaComponentLib ${ZEROMQ_LIBRARIES} )
-endif()
+target_link_libraries( YaComponentLib Qt5::Core libzmq::static )
 
 if( WITH_PROTOBUF )
   add_dependencies( YaComponentLib protobuf )

@@ -1,14 +1,5 @@
 project ( SubscriptionsTest)
 
-set( QT_USE_QTCORE true )
-set( QT_USE_QTGUI true )
-set( QT_USE_QTTEST true )
-
-include(${INSTALL_QT_USE_FILE})
-
-include_directories( ${QT_INCLUDE_DIR} )
-
-
 PROTOBUF_GENERATE_CPP(ProtoSourcesTextGen ProtoHeadersTextGen publisher/PublisherIfc.proto)
 
 YACOMPONENT_IFC_GENERATE(GENERATED_IFC_SRC_PUB publisher/PublisherIfc.xml)
@@ -20,9 +11,9 @@ YACOMPONENT_GENERATE(GENERATED_COMP_SUB_SRC subscriber/SubscriberComp.xml)
 
 YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT_SRC PubSubUnittestMPMT.xml)
 
-QT4_WRAP_CPP( UNITTESTMPSUB_FAST_MOCS PubSubUnittestMP_fast_SUB.h )
-QT4_WRAP_CPP( UNITTESTMPSUB_SLOW_MOCS PubSubUnittestMP_slow_SUB.h)
-QT4_WRAP_CPP( UNITTESTMPPUB_MOCS PubSubUnittestMP_PUB.h )
+QT5_WRAP_CPP( UNITTESTMPSUB_FAST_MOCS PubSubUnittestMP_fast_SUB.h )
+QT5_WRAP_CPP( UNITTESTMPSUB_SLOW_MOCS PubSubUnittestMP_slow_SUB.h)
+QT5_WRAP_CPP( UNITTESTMPPUB_MOCS PubSubUnittestMP_PUB.h )
 
 set( publisher_SRCS
   ${GENERATED_IFC_SRC_PUB}
@@ -61,7 +52,7 @@ set( subscriber_slow_SRCS
   ${UNITTESTMPSUB_SLOW_MOCS}
 )
 
-QT4_WRAP_CPP( UNITTESTMP_MOCS PubSubUnittestMP.h )
+QT5_WRAP_CPP( UNITTESTMP_MOCS PubSubUnittestMP.h )
 
 set( pubsubunittestmp_SRCS
   PubSubUnittestMP.cpp
@@ -78,9 +69,9 @@ add_executable( subscriber_slow_MPMT  ${subscriber_slow_SRCS} )
 add_executable( pubsubunittestmp ${pubsubunittestmp_SRCS} )
 
 
-target_link_libraries(publisherMPMT ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES} ${ZEROMQ_LIBRARIES})
-target_link_libraries(subscriber_fast_MPMT ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES} ${ZEROMQ_LIBRARIES})
-target_link_libraries(subscriber_slow_MPMT ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES} ${ZEROMQ_LIBRARIES})
-target_link_libraries(pubsubunittestmp ${QT_LIBRARIES} ${PROTOBUF_LIBRARIES} ${ZEROMQ_LIBRARIES})
+target_link_libraries(publisherMPMT Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
+target_link_libraries(subscriber_fast_MPMT Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
+target_link_libraries(subscriber_slow_MPMT Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
+target_link_libraries(pubsubunittestmp Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
 
 add_test( NAME pubsubunittestmp COMMAND pubsubunittestmp )

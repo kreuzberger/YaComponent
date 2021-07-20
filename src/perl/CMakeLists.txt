@@ -44,7 +44,7 @@ macro (YACOMPONENT_IFC_GENERATE outfiles)
 
     set( ${outfiles} ${${outfiles}} ${outfile} )
 
-    QT4_WRAP_CPP(outfile_component_mocs ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h )
+    QT5_WRAP_CPP(outfile_component_mocs ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h )
     set( ${outfiles} ${${outfiles}} ${outfile_component_mocs} )
 
 
@@ -63,7 +63,7 @@ macro (YACOMPONENT_IFC_GENERATE outfiles)
     set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/code/${file} )
   endforeach( file )
 
-  QT4_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaProxyBase.h ${CMAKE_CURRENT_BINARY_DIR}/code/YaStubBase.h)
+  QT5_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaProxyBase.h ${CMAKE_CURRENT_BINARY_DIR}/code/YaStubBase.h)
   set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
 
   set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
@@ -95,7 +95,7 @@ macro (YACOMPONENT_GENERATE outfiles)
 
     set( ${outfiles} ${${outfiles}} ${outfile})
 
-    QT4_WRAP_CPP(outfiles_moc #${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h
+    QT5_WRAP_CPP(outfiles_moc #${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h
                          #${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Proxy.h
                          ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Impl.h
     )
@@ -163,7 +163,7 @@ macro (YACOMPONENT_LAYOUT_GENERATE outfiles)
     set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/code/${file} )
   endforeach( file )
 
-  QT4_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaComponentThread.h)
+  QT5_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaComponentThread.h)
   set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
 
   set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )

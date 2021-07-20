@@ -484,7 +484,7 @@ sub writeIfcStub
     print $fhHeader $resp->{id}. "&, const std::string& ident );\n";
   }
 
-  print $fhHeader "    int receive();\n";
+  print $fhHeader "    void receive();\n";
 
   print $fhHeader "  protected:\n";
 
@@ -532,7 +532,7 @@ sub writeIfcStub
 #  print $fhSource "  mPublisher.setConnectionPara( address, hwm );\n";
 #  print $fhSource "}\n";
 
-  print $fhSource "int " . $IfcName ."Stub::receive()\n";
+  print $fhSource "void " . $IfcName ."Stub::receive()\n";
   print $fhSource "{\n";
   print $fhSource "  int iMsgCnt = 0;\n";
   print $fhSource "  bool bMsgAvailable = true;\n";
@@ -729,7 +729,7 @@ sub writeIfcProxy
   print $fhHeader "  public:\n";
   print $fhHeader "    " . $IfcName . "Proxy( void* context, int id, I" . $IfcName . "ProxyHandler& );\n";
   print $fhHeader "    virtual ~" . $IfcName . "Proxy();\n\n";
-  print $fhHeader "    virtual int receive();\n";
+  print $fhHeader "    virtual void receive();\n";
 
   #print $fhHeaderIfc "\nclass YaProxyBase;\n\n";
 
@@ -825,7 +825,7 @@ sub writeIfcProxy
     print $fhSource "}\n";
   }
 
-  print $fhSource "int " . $IfcName ."Proxy::receive()\n";
+  print $fhSource "void " . $IfcName ."Proxy::receive()\n";
   print $fhSource "{\n";
   print $fhSource "  int iMsgCnt = 0;\n";
   print $fhSource "  bool bMsgAvailable = true;\n";
