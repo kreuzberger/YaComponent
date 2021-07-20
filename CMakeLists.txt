@@ -58,7 +58,9 @@ find_package( SphinxBuild REQUIRED)
 enable_testing()
 include(CTest)
 
-if( WITH_PROTOBUF )
+add_executable(protobuf::protoc IMPORTED GLOBAL)
+add_library(protobuf::lib STATIC IMPORTED GLOBAL)
+
   if( UNIX )
     ExternalProject_Add(protobuf
       #SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.."
@@ -76,20 +78,18 @@ if( WITH_PROTOBUF )
     )
 
     ExternalProject_Get_Property(protobuf install_dir)
-    set(PROTOBUF_LIBRARIES "${install_dir}/lib/libprotobuf.a")
+    set_property(TARGET protobuf::lib
+                 PROPERTY IMPORTED_LOCATION "${install_dir}/lib/libprotobuf.a")
+    set_property(TARGET protobuf::protoc
+                 PROPERTY IMPORTED_LOCATION "${install_dir}/bin/protoc")
   endif()
-  set( PROTOBUF_INCLUDE_DIRS "${install_dir}/include")
-  include(${CMAKE_SOURCE_DIR}/cmake/Protobuf.cmake)
-else()
-  find_package(Protobuf REQUIRED)
-endif()
 
-include_directories(${PROTOBUF_INCLUDE_DIRS})
+  set_property(TARGET protobuf::lib
+               PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${install_dir}/include")
 
+
+include(${CMAKE_SOURCE_DIR}/cmake/Protobuf.cmake)
 add_definitions(-DZMQ_STATIC)
-include_directories(${ZEROMQ_INCLUDE_DIRS})
-
-#ADD_DEFINITIONS( ${QT_DEFINITIONS} )
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/cpp")
 
 #installation default prefix like for old buildsys

@@ -72,10 +72,10 @@ add_executable( textunittest ${textunittest_SRCS} )
 add_executable( textunittestmp ${textunittestmp_SRCS} )
 
 
-target_link_libraries(textgenMPMT Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
-target_link_libraries(textoutMPMT Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
-target_link_libraries(textunittest Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
-target_link_libraries(textunittestmp Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
+target_link_libraries(textgenMPMT Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(textoutMPMT Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(textunittest Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(textunittestmp Qt5::Core Qt5::Test protobuf::lib libzmq::static)
 
 install( TARGETS textgenMPMT textoutMPMT RUNTIME DESTINATION "unittest/text" )
 install( TARGETS textunittest RUNTIME DESTINATION "unittest/text" )

@@ -69,9 +69,9 @@ add_executable( subscriber_slow_MPMT  ${subscriber_slow_SRCS} )
 add_executable( pubsubunittestmp ${pubsubunittestmp_SRCS} )
 
 
-target_link_libraries(publisherMPMT Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
-target_link_libraries(subscriber_fast_MPMT Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
-target_link_libraries(subscriber_slow_MPMT Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
-target_link_libraries(pubsubunittestmp Qt5::Core Qt5::Test ${PROTOBUF_LIBRARIES} libzmq::static)
+target_link_libraries(publisherMPMT Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(subscriber_fast_MPMT Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(subscriber_slow_MPMT Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(pubsubunittestmp Qt5::Core Qt5::Test protobuf::lib libzmq::static)
 
 add_test( NAME pubsubunittestmp COMMAND pubsubunittestmp )
