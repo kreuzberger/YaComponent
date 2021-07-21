@@ -62,8 +62,7 @@ sub writeComponentIfc
     }
   }
 
-  print $fhHeader '#ifndef ' . uc($CompName) ."_H\n";
-  print $fhHeader '#define ' . uc($CompName) ."_H\n\n";
+  print $fhHeader "#pragma once\n";
   print $fhHeader "#include <stdio.h>\n";
 
   print $fhHeader "namespace YaComponent {\n";
@@ -77,7 +76,7 @@ sub writeComponentIfc
   print $fhHeader "};\n";
   print $fhHeader "}\n";
 
-  print $fhHeader "\n#endif\n";
+  print $fhHeader "\n";
   close( $fhHeader);
 
 }
@@ -109,8 +108,7 @@ sub writeComponentImpl
   print $fhSource "namespace YaComponent {\n\n";
 #  print $fhSource "#include \"" . $CompName . "Impl.moc\"\n";
 
-  print $fhHeader '#ifndef ' . uc($CompName) ."IMPL_H\n";
-  print $fhHeader '#define ' . uc($CompName) ."IMPL_H\n\n";
+  print $fhHeader "#pragma once\n";
   #print $fhHeader "#include \"YaComponentBase.h\"\n";
 
   my %classNameProxyHash;
@@ -333,7 +331,7 @@ sub writeComponentImpl
 
   print $fhHeader "}\n";
 
-  print $fhHeader "\n#endif\n";
+  print $fhHeader "\n";
 
   print $fhSource "}\n";
 
@@ -369,16 +367,14 @@ sub writeIfcStub
  # print Dumper($ifc) if $YaComponent::gVerbose;
   print $fhSource "#include \"" . $IfcName . "Stub.h\"\n";
 
-  print $fhHeader '#ifndef ' . uc($IfcName) ."STUB_H\n";
-  print $fhHeader '#define ' . uc($IfcName) ."STUB_H\n\n";
-
-  print $fhHeaderIfc '#ifndef ' . uc($IfcName) ."STUBHANDLER_H\n";
-  print $fhHeaderIfc '#define ' . uc($IfcName) ."STUBHANDLER_H\n\n";
+  print $fhHeader "#pragma once\n";
+  print $fhHeaderIfc "#pragma once\n";
 
 
   foreach my $incFile (@{$ifc->{includes}})
   {
     print $fhHeader "#include \"$incFile\"\n";
+    print $fhHeaderIfc "#include \"$incFile\"\n";
   }
 #  print $fhHeader "#include <QtCore/QObject>\n";
   print $fhHeader "#include \"I" . $IfcName . "StubHandler.h\"\n";
@@ -651,8 +647,8 @@ sub writeIfcStub
   print $fhHeaderIfc "\n}\n";
   print $fhSource "}\n";
 
-  print $fhHeader "\n#endif\n";
-  print $fhHeaderIfc "\n#endif\n";
+  print $fhHeader "\n";
+  print $fhHeaderIfc "\n";
 
   close( $fhHeader);
   close( $fhHeaderIfc);
@@ -701,11 +697,9 @@ sub writeIfcProxy
   my $strDtor = "\n" . $IfcName . "Proxy::~" . $IfcName . "Proxy()\n{\n";
 
 
-  print $fhHeader '#ifndef ' . uc($IfcName) ."PROXY_H\n";
-  print $fhHeader '#define ' . uc($IfcName) ."PROXY_H\n\n";
+  print $fhHeader "#pragma once\n";
 
-  print $fhHeaderIfc '#ifndef ' . uc($IfcName) ."PROXYHANDLER_H\n";
-  print $fhHeaderIfc '#define ' . uc($IfcName) ."PROXYHANDLER_H\n\n";
+  print $fhHeaderIfc "#pragma once\n";
 
 
   foreach my $incFile (@{$ifc->{includes}})
@@ -918,8 +912,8 @@ sub writeIfcProxy
   print $fhHeader "}\n";
 #  print $fhHeaderIfc "}\n";
 
-  print $fhHeader "\n#endif\n";
-  print $fhHeaderIfc "\n#endif\n";
+  print $fhHeader "\n";
+  print $fhHeaderIfc "\n";
 
   print $fhSource "\n}\n"; #closing namespace
 
