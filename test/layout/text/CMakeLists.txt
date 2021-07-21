@@ -77,10 +77,5 @@ target_link_libraries(textoutMPMT Qt5::Core Qt5::Test protobuf::lib libzmq::stat
 target_link_libraries(textunittest Qt5::Core Qt5::Test protobuf::lib libzmq::static)
 target_link_libraries(textunittestmp Qt5::Core Qt5::Test protobuf::lib libzmq::static)
 
-install( TARGETS textgenMPMT textoutMPMT RUNTIME DESTINATION "unittest/text" )
-install( TARGETS textunittest RUNTIME DESTINATION "unittest/text" )
-install( TARGETS textunittestmp RUNTIME DESTINATION "unittest/text" )
-
-
 add_test( NAME textunittest COMMAND textunittest )
 add_test( NAME textunittestmp COMMAND textunittestmp )
