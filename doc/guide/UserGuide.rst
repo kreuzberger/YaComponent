@@ -351,10 +351,6 @@ As you can see, the two concrete classes WavFilePlayerComponent and SoundOutComp
 
 .. uml::
 
-  class WavFilePlayerComponent -up--|> WavFilePlayerComponentImpl
-  
-  class SoundOutComponent -up--|> SoundOutComponentImpl
-  
   class WavFilePlayerComponent {
     onRequestStartData( int id , StartedData& ) 
     onRequestStopData( int id , StoppedData& ) 
@@ -366,6 +362,9 @@ As you can see, the two concrete classes WavFilePlayerComponent and SoundOutComp
     virtual void onResponse( int proxyId, const StartedData& );
     virtual void onResponse( int proxyId, const StoppedData& );
   }
+
+  WavFilePlayerComponent -up--|> WavFilePlayerComponentImpl
+  SoundOutComponent -up--|> SoundOutComponentImpl
 
 
 For the SoundOutComponent theres now an active part to implmement

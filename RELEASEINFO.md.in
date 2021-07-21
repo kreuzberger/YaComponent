@@ -1,0 +1,4 @@
+See [@readme_url@](@readme_url@) for release notes.
+
+To use the plugin you need a compatible Qt(5) version.
+The library was build against Qt @qt_version@.
