@@ -10,9 +10,15 @@ if (NOT SPHINX_BUILD_EXECUTABLE)
   set(USE_DOC_SPHINX false)
 endif()
 
+set(USE_DOC_HIEROGLYPH true)
+find_program(HIEROGLYPH_EXECUTABLE hieroglyph PATH_SUFFIXES bin)
+if (NOT HIEROGLYPH_EXECUTABLE)
+  message(STATUS "hieroglyph was not found, the slides will not be generated.")
+  set(USE_DOC_HIEROGLYPH false)
+endif()
 
 
-if (USE_DOC_SPHINX)
+if(USE_DOC_HIEROGLYPH)
   macro (SPHINX_SLIDE_GENERATE outtarget)
     set( SPHINX_CLEAN_FILES  "${CMAKE_CURRENT_BINARY_DIR}/slides ${CMAKE_CURRENT_BINARY_DIR}/doctrees")
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/slides ${CMAKE_CURRENT_BINARY_DIR}/doctrees
@@ -22,7 +28,9 @@ if (USE_DOC_SPHINX)
     add_custom_target( doc_${outtarget} ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/slides)
     set_directory_properties( PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${SPHINX_CLEAN_FILES}" )
   endmacro( )
+endif()
 
+if (USE_DOC_SPHINX)
   macro (SPHINX_DOC_GENERATE outtarget)
     set( SPHINX_CLEAN_FILES  "${CMAKE_CURRENT_BINARY_DIR}/html ${CMAKE_CURRENT_BINARY_DIR}/doctrees-html")
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html ${CMAKE_CURRENT_BINARY_DIR}/doctrees-html

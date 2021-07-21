@@ -115,5 +115,5 @@ set( CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE STRING "" FORCE)
 
 
 add_subdirectory(src)
-#add_subdirectory(doc)
+add_subdirectory(doc)
 add_subdirectory(test)

@@ -1,4 +1,4 @@
-#pramga once
+#pragma once
 
 #include <QtCore/QObject>
 
@@ -11,4 +11,3 @@ public:
     {}
     virtual ~YaComponent() {}
 };
-
