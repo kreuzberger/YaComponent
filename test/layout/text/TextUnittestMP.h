@@ -7,10 +7,10 @@
 
 class TextUnittestMP : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  TextUnittestMP(QObject *parent = 0);
-  ~TextUnittestMP() {}
+    TextUnittestMP(QObject *parent = 0);
+    ~TextUnittestMP() {}
 
 signals:
 
@@ -23,7 +23,6 @@ private slots:
 private:
     QProcess moProcessTextGen;
     QProcess moProcessTextOut;
-
 };
 
 #endif // TEXTUNITTEST_H

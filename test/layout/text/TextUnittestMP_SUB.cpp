@@ -5,82 +5,70 @@
 QTEST_MAIN(TextUnittestMPSub);
 
 TextUnittestMPSub::TextUnittestMPSub(QObject *parent)
-  : QObject(parent)
-  , mpContext(0)
-  , mpTextOutThread(0)
-  , mpTextOut( 0 )
-{
-}
+    : QObject(parent)
+    , mpContext(0)
+    , mpTextOutThread(0)
+    , mpTextOut(0)
+{}
 
 void TextUnittestMPSub::initComponentsMPMT()
 {
+    mpContext = YaComponent::context_new();
+    mpTextOutThread = new YaComponentThread();
+    mpTextOut = new TextOutComp(mpContext);
 
-  mpContext = YaComponent::context_new();
-  mpTextOutThread = new YaComponentThread();
-  mpTextOut = new TextOutComp( mpContext );
-
-  mpTextOutThread->start();
-  mpTextOut->init();
-  mpTextOut->setConnectionParaXml( "tcp://127.0.0.1:42163","TextOut" );
-  mpTextOut->moveToThread(mpTextOutThread);
+    mpTextOutThread->start();
+    mpTextOut->init();
+    mpTextOut->setConnectionParaXml("tcp://127.0.0.1:42163", "TextOut");
+    mpTextOut->moveToThread(mpTextOutThread);
 }
 
-void TextUnittestMPSub::cleanupTestCase()
-{
-
-}
+void TextUnittestMPSub::cleanupTestCase() {}
 
 void TextUnittestMPSub::cleanupComponents()
 {
-  mpTextOut->close();
+    mpTextOut->close();
 
-  zmq_ctx_term( mpContext );
+    zmq_ctx_term(mpContext);
 
+    if (mpTextOutThread) {
+        mpTextOutThread->quit();
+        QTest::qWait(100);
+        QVERIFY(mpTextOutThread->isFinished());
+    }
 
-  if( mpTextOutThread )
-  {
-    mpTextOutThread->quit();
-    QTest::qWait(100);
-    QVERIFY(mpTextOutThread->isFinished());
-  }
-
-  mpContext = 0;
-  delete mpTextOutThread;
-  mpTextOutThread = 0;
-  delete mpTextOut;
-  mpTextOut = 0;
+    mpContext = 0;
+    delete mpTextOutThread;
+    mpTextOutThread = 0;
+    delete mpTextOut;
+    mpTextOut = 0;
 }
-
 
 void TextUnittestMPSub::testMPMTSub()
 {
-  initComponentsMPMT();
+    initComponentsMPMT();
 
-  testRoutine();
+    testRoutine();
 
-  cleanupComponents();
+    cleanupComponents();
 }
-
 
 void TextUnittestMPSub::testRoutine()
 {
-  mpTextOut->setNotifications();
-  mpTextOut->requestStart();
+    mpTextOut->setNotifications();
+    mpTextOut->requestStart();
 
-  for( int i=1;i<3;i++)
-  {
-    QTest::qWait(YaComponent::TimeOut);
-  }
+    for (int i = 1; i < 3; i++) {
+        QTest::qWait(YaComponent::TimeOut);
+    }
 
-  mpTextOut->requestStop();
+    mpTextOut->requestStop();
 
-  for( int i=1;i<3;i++)
-  {
-    QTest::qWait(YaComponent::TimeOut);
-  }
+    for (int i = 1; i < 3; i++) {
+        QTest::qWait(YaComponent::TimeOut);
+    }
 
-  QCOMPARE(mpTextOut->miPropertiesCnt,1);
-  QCOMPARE(mpTextOut->miResponseStartCnt,1);
-  QCOMPARE(mpTextOut->miResponseStopCnt,1);
-
+    QCOMPARE(mpTextOut->miPropertiesCnt, 1);
+    QCOMPARE(mpTextOut->miResponseStartCnt, 1);
+    QCOMPARE(mpTextOut->miResponseStopCnt, 1);
 }

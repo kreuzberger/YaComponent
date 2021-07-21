@@ -1,24 +1,36 @@
-#ifndef PUBSUBUNITTESTMP_H
-#define PUBSUBUNITTESTMP_H
-
+#pragma once
 #include <QObject>
 
 #include <QtCore/QProcess>
 #include <QtTest>
 class PubSubUnittestMP : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  PubSubUnittestMP(QObject *parent = 0);
-  ~PubSubUnittestMP() {}
+    PubSubUnittestMP(QObject *parent = 0);
+    ~PubSubUnittestMP() {}
 
 signals:
 
 public slots:
-  void finishedPub ( int exitCode, QProcess::ExitStatus exitStatus) { qDebug() << "process pub finished"; miExitCodePub = exitCode; QVERIFY( exitStatus != QProcess::CrashExit);}
-  void finishedSubFast ( int exitCode, QProcess::ExitStatus exitStatus) { qDebug() << "process subfast finished"; miExitCodeSubFast = exitCode; QVERIFY( exitStatus != QProcess::CrashExit);}
-  void finishedSubSlow ( int exitCode, QProcess::ExitStatus exitStatus) { qDebug() << "process subslow finished"; miExitCodeSubSlow = exitCode; QVERIFY( exitStatus != QProcess::CrashExit);}
-
+    void finishedPub(int exitCode, QProcess::ExitStatus exitStatus)
+    {
+        qDebug() << "process pub finished";
+        miExitCodePub = exitCode;
+        QVERIFY(exitStatus != QProcess::CrashExit);
+    }
+    void finishedSubFast(int exitCode, QProcess::ExitStatus exitStatus)
+    {
+        qDebug() << "process subfast finished";
+        miExitCodeSubFast = exitCode;
+        QVERIFY(exitStatus != QProcess::CrashExit);
+    }
+    void finishedSubSlow(int exitCode, QProcess::ExitStatus exitStatus)
+    {
+        qDebug() << "process subslow finished";
+        miExitCodeSubSlow = exitCode;
+        QVERIFY(exitStatus != QProcess::CrashExit);
+    }
 
 private slots:
 
@@ -33,10 +45,7 @@ private:
     QProcess moProcessSubscriberFast;
     QProcess moProcessSubscriberSlow;
 
-    int miExitCodePub;
-    int miExitCodeSubFast;
-    int miExitCodeSubSlow;
-
+    int miExitCodePub = 0;
+    int miExitCodeSubFast = 0;
+    int miExitCodeSubSlow = 0;
 };
-
-#endif // TEXTUNITTEST_H

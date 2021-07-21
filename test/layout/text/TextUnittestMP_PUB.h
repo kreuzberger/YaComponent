@@ -7,13 +7,12 @@
 #include "YaComponentThread.h"
 #include "textgencompunittest.h"
 
-
 class TextUnittestMPPub : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  TextUnittestMPPub(QObject *parent = 0);
-  ~TextUnittestMPPub() {}
+    TextUnittestMPPub(QObject *parent = 0);
+    ~TextUnittestMPPub() {}
 
 signals:
 
@@ -28,9 +27,9 @@ private:
     void cleanupComponents();
     void testRoutine();
 
-    void* mpContext;
-    YaComponentThread* mpTextGenThread;
-    TextGenComp* mpTextGen1;
+    void *mpContext;
+    YaComponentThread *mpTextGenThread;
+    TextGenComp *mpTextGen1;
 };
 
 #endif // TEXTUNITTEST_H

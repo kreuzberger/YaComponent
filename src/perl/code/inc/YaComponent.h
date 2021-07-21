@@ -1,15 +1,14 @@
-#ifndef IYACOMPONENT_H
-#define IYACOMPONENT_H
+#pramga once
 
 #include <QtCore/QObject>
 
-class YaComponent: public QObject
+class YaComponent : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  YaComponent():QObject() {}
-  virtual ~YaComponent() {}
-  
+    YaComponent()
+        : QObject()
+    {}
+    virtual ~YaComponent() {}
 };
 
-#endif 

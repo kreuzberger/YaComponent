@@ -5,81 +5,67 @@
 QTEST_MAIN(TextUnittestMPSub);
 
 TextUnittestMPSub::TextUnittestMPSub(QObject *parent)
-  : QObject(parent)
-  , mpContext(0)
-  , mpSubscriberThread(0)
-  , mpSubscriberComp( 0 )
-{
-}
+    : QObject(parent)
+    , mpContext(0)
+    , mpSubscriberThread(0)
+    , mpSubscriberComp(0)
+{}
 
 void TextUnittestMPSub::initComponentsMPMT()
 {
+    mpContext = YaComponent::context_new();
+    mpSubscriberThread = new YaComponentThread();
+    mpSubscriberComp = new SubscriberComp(mpContext);
 
-  mpContext = YaComponent::context_new();
-  mpSubscriberThread = new YaComponentThread();
-  mpSubscriberComp = new SubscriberComp( mpContext );
-
-  mpSubscriberThread->start();
-  mpSubscriberComp->init();
-  mpSubscriberComp->setConnectionParaData( "tcp://127.0.0.1:42163","subscriber_fast" );
-  mpSubscriberComp->moveToThread(mpSubscriberThread);
+    mpSubscriberThread->start();
+    mpSubscriberComp->init();
+    mpSubscriberComp->setConnectionParaData("tcp://127.0.0.1:42163", "subscriber_fast");
+    mpSubscriberComp->moveToThread(mpSubscriberThread);
 }
 
-void TextUnittestMPSub::cleanupTestCase()
-{
-
-}
+void TextUnittestMPSub::cleanupTestCase() {}
 
 void TextUnittestMPSub::cleanupComponents()
 {
-  mpSubscriberComp->close();
+    mpSubscriberComp->close();
 
-  zmq_ctx_term( mpContext );
+    zmq_ctx_term(mpContext);
 
+    if (mpSubscriberThread) {
+        mpSubscriberThread->quit();
+        QTest::qWait(100);
+        QVERIFY(mpSubscriberThread->isFinished());
+    }
 
-  if( mpSubscriberThread )
-  {
-    mpSubscriberThread->quit();
-    QTest::qWait(100);
-    QVERIFY(mpSubscriberThread->isFinished());
-  }
-
-  mpContext = 0;
-  delete mpSubscriberThread;
-  mpSubscriberThread = 0;
-  delete mpSubscriberComp;
-  mpSubscriberComp = 0;
+    mpContext = 0;
+    delete mpSubscriberThread;
+    mpSubscriberThread = 0;
+    delete mpSubscriberComp;
+    mpSubscriberComp = 0;
 }
-
 
 void TextUnittestMPSub::testMPMTSub()
 {
-  initComponentsMPMT();
+    initComponentsMPMT();
 
-  testRoutine();
+    testRoutine();
 
-  cleanupComponents();
+    cleanupComponents();
 }
-
 
 void TextUnittestMPSub::testRoutine()
 {
-  int rc = -1;
-  rc = mpSubscriberComp->setNotifications();
-  QVERIFY(-1 != rc);
-  QTest::qWait(500);
-  rc = mpSubscriberComp->requestStart();
-  QVERIFY( -1 != rc);
+    int rc = -1;
+    rc = mpSubscriberComp->setNotifications();
+    QVERIFY(-1 != rc);
+    QTest::qWait(500);
+    rc = mpSubscriberComp->requestStart();
+    QVERIFY(-1 != rc);
 
+    do {
+        QTest::qWait(YaComponent::TimeOut);
 
-  do
-  {
-    QTest::qWait(YaComponent::TimeOut);
+    } while (mpSubscriberComp->miPropertiesCnt <= 12522);
 
-  } while (mpSubscriberComp->miPropertiesCnt <= 12522);
-
-
-  QCOMPARE(mpSubscriberComp->miPropertiesCnt,12522+1);
-
-
+    QCOMPARE(mpSubscriberComp->miPropertiesCnt, 12522 + 1);
 }

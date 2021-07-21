@@ -8,13 +8,12 @@
 #include "textgencompunittest.h"
 #include "textoutcompunittest.h"
 
-
 class TextUnittestMPSub : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  TextUnittestMPSub(QObject *parent = 0);
-  ~TextUnittestMPSub() {}
+    TextUnittestMPSub(QObject *parent = 0);
+    ~TextUnittestMPSub() {}
 
 signals:
 
@@ -29,9 +28,9 @@ private:
     void cleanupComponents();
     void testRoutine();
 
-    void* mpContext;
-    YaComponentThread* mpTextOutThread;
-    TextOutComp* mpTextOut;
+    void *mpContext;
+    YaComponentThread *mpTextOutThread;
+    TextOutComp *mpTextOut;
 };
 
 #endif // TEXTUNITTEST_H

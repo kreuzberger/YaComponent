@@ -1,17 +1,14 @@
-#ifndef YACOMPONENTTHREAD_H
-#define YACOMPONENTTHREAD_H
-
-#include <QtCore/QThread>
+#pragma once
 #include <stdio.h>
+#include <QtCore/QThread>
 
-class YaComponentThread: public QThread
+class YaComponentThread : public QThread
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  YaComponentThread();
-  virtual ~YaComponentThread();
-protected:
-  virtual void run() { exec(); }
-};
+    YaComponentThread();
+    virtual ~YaComponentThread();
 
-#endif // YACOMPONENTTHREAD_H
+protected:
+    virtual void run() { exec(); }
+};

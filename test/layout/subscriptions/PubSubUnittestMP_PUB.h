@@ -7,13 +7,12 @@
 #include "YaComponentThread.h"
 #include "publishercompunittest.h"
 
-
 class PubSubUnittestMPPub : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  PubSubUnittestMPPub(QObject *parent = 0);
-  ~PubSubUnittestMPPub() {}
+    PubSubUnittestMPPub(QObject *parent = 0);
+    ~PubSubUnittestMPPub() {}
 
 signals:
 
@@ -28,9 +27,9 @@ private:
     void cleanupComponents();
     void testRoutine();
 
-    void* mpContext;
-    YaComponentThread* mpPublisherThread;
-    PublisherComp* mpPublisher;
+    void *mpContext;
+    YaComponentThread *mpPublisherThread;
+    PublisherComp *mpPublisher;
 };
 
 #endif // TEXTUNITTEST_H

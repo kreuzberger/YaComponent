@@ -8,13 +8,12 @@
 #include "publishercompunittest.h"
 #include "subscriber_slow_compunittest.h"
 
-
 class TextUnittestMPSub : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  TextUnittestMPSub(QObject *parent = 0);
-  ~TextUnittestMPSub() {}
+    TextUnittestMPSub(QObject *parent = 0);
+    ~TextUnittestMPSub() {}
 
 signals:
 
@@ -29,9 +28,9 @@ private:
     void cleanupComponents();
     void testRoutine();
 
-    void* mpContext;
-    YaComponentThread* mpSubscriberThread;
-    SubscriberComp* mpSubscriberComp;
+    void *mpContext;
+    YaComponentThread *mpSubscriberThread;
+    SubscriberComp *mpSubscriberComp;
 };
 
 #endif // TEXTUNITTEST_H

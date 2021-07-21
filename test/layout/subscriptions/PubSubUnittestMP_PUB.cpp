@@ -5,71 +5,61 @@
 QTEST_MAIN(PubSubUnittestMPPub);
 
 PubSubUnittestMPPub::PubSubUnittestMPPub(QObject *parent)
-  : QObject(parent)
-  , mpContext(0)
-  , mpPublisherThread(0)
-  , mpPublisher( 0 )
-{
-}
-
+    : QObject(parent)
+    , mpContext(0)
+    , mpPublisherThread(0)
+    , mpPublisher(0)
+{}
 
 void PubSubUnittestMPPub::initComponentsMPMT()
 {
-  mpContext = YaComponent::context_new();
-  mpPublisher = new PublisherComp ( mpContext );
-  mpPublisherThread = new YaComponentThread();
+    mpContext = YaComponent::context_new();
+    mpPublisher = new PublisherComp(mpContext);
+    mpPublisherThread = new YaComponentThread();
 
-  mpPublisherThread->start();
+    mpPublisherThread->start();
 
-  mpPublisher->init();
-  mpPublisher->setConnectionParaReceiverData( "tcp://*:42163", 5000 );
-  mpPublisher->miMaxMessageCnt = 12522;
-  mpPublisher->moveToThread(mpPublisherThread);
-
+    mpPublisher->init();
+    mpPublisher->setConnectionParaReceiverData("tcp://*:42163", 5000);
+    mpPublisher->miMaxMessageCnt = 12522;
+    mpPublisher->moveToThread(mpPublisherThread);
 }
-void PubSubUnittestMPPub::cleanupTestCase()
-{
-
-}
+void PubSubUnittestMPPub::cleanupTestCase() {}
 
 void PubSubUnittestMPPub::cleanupComponents()
 {
-  mpPublisher->close();
+    mpPublisher->close();
 
-  zmq_ctx_term( mpContext );
+    zmq_ctx_term(mpContext);
 
-  if( mpPublisherThread)
-  {
-    mpPublisherThread->quit();
-    QTest::qWait(100);
-    QVERIFY(mpPublisherThread->isFinished());
-  }
+    if (mpPublisherThread) {
+        mpPublisherThread->quit();
+        QTest::qWait(100);
+        QVERIFY(mpPublisherThread->isFinished());
+    }
 
-  mpContext = 0;
-  delete mpPublisherThread;
-  mpPublisherThread = 0;
-  delete mpPublisher;
-  mpPublisher = 0;
+    mpContext = 0;
+    delete mpPublisherThread;
+    mpPublisherThread = 0;
+    delete mpPublisher;
+    mpPublisher = 0;
 }
 
 void PubSubUnittestMPPub::testMPMTPub()
 {
-  initComponentsMPMT();
+    initComponentsMPMT();
 
-  testRoutine();
-  cleanupComponents();
+    testRoutine();
+    cleanupComponents();
 }
-
 
 void PubSubUnittestMPPub::testRoutine()
 {
-  QVERIFY( 0 == mpPublisher->miRequestStop );
-  do
-  {
-    QTest::qWait(10);
+    QVERIFY(0 == mpPublisher->miRequestStop);
+    do {
+        QTest::qWait(10);
 
-  } while( ! mpPublisher->mbFinished );
+    } while (!mpPublisher->mbFinished);
 
-  QTest::qWait(1000);
-
+    QTest::qWait(1000);
 }

@@ -81,7 +81,7 @@ if( UNIX )
       INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/protobuf/install
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/protobuf/
       LOG_MERGED_STDOUTERR TRUE
-      #CONFIGURE_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/protobuf/build/configure --prefix=${CMAKE_CURRENT_BINARY_DIR}/protobuf/install
+      #CONFIGURE_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/configure --prefix=${CMAKE_CURRENT_BINARY_DIR}/protobuf/install
       #BUILD_COMMAND make -j ${N}
       #INSTALL_COMMAND make install
       CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/protobuf/install/"
