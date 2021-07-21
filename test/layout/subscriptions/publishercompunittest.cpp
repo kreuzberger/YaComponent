@@ -36,7 +36,9 @@ void PublisherComp::onRequestStopData(int id)
 {
     qDebug() << "received onRequestStopData";
     miRequestStop++;
-    QObject::killTimer(miTimerID);
+    if (0 < miTimerID) {
+        QObject::killTimer(miTimerID);
+    }
     miTimerID = 0;
     qDebug() << "send %d messages" << miMessageCnt;
 }
@@ -59,8 +61,10 @@ void PublisherComp::timerEvent(QTimerEvent *)
             miMessageCnt++;
         }
         if (miMessageCnt >= miMaxMessageCnt) {
-            QObject::killTimer(miTimerID);
-            miTimerID = 0;
+            if (0 < miTimerID) {
+                QObject::killTimer(miTimerID);
+                miTimerID = 0;
+            }
             mbFinished = true;
             break;
         }

@@ -68,7 +68,7 @@ void TextUnittestMPSub::testRoutine()
         QTest::qWait(YaComponent::TimeOut);
     }
 
-    QCOMPARE(mpTextOut->miPropertiesCnt, 1);
+    QVERIFY(0 < mpTextOut->miPropertiesCnt);
     QCOMPARE(mpTextOut->miResponseStartCnt, 1);
     QCOMPARE(mpTextOut->miResponseStopCnt, 1);
 }

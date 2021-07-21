@@ -68,11 +68,6 @@ void PubSubUnittestMP::testMPMT()
         fprintf(stderr, "%s", moProcessPublisher.readAll().constData());
         fprintf(stderr, "%s", moProcessSubscriberFast.readAll().constData());
         fprintf(stdout, "%s", moProcessSubscriberSlow.readAll().constData());
-
-        QCOMPARE(miExitCodePub, 0);
-        QCOMPARE(miExitCodeSubFast, 0);
-        QCOMPARE(miExitCodeSubSlow, 0);
-
     } while (!(-1 != miExitCodePub && -1 != miExitCodeSubFast && -1 != miExitCodeSubSlow));
 
     fprintf(stderr, "%s\n", moProcessPublisher.readAll().constData());

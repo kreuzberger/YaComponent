@@ -267,7 +267,7 @@ sub writeComponentImpl
   print $fhSource "void $CompName" . "Impl::killTimer()\n";
   print $fhSource "{\n";
   print $fhSource "  delete mpoTimer;\n";
-  print $fhSource "  mpoTimer = 0;\n";
+  print $fhSource "  mpoTimer = nullptr;\n";
   print $fhSource "}\n";
 
   foreach my $providedIfc (@{$comp->{provided}})
@@ -324,7 +324,7 @@ sub writeComponentImpl
 #  print $fhHeader "    ". $CompName . "Impl ();\n";
   print $fhHeader "    ". $CompName. "Impl( const " . $CompName . "Impl& );\n";
   print $fhHeader "    ". $CompName. "Impl& operator= ( const " . $CompName . "Impl& );\n";
-  print $fhHeader "    QTimer* mpoTimer;\n";
+  print $fhHeader "    QTimer* mpoTimer = nullptr;\n";
 
 
   print $fhHeader "};\n";
