@@ -71,27 +71,30 @@ macro (YACOMPONENT_IFC_GENERATE outfiles)
 
     set( ${outfiles} ${${outfiles}} ${outfile} )
 
-    QT5_WRAP_CPP(outfile_component_mocs ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h )
-    set( ${outfiles} ${${outfiles}} ${outfile_component_mocs} )
+    #QT5_WRAP_CPP(outfile_component_mocs ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h )
+    #set( ${outfiles} ${${outfiles}} ${outfile_component_mocs} )
 
 
 
     #message(" resulting outfiles in if generation ${${outfiles}}")
     INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
-    INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR} )
   endforeach( it )
+
+  INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR} )
+  INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/code )
 
   foreach ( file ${fileCodeIfc} )
     add_custom_command(
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/code/${file}
-      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/cpp/${file}  ${CMAKE_CURRENT_BINARY_DIR}/code/
-      DEPENDS ${CMAKE_SOURCE_DIR}/src/cpp/${file}
+      COMMAND ${CMAKE_COMMAND} -E copy ${YaComponentLib_SOURCE_DIR}/${file}  ${CMAKE_CURRENT_BINARY_DIR}/code/
+      DEPENDS ${YaComponentLib_SOURCE_DIR}/${file}
     )
     set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/code/${file} )
   endforeach( file )
 
-  QT5_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaProxyBase.h ${CMAKE_CURRENT_BINARY_DIR}/code/YaStubBase.h)
-  set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
+  #QT5_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaProxyBase.h ${CMAKE_CURRENT_BINARY_DIR}/code/YaStubBase.h)
+  #set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
+  set( ${outfiles} ${${outfiles}}  )
 
   set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
 
@@ -122,26 +125,26 @@ macro (YACOMPONENT_GENERATE outfiles)
 
     set( ${outfiles} ${${outfiles}} ${outfile})
 
-    QT5_WRAP_CPP(outfiles_moc #${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h
-                         #${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Proxy.h
-                         ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Impl.h
-    )
+    #QT5_WRAP_CPP(outfiles_moc
+    #                     ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Impl.h
+    #)
 
-    set( ${outfiles} ${${outfiles}} ${outfiles_moc})
+    #set( ${outfiles} ${${outfiles}} ${outfiles_moc})
     INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
   endforeach( it )
 
   foreach ( file ${fileCodeComp} )
     add_custom_command(
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/code/${file}
-      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/cpp/${file}  ${CMAKE_CURRENT_BINARY_DIR}/code/
-      DEPENDS ${CMAKE_SOURCE_DIR}/src/cpp/${file}
+      COMMAND ${CMAKE_COMMAND} -E copy ${YaComponentLib_SOURCE_DIR}/${file}  ${CMAKE_CURRENT_BINARY_DIR}/code/
+      DEPENDS ${YaComponentLib_SOURCE_DIR}/${file}
     )
     set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/code/${file} )
   endforeach( file )
 
-#  QT5_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaComponentBase.h )
-  set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
+    #  QT5_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaComponentBase.h )
+    #set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
+    set( ${outfiles} ${${outfiles}} )
 
   set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
 
@@ -184,14 +187,15 @@ macro (YACOMPONENT_LAYOUT_GENERATE outfiles)
   foreach( file ${fileCodeLayout} )
     add_custom_command(
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/code/${file}
-      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/cpp/${file}  ${CMAKE_CURRENT_BINARY_DIR}/code/
-      DEPENDS ${CMAKE_SOURCE_DIR}/src/cpp/${file}
+      COMMAND ${CMAKE_COMMAND} -E copy ${YaComponentLib_SOURCE_DIR}/${file}  ${CMAKE_CURRENT_BINARY_DIR}/code/
+      DEPENDS ${YaComponentLib_SOURCE_DIR}/${file}
     )
     set( ${outfiles} ${${outfiles}} ${CMAKE_CURRENT_BINARY_DIR}/code/${file} )
   endforeach( file )
 
-  QT5_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaComponentThread.h)
-  set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
+  #QT5_WRAP_CPP(outfile_mocs ${CMAKE_CURRENT_BINARY_DIR}/code/YaComponentThread.h)
+  #set( ${outfiles} ${${outfiles}} ${outfile_mocs}  )
+  set( ${outfiles} ${${outfiles}}  )
 
   set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
 
