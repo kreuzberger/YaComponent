@@ -1,7 +1,9 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <tinyxml2.h>
+#include <vector>
+
 class YaComponentCore
 {
 public:
@@ -10,6 +12,7 @@ public:
     static void printDbg(const std::string &);
     static void printWarn(const std::string &);
     static void printFatal(const std::string &);
+    static void printDbgXml(const tinyxml2::XMLElement *);
 
     static std::vector<std::string> split(const std::string &s, char delim);
     static std::string SEP;

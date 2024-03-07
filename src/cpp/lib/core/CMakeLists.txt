@@ -6,3 +6,4 @@ target_sources(YaComponentCore  PRIVATE   ${YaComponentCore_SOURCE_DIR}/src/YaCo
     )
 
 target_include_directories(YaComponentCore PUBLIC ${YaComponentCore_SOURCE_DIR}/include)
+target_link_libraries( YaComponentCore tinyxml2)

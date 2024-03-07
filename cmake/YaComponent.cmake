@@ -172,11 +172,8 @@ macro (YACOMPONENT_LAYOUT_GENERATE outfiles)
 #    message("include dirs ${inc_dirs}")
 
     add_custom_command( OUTPUT ${outfile}
-      COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaCompLayout.pl --layout=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${layout}/code --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${layout}/doc
-      COMMAND echo ${Java_JAVA_EXECUTABLE} -Dplantuml.include.path=${CMAKE_CURRENT_BINARY_DIR} -jar ${PLANTUML_JAR} -tpng ${CMAKE_CURRENT_BINARY_DIR}/${layout}/doc/${layout}.txt
-      COMMAND ${Java_JAVA_EXECUTABLE} -Dplantuml.include.path=${CMAKE_CURRENT_BINARY_DIR} -jar ${PLANTUML_JAR} -tpng ${CMAKE_CURRENT_BINARY_DIR}/${layout}/doc/${layout}.txt
-      #ARGS -o ${outfile} ${it}
-      DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR}
+      COMMAND $<TARGET_FILE:yacomplayout> --layout=${it} --outcode=${CMAKE_CURRENT_BINARY_DIR}/${layout}/code
+      DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:yacomplayout>
     )
 
    set( ${outfiles} ${${outfiles}} ${outfile})

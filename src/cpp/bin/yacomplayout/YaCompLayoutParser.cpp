@@ -1,14 +1,21 @@
 #include "YaCompLayoutParser.h"
+#include "YaCompLayoutCodeGen.h"
 
 #include <core/YaComponentCore.h>
 
 YaCompLayoutParser::YaCompLayoutParser() {}
 
-void YaCompLayoutParser::init(const std::filesystem::path &layout, bool verbose)
+void YaCompLayoutParser::init(const std::filesystem::path &layout,
+                              const std::filesystem::path &code,
+                              bool verbose)
 {
     mLayoutPath = std::filesystem::absolute(layout);
     mBaseName = std::filesystem::absolute(mLayoutPath).stem();
-    mCodePath = std::filesystem::current_path() / mBaseName / std::filesystem::path("code");
+    if (!mCodePath.empty()) {
+        mCodePath = std::filesystem::absolute(code);
+    } else {
+        mCodePath = std::filesystem::current_path() / mBaseName / std::filesystem::path("code");
+    }
     std::filesystem::create_directories(mCodePath);
     mVerbose = verbose;
 }
@@ -25,31 +32,69 @@ void YaCompLayoutParser::parse()
     tinyxml2::XMLElement *layout = doc.FirstChildElement("componentlayout");
     if (layout) {
         parseDefinitions(layout);
+        YaCompLayoutCodeGen code_writer;
+        code_writer.write(mCodePath, mBaseName, mProcesses, mAdresses);
+    } else {
+        YaComponentCore::printFatal("expected <componentlayout> as first tag");
     }
-    //writeCodeFiles();
 }
 
-void YaCompLayoutParser::parseDefinitions(tinyxml2::XMLElement *layout)
+void YaCompLayoutParser::parseDefinitions(Element *layout)
 {
-    const tinyxml2::XMLElement *include = layout->FirstChildElement("include");
+    auto *include = layout->FirstChildElement("include");
     while (include) {
         const char *file = include->Attribute("file");
         if (file) {
-            YaComponentCore::printDbg(file);
+            YaComponentCore::printDbg(std::string("found include ") + std::string(file));
+            mIncludes.push_back(std::filesystem::path(file));
         }
-        include = layout->NextSiblingElement("include");
+        include = include->NextSiblingElement();
     }
 
     const tinyxml2::XMLElement *processes = layout->FirstChildElement("processes");
     while (processes) {
-        const tinyxml2::XMLElement *process = processes->FirstChildElement("process");
+        auto *process = processes->FirstChildElement("process");
         while (process) {
             const char *name = process->Attribute("name");
             if (name) {
-                YaComponentCore::printDbg(name);
+                YaComponentCore::printDbg(std::string("found process ") + std::string(name));
             }
-            process = processes->NextSiblingElement("process");
+            mProcesses.push_back(process);
+            process = process->NextSiblingElement();
         }
-        processes = layout->NextSiblingElement("processes");
+        processes = processes->NextSiblingElement();
     }
+
+    if (!mProcesses.empty()) {
+        mAdresses = parseAddressInformations(mProcesses);
+    }
+}
+
+std::map<std::string, std::string> YaCompLayoutParser::parseAddressInformations(const ElementList &processes)
+{
+    std::map<std::string, std::string> adresses;
+    for (auto *process : processes) {
+        auto *thread = process->FirstChildElement("thread");
+        while (thread) {
+            auto *component = thread->FirstChildElement("component");
+            while (component) {
+                auto *provides = component->FirstChildElement("provides");
+                while (provides) {
+                    auto *ifc = provides->FirstChildElement("interface");
+                    while (ifc) {
+                        auto id = std::string(component->Attribute("name")) + std::string(".")
+                                  + std::string(ifc->Attribute("id"));
+                        adresses.insert_or_assign(id, std::string(ifc->Attribute("address")));
+                        ifc = ifc->NextSiblingElement();
+                    }
+
+                    provides = provides->NextSiblingElement();
+                }
+                component = component->NextSiblingElement();
+            }
+
+            thread = thread->NextSiblingElement();
+        }
+    }
+    return adresses;
 }

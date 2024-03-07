@@ -16,20 +16,21 @@ void printHelp()
 
 int main(int argc, char** argv)
 {
-    std::cout << "yacomplayout - Code Generator for YaComponent Layout" << std::endl;
-
-    auto layout = std::filesystem::path();
+    auto layoutPath = std::filesystem::path();
+    auto codePath = std::filesystem::path();
     auto verbose = false;
-
-    bool ret = true;
 
     for (int idx = 1; idx < argc; idx++) {
         if (std::string(argv[idx]) == std::string("--layout")) {
-            layout = (argv[idx + 1]);
+            layoutPath = (argv[idx + 1]);
             idx++;
+        } else if (std::string(argv[idx]).rfind("--layout=", 0) == 0) {
+            layoutPath = std::string(argv[idx]).erase(0, std::string("--layout=").length());
         } else if (std::string(argv[idx]) == std::string("--outcode")) {
-            std::string codePath = argv[idx + 1];
+            codePath = argv[idx + 1];
             idx++;
+        } else if (std::string(argv[idx]).rfind("--outcode=", 0) == 0) {
+            codePath = std::string(argv[idx]).erase(0, std::string("--outcode=").length());
         } else if (std::string(argv[idx]) == std::string("--verbose")) {
             YaComponentCore::VERBOSE = true;
         } else if (std::string(argv[idx]) == std::string("--help")) {
@@ -38,19 +39,19 @@ int main(int argc, char** argv)
         }
     }
 
-    if (layout.empty()) {
-        std::cerr << "error: missing required argument layout xml file" << std::endl;
-        ret = false;
+    if (layoutPath.empty()) {
+        YaComponentCore::printFatal("missing required argument layout xml file");
 
     } else {
-        if (!std::filesystem::exists(layout)) {
-            std::cerr << "error: given layout xml file" << layout << "not found" << std::endl;
+        if (!std::filesystem::exists(layoutPath)) {
+            YaComponentCore::printFatal(std::string("given layout xml file ") + layoutPath.c_str()
+                                        + std::string(" not found"));
         } else {
             YaCompLayoutParser parser;
-            parser.init(layout, verbose);
+            parser.init(layoutPath, codePath, verbose);
             parser.parse();
         }
     }
 
-    return (ret) ? 0 : 1;
+    return 0;
 }

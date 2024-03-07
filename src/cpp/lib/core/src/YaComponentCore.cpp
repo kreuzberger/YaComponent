@@ -53,3 +53,12 @@ void YaComponentCore::printFatal(const std::string &str)
   std::cerr << "error: " << str << std::endl;
   exit( 1 );
 }
+
+void YaComponentCore::printDbgXml(const tinyxml2::XMLElement *elem)
+{
+    if (YaComponentCore::VERBOSE) {
+        tinyxml2::XMLPrinter printer;
+        elem->Accept(&printer);
+        std::cout << printer.CStr() << std::endl;
+    }
+}
