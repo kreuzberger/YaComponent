@@ -34,7 +34,7 @@ int main(int argc, char** argv)
             ifcPath = (argv[idx + 1]);
             idx++;
         } else if (std::string(argv[idx]).rfind("--ifc=", 0) == 0) {
-            componentPath = std::string(argv[idx]).erase(0, std::string("--ifc=").length());
+            ifcPath = std::string(argv[idx]).erase(0, std::string("--ifc=").length());
         } else if (std::string(argv[idx]) == std::string("--outcode")) {
             codePath = argv[idx + 1];
             idx++;

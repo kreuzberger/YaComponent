@@ -36,10 +36,10 @@ void YaCompLayoutCodeGen::write(const std::filesystem::path &codePath,
                 fhSource << "    " << component->Attribute("name")
                          << ".moveToThread(&$thread->{name});" << std::endl;
                 fhSource << "    printf(\"calling move to thread\\n\");" << std::endl;
-                component = component->NextSiblingElement();
+                component = component->NextSiblingElement("component");
             }
 
-            thread = thread->NextSiblingElement();
+            thread = thread->NextSiblingElement("thread");
         }
 
         // components associated with the main thread
@@ -47,7 +47,7 @@ void YaCompLayoutCodeGen::write(const std::filesystem::path &codePath,
         while (component) {
             YaComponentCore::printDbg(std::string("write code for main thread "));
             writeComponentParts(fhSource, component, adresses);
-            component = component->NextSiblingElement();
+            component = component->NextSiblingElement("component");
         }
 
         fhSource.close();
@@ -75,10 +75,10 @@ void YaCompLayoutCodeGen::writeComponentParts(std::ofstream &fhSource,
                 fhSource << " );" << std::endl;
             }
 
-            ifc = ifc->NextSiblingElement();
+            ifc = ifc->NextSiblingElement("interface");
         }
 
-        provides = provides->NextSiblingElement();
+        provides = provides->NextSiblingElement("provides");
     }
 
     auto *uses = component->FirstChildElement("uses");
@@ -95,10 +95,10 @@ void YaCompLayoutCodeGen::writeComponentParts(std::ofstream &fhSource,
         }
 
         while (ifc) {
-            ifc = ifc->NextSiblingElement();
+            ifc = ifc->NextSiblingElement("interface");
         }
 
-        uses = uses->NextSiblingElement();
+        uses = uses->NextSiblingElement("uses");
     }
 
     fhSource << "    " << component->Attribute("name") << ".init();" << std::endl;

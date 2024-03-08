@@ -48,7 +48,7 @@ void YaCompLayoutParser::parseDefinitions(Element *layout)
             YaComponentCore::printDbg(std::string("found include ") + std::string(file));
             mIncludes.push_back(std::filesystem::path(file));
         }
-        include = include->NextSiblingElement();
+        include = include->NextSiblingElement("include");
     }
 
     const tinyxml2::XMLElement *processes = layout->FirstChildElement("processes");
@@ -60,9 +60,9 @@ void YaCompLayoutParser::parseDefinitions(Element *layout)
                 YaComponentCore::printDbg(std::string("found process ") + std::string(name));
             }
             mProcesses.push_back(process);
-            process = process->NextSiblingElement();
+            process = process->NextSiblingElement("process");
         }
-        processes = processes->NextSiblingElement();
+        processes = processes->NextSiblingElement("processes");
     }
 
     if (!mProcesses.empty()) {
@@ -85,15 +85,15 @@ std::map<std::string, std::string> YaCompLayoutParser::parseAddressInformations(
                         auto id = std::string(component->Attribute("name")) + std::string(".")
                                   + std::string(ifc->Attribute("id"));
                         adresses.insert_or_assign(id, std::string(ifc->Attribute("address")));
-                        ifc = ifc->NextSiblingElement();
+                        ifc = ifc->NextSiblingElement("interface");
                     }
 
-                    provides = provides->NextSiblingElement();
+                    provides = provides->NextSiblingElement("provides");
                 }
-                component = component->NextSiblingElement();
+                component = component->NextSiblingElement("component");
             }
 
-            thread = thread->NextSiblingElement();
+            thread = thread->NextSiblingElement("thread");
         }
     }
     return adresses;

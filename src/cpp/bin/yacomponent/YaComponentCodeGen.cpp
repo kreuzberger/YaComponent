@@ -363,8 +363,8 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
             if (para->Attribute("package")) {
                 strPara += std::string(para->Attribute("package")) + "::";
             }
-            strPara += std::string(para->Attribute(" id ")) + "&,";
-            para = para->NextSiblingElement();
+            strPara += std::string(para->Attribute("id")) + "&,";
+            para = para->NextSiblingElement("para");
         }
         if (!strPara.empty()) {
             strPara.pop_back();
@@ -415,9 +415,9 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
         }
         strResp += YaComponentCore::to_upper(resp->Attribute("id"));
         fhSource << "    case " << strResp << ":" << std::endl;
-        fhSource << "      m" << resp->Attribute(" id ") << "ParseFromArray(msgData, size);"
+        fhSource << "      m" << resp->Attribute("id") << "ParseFromArray(msgData, size);"
                  << std::endl;
-        fhSource << "      mCallbackHandler.onResponse( mId, m" << resp->Attribute(" id ") << ");"
+        fhSource << "      mCallbackHandler.onResponse( mId, m" << resp->Attribute("id") << ");"
                  << std::endl;
         fhSource << "      break;" << std::endl;
     }
@@ -430,7 +430,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
         }
         strProp += YaComponentCore::to_upper(prop->Attribute("id"));
         fhSource << "    case " << strProp << ":" << std::endl;
-        fhSource << "      mCallbackHandler.onProperty( mId, m" << prop->Attribute(" id ") << ");"
+        fhSource << "      mCallbackHandler.onProperty( mId, m" << prop->Attribute("id") << ");"
                  << std::endl;
         fhSource << "      break;" << std::endl;
     }
@@ -608,8 +608,8 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
             if (para->Attribute("package")) {
                 strPara += std::string(para->Attribute("package")) + "::";
             }
-            strPara += std::string(para->Attribute(" id ")) + "&";
-            para = para->NextSiblingElement();
+            strPara += std::string(para->Attribute("id")) + "&";
+            para = para->NextSiblingElement("para");
         }
 
         auto *resp = req->FirstChildElement("resp");
@@ -618,8 +618,8 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
             if (resp->Attribute("package")) {
                 strPara += std::string(resp->Attribute("package")) + "::";
             }
-            strPara += std::string(resp->Attribute(" id ")) + "&";
-            resp = resp->NextSiblingElement();
+            strPara += std::string(resp->Attribute("id")) + "&";
+            resp = resp->NextSiblingElement("resp");
         }
         if (!strPara.empty()) {
             fhHeaderIfc << strPara << " ) = 0;\n";
@@ -711,7 +711,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
         while (para) {
             strMember += std::string("      m") + req->Attribute("id") + "_" + para->Attribute("id")
                          + ".ParseFromArray(msgData, size);\n";
-            para = para->NextSiblingElement();
+            para = para->NextSiblingElement("para");
         }
 
         if (!strMember.empty()) {
@@ -722,7 +722,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
         while (resp) {
             fhSource << "      m" << req->Attribute("id") << "_" << resp->Attribute("id")
                      << ".Clear();\n";
-            resp = resp->NextSiblingElement();
+            resp = resp->NextSiblingElement("resp");
         }
 
         fhSource << "      mCallbackHandler.onRequest" << req->Attribute("id") << "( mId";
@@ -733,13 +733,13 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
         {
             strPara += std::string(", m") + req->Attribute("id") + "_" + para->Attribute("id");
-            para = para->NextSiblingElement();
+            para = para->NextSiblingElement("para");
         }
 
         resp = req->FirstChildElement("resp");
         while (resp) {
             strPara += std::string(", m") + req->Attribute("id") + "_" + resp->Attribute("id");
-            resp = resp->NextSiblingElement();
+            resp = resp->NextSiblingElement("resp");
         }
         if (!strPara.empty()) {
             fhSource << strPara << " );\n";
@@ -757,7 +757,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
             strResp += YaComponentCore::to_upper(resp->Attribute("id"));
             fhSource << "      response( " << strResp << ", m" << req->Attribute("id") << "_"
                      << resp->Attribute("id") << ", ident );\n";
-            resp = resp->NextSiblingElement();
+            resp = resp->NextSiblingElement("resp");
         }
 
         fhSource << "      break;\n";
@@ -788,9 +788,9 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
             if (para->Attribute("package")) {
                 strPara += std::string(para->Attribute("package")) + "::";
             }
-            strPara += std::string(para->Attribute(" id ")) + " m" + req->Attribute("id") + "_"
-                       + para->Attribute(" id ") + ";\n";
-            para = para->NextSiblingElement();
+            strPara += std::string(para->Attribute("id")) + " m" + req->Attribute("id") + "_"
+                       + para->Attribute("id") + ";\n";
+            para = para->NextSiblingElement("para");
         }
 
         auto *resp = req->FirstChildElement("resp");
@@ -799,9 +799,9 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
             if (resp->Attribute("package")) {
                 strPara += std::string(resp->Attribute("package")) + "::";
             }
-            strPara += std::string(resp->Attribute(" id ")) + " m" + req->Attribute("id") + "_"
-                       + resp->Attribute(" id ") + ";\n";
-            resp = resp->NextSiblingElement();
+            strPara += std::string(resp->Attribute("id")) + " m" + req->Attribute("id") + "_"
+                       + resp->Attribute("id") + ";\n";
+            resp = resp->NextSiblingElement("resp");
         }
 
         if (!strPara.empty()) {
