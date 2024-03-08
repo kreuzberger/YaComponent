@@ -1,9 +1,9 @@
+#include "YaCompLayoutParser.h"
+#include "core/YaComponentCore.h"
 
 #include <filesystem>
 #include <iostream>
 
-#include "YaCompLayoutParser.h"
-#include "core/YaComponentCore.h"
 
 void printHelp()
 {
@@ -12,6 +12,7 @@ void printHelp()
     std::cerr << "  --layout <xml>   layout xml file name" << std::endl;
     std::cerr << "  --outcode <dir>  generated code directory" << std::endl;
     std::cerr << "  --verbose        output parser info" << std::endl;
+    std::cerr << "  --help           print help" << std::endl;
 }
 
 int main(int argc, char** argv)

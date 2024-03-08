@@ -1,0 +1,825 @@
+/*!
+ * **********************************************************************************
+ * Firma     PROCITEC GmbH    (C) Copyright PROCITEC GmbH 2022
+ * **********************************************************************************
+ * Dieses Computerprogramm ist urheberrechtlich geschuetzt(Paragraphen 69a ff UrhG).
+ * Urheber ist die PROCITEC GmbH.
+ *
+ * Die Nutzung, Weitergabe und Vervielfaeltigung dieses Computerprogramms,
+ * sowie Verwertung und Mitteilung seines Inhaltes ist durch den Vertrag
+ * BWB E/UR1A/4A104/L5305 geregelt.
+ *
+ * Anderweitige Nutzung, Weitergabe und Vervielfaeltigung dieses Computer-
+ * programms, sowie Verwertung und Mitteilung seines Inhaltes bedarf der
+ * ausdruecklichen Zustimmung der PROCITEC GmbH.
+ *
+ * Zuwiderhandlung verpflichtet zum Schadensersatz.
+ * **********************************************************************************
+ */
+
+#include "YaComponentCodeGen.h"
+
+#include <core/YaComponentCore.h>
+#include <fstream>
+#include <iostream>
+
+YaComponentCodeGen::YaComponentCodeGen() {}
+
+void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
+                                        const std::string &compName,
+                                        const EntryList &providedIfc,
+                                        const EntryList &usedIfc)
+{
+    std::ofstream fhSource;
+    std::ofstream fhHeader;
+
+    auto sourceFilename = (codePath / (compName + "Impl.cpp")).string();
+    auto headerFilename = (codePath / (compName + "Impl.h")).string();
+
+    YaComponentCore::printDbg(std::string("YaComponentCodeGen:: write component source code file ")
+                              + sourceFilename);
+    fhSource.open(sourceFilename, std::ios::out | std::ios::trunc);
+    fhHeader.open(headerFilename, std::ios::out | std::ios::trunc);
+
+    fhSource << "#include \"" + compName + "Impl.h\"\n" << std::endl;
+    fhSource << "namespace YaComponent {\n" << std::endl;
+
+    fhHeader << "#pragma once" << std::endl;
+
+    std::map<std::string, std::string> proxies;
+    std::map<std::string, std::string> stubs;
+
+    for (auto ifc : usedIfc) {
+        proxies[ifc["classname"]] = ifc["id"];
+    }
+
+    for (auto ifc : providedIfc) {
+        stubs[ifc["classname"]] = ifc["id"];
+    }
+
+    for (const auto &p : proxies) {
+        fhHeader << "#include\"" << p.first << "Proxy.h\"" << std::endl;
+    }
+
+    for (const auto &s : stubs) {
+        fhHeader << "#include\"" << s.first << "Stub.h\"" << std::endl;
+    }
+
+    fhHeader << "#include <QtCore/QObject>" << std::endl;
+    fhHeader << "#include <QtCore/QTimer>" << std::endl;
+    fhHeader << "#include <stdio.h>" << std::endl;
+
+    fhHeader << "namespace YaComponent {" << std::endl;
+
+    fhHeader << "class " << compName << "Impl: public QObject";
+    fhHeader << "{" << std::endl;
+    fhHeader << "  Q_OBJECT" << std::endl;
+    fhHeader << "  public:" << std::endl;
+    fhHeader << "    " + compName + "Impl(";
+
+    fhSource << compName << "Impl::" << compName << "Impl(";
+    auto strCtor = std::string("void* context");
+
+    for (const auto &p : proxies) {
+        strCtor += ", I" + p.first + "ProxyHandler& r" + p.first;
+    }
+
+    for (const auto &s : stubs) {
+        strCtor += ", I" + s.first + "StubHandler& r" + s.first;
+    }
+
+    fhHeader << strCtor << " );" << std::endl;
+    fhSource << strCtor << " )" << std::endl;
+
+    fhHeader << "    virtual ~" << compName << "Impl();" << std::endl;
+
+    for (auto &ifc : providedIfc) {
+        fhHeader << "    void setConnectionPara" << ifc.at("id")
+                 << "( const char* address, int hwm = 0 );" << std::endl;
+    }
+
+    for (auto &ifc : usedIfc) {
+        fhHeader << "    void setConnectionPara" << ifc.at("id")
+                 << "( const char* address, const char* ident );" << std::endl;
+    }
+
+    fhHeader << "    /// called after setting connections and moveToThread" << std::endl;
+    fhHeader << "    /// if overloaded base class implementation must be called!" << std::endl;
+    fhHeader << "    virtual void init();" << std::endl;
+    fhHeader << "    virtual void close();" << std::endl;
+
+    fhHeader << "  public slots:" << std::endl;
+    fhHeader << "    void onTimer();" << std::endl;
+    fhHeader << "    void killTimer();" << std::endl;
+
+    fhHeader << "  signals:" << std::endl;
+    fhHeader << "    void startTimer( int iTimeOutMs );" << std::endl;
+    fhHeader << "    void stopTimer( );" << std::endl;
+
+    fhHeader << "  protected:" << std::endl;
+
+    fhHeader << "    enum PROXY_IDS {" << std::endl;
+    fhHeader << "      PROXY_INVALID = -1" << std::endl;
+
+    for (auto &ifc : usedIfc) {
+        fhHeader << "    , PROXY_" << YaComponentCore::to_upper(ifc.at("id")) << std::endl;
+    }
+
+    fhHeader << "     };\n" << std::endl;
+
+    fhHeader << "    enum STUB_IDS {" << std::endl;
+    fhHeader << "      STUB_INVALID = -1" << std::endl;
+    for (auto &ifc : providedIfc) {
+        fhHeader << "    , STUB_" << YaComponentCore::to_upper(ifc.at("id")) << std::endl;
+    }
+
+    fhHeader << "     };\n" << std::endl;
+
+    std::string strCtorImpl;
+
+    strCtorImpl += " :QObject()";
+
+    for (auto &ifc : usedIfc) {
+        fhHeader << "  " << ifc.at("classname") << "Proxy m" << ifc.at("id") << ";" << std::endl;
+        strCtorImpl += " , m" + ifc.at("id") + "( context, PROXY_"
+                       + YaComponentCore::to_upper(ifc.at("id")) + ", r" + ifc.at("classname") + " )";
+    }
+
+    for (auto &ifc : providedIfc) {
+        fhHeader << "  " << ifc.at("classname") << "Stub m" << ifc.at("id") << ";" << std::endl;
+        strCtorImpl += " , m" + ifc.at("id") + "( context, STUB_"
+                       + YaComponentCore::to_upper(ifc.at("id")) + ", r" + ifc.at("classname") + " )";
+    }
+
+    strCtorImpl.pop_back();
+
+    fhSource << strCtorImpl << std::endl;
+    fhSource << "{" << std::endl;
+    fhSource << "  mpoTimer = new QTimer( this );" << std::endl;
+    fhSource << "}" << std::endl;
+
+    fhSource << compName << "Impl::~" << compName << "Impl()" << std::endl;
+    fhSource << "{" << std::endl;
+    fhSource << "}" << std::endl;
+
+    fhSource << "void " << compName << "Impl::init()" << std::endl;
+    fhSource << "{" << std::endl;
+    fhSource << "  connect( mpoTimer, SIGNAL(timeout()), this, SLOT(onTimer()));" << std::endl;
+    fhSource << "  connect( this, SIGNAL(startTimer(int)), mpoTimer, SLOT(start(int)));" << std::endl;
+    fhSource << "  connect( this, SIGNAL(stopTimer()), this, SLOT(killTimer()));" << std::endl;
+    fhSource << "  emit startTimer( YaComponent::TimeOut );" << std::endl;
+    fhSource << "}" << std::endl;
+
+    fhSource << "void " << compName << "Impl::close()" << std::endl;
+    fhSource << "{" << std::endl;
+    fhSource << "  emit stopTimer( );" << std::endl;
+
+    for (auto &ifc : providedIfc) {
+        fhSource << "  m" << ifc.at("id") << ".close();" << std::endl;
+    }
+
+    for (auto &ifc : usedIfc) {
+        fhSource << "  m" << ifc.at("id") << ".close();" << std::endl;
+    }
+
+    fhSource << "}" << std::endl;
+
+    fhSource << "void " << compName << "Impl::killTimer()" << std::endl;
+    fhSource << "{" << std::endl;
+    fhSource << "  delete mpoTimer;" << std::endl;
+    fhSource << "  mpoTimer = nullptr;" << std::endl;
+    fhSource << "}" << std::endl;
+
+    for (auto &ifc : providedIfc) {
+        fhSource << "void " << compName << "Impl::setConnectionPara" << ifc.at("id")
+                 << "( const char* address, int hwm )" << std::endl;
+        fhSource << "{" << std::endl;
+        fhSource << "  m" << ifc.at("id") << ".setConnectionPara( address, hwm );" << std::endl;
+        fhSource << "}" << std::endl;
+    }
+
+    for (auto &ifc : usedIfc) {
+        fhSource << "void " << compName << "Impl::setConnectionPara" << ifc.at("id")
+                 << "( const char* address, const char* ident )" << std::endl;
+        fhSource << "{" << std::endl;
+        fhSource << "  m" << ifc.at("id") << ".setConnectionPara( address, ident );" << std::endl;
+        fhSource << "}" << std::endl;
+    }
+
+    fhSource << "void " << compName << "Impl::onTimer()" << std::endl;
+    fhSource << "{" << std::endl;
+    for (auto &ifc : usedIfc) {
+        fhSource << "  m" << ifc.at("id") << ".receive();" << std::endl;
+    }
+    for (auto &ifc : providedIfc) {
+        fhSource << "  m" << ifc.at("id") << ".receive();" << std::endl;
+    }
+
+    fhSource << "}" << std::endl;
+
+    fhHeader << "\n  private:" << std::endl;
+    fhHeader << "    " << compName << "Impl( const " << compName << "Impl& );" << std::endl;
+    fhHeader << "    " << compName << "Impl& operator= ( const " << compName << "Impl& );"
+             << std::endl;
+    fhHeader << "    QTimer* mpoTimer = nullptr;" << std::endl;
+
+    fhHeader << "};" << std::endl;
+
+    fhHeader << "}" << std::endl;
+
+    fhHeader << "" << std::endl;
+
+    fhSource << "}" << std::endl;
+
+    fhSource.close();
+    fhHeader.close();
+}
+
+void YaComponentCodeGen::writeIfc(const std::filesystem::path &codePath,
+                                  const std::string &ifcName,
+                                  const ElementList &properties,
+                                  const ElementList &requests,
+                                  const ElementList &responses,
+                                  const ElementList &includes)
+{
+    writeIfcProxy(codePath, ifcName, properties, requests, responses, includes);
+    writeIfcStub(codePath, ifcName, properties, requests, responses, includes);
+}
+void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
+                                       const std::string &ifcName,
+                                       const ElementList &properties,
+                                       const ElementList &requests,
+                                       const ElementList &responses,
+                                       const ElementList &includes)
+{
+    std::ofstream fhSource;
+    std::ofstream fhHeaderIfc;
+    std::ofstream fhHeader;
+
+    auto sourceFilename = (codePath / (ifcName + "Proxy.cpp")).string();
+    auto headerFilename = (codePath / (ifcName + "Proxy.h")).string();
+    auto interfaceFilename = (codePath / (ifcName + "ProxyHandler.h")).string();
+
+    YaComponentCore::printDbg(
+        std::string("YaComponentCodeGen:: write interface proxy source code file ") + sourceFilename);
+    fhSource.open(sourceFilename, std::ios::out | std::ios::trunc);
+    fhHeader.open(headerFilename, std::ios::out | std::ios::trunc);
+    fhHeaderIfc.open(interfaceFilename, std::ios::out | std::ios::trunc);
+
+    fhSource << "#include \"" << ifcName << "Proxy.h\"" << std::endl;
+    fhSource << "namespace YaComponent {" << std::endl;
+    fhSource << ifcName << "Proxy::" << ifcName << "Proxy( void* context, int id, I" << ifcName
+             << "ProxyHandler& callbackHandler)" << std::endl;
+    fhSource << ": YaProxyBase( context, id )" << std::endl;
+    fhSource << ", mCallbackHandler( callbackHandler )" << std::endl;
+
+    fhSource << "{\n}\n" << std::endl;
+
+    std::string strDtor = "\n" + ifcName + "Proxy::~" + ifcName + "Proxy()\n{\n";
+
+    fhHeader << "#pragma once" << std::endl;
+
+    fhHeaderIfc << "#pragma once" << std::endl;
+
+    for (const auto *include : includes) {
+        fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+    }
+
+    fhHeader << "#include \"I" << ifcName << "ProxyHandler.h\"" << std::endl;
+    fhHeader << "#include \"YaProxyBase.h\"" << std::endl;
+    fhHeader << "#include \"YaSUBImpl.h\"" << std::endl;
+    fhHeader << "#include <QtCore/QObject>" << std::endl;
+
+    fhHeader << "namespace YaComponent {" << std::endl;
+
+    fhHeader << "class " << ifcName << "Proxy: public YaProxyBase" << std::endl;
+    fhHeader << "{" << std::endl;
+    fhHeader << "  public:" << std::endl;
+    fhHeader << "    " << ifcName << "Proxy( void* context, int id, I" << ifcName
+             << "ProxyHandler& );" << std::endl;
+    fhHeader << "    virtual ~" << ifcName << "Proxy();\n" << std::endl;
+    fhHeader << "    virtual void receive();" << std::endl;
+
+    fhHeaderIfc << "class I" << ifcName << "ProxyHandler" << std::endl;
+    fhHeaderIfc << "{" << std::endl;
+    fhHeaderIfc << "  public:" << std::endl;
+    fhHeaderIfc << "    I" << ifcName << "ProxyHandler() {}" << std::endl;
+    fhHeaderIfc << "    virtual ~I" << ifcName << "ProxyHandler() {}\n" << std::endl;
+
+    fhHeader << "    enum KEYS {" << std::endl;
+    for (const auto *prop : properties) {
+        std::string strProp;
+        strProp += "PROP_";
+        if (prop->Attribute("package")) {
+            strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
+        }
+        strProp += YaComponentCore::to_upper(prop->Attribute("id"));
+        fhHeader << "      " << strProp << "," << std::endl;
+    }
+    for (const auto *req : requests) {
+        std::string strReq;
+        strReq += "REQ_";
+        if (req->Attribute("package")) {
+            strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
+        }
+
+        strReq += YaComponentCore::to_upper(req->Attribute("id"));
+        fhHeader << "      " << strReq << "," << std::endl;
+    }
+    for (const auto *resp : responses) {
+        std::string strResp;
+        strResp += "RESP_";
+        if (resp->Attribute("package")) {
+            strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
+        }
+        strResp += YaComponentCore::to_upper(resp->Attribute("id"));
+        fhHeader << "      " << strResp << "," << std::endl;
+    }
+    fhHeader << "    };\n" << std::endl;
+
+    for (const auto *prop : properties) {
+        fhHeaderIfc << "    virtual void onProperty( int id, const ";
+        if (prop->Attribute("package")) {
+            fhHeaderIfc << prop->Attribute("package") << "::";
+        }
+        fhHeaderIfc << prop->Attribute("id") << "& ) = 0;" << std::endl;
+    }
+
+    fhHeader << "" << std::endl;
+    fhHeaderIfc << "" << std::endl;
+    fhSource << strDtor << "\n}\n" << std::endl;
+
+    for (const auto *req : requests) {
+        fhHeader << "    int request" << req->Attribute("id");
+        fhSource << "int " << ifcName << "Proxy::request" << req->Attribute("id");
+        fhHeader << "( ";
+        fhSource << "( ";
+        std::string strPara;
+
+        auto *para = req->FirstChildElement("para");
+        while (para) {
+            strPara += " const ";
+            if (para->Attribute("package")) {
+                strPara += std::string(para->Attribute("package")) + "::";
+            }
+            strPara += std::string(para->Attribute(" id ")) + "&,";
+            para = para->NextSiblingElement();
+        }
+        if (!strPara.empty()) {
+            strPara.pop_back();
+            fhHeader << strPara << ");" << std::endl;
+            fhSource << strPara << " msg )\n{" << std::endl;
+        } else {
+            fhHeader << " );" << std::endl;
+            fhSource << " )\n{" << std::endl;
+        }
+        fhSource << "  return mSubscriber.request( REQ_";
+        if (req->Attribute("package")) {
+            fhSource << YaComponentCore::to_upper(req->Attribute("package")) + "_";
+        }
+        fhSource << YaComponentCore::to_upper(req->Attribute("id"));
+        if (!strPara.empty()) {
+            fhSource << ", msg";
+        }
+        fhSource << " );" << std::endl;
+        fhSource << "}" << std::endl;
+    }
+
+    fhSource << "void " << ifcName << "Proxy::receive()" << std::endl;
+    fhSource << "{" << std::endl;
+    fhSource << "  int iMsgCnt = 0;" << std::endl;
+    fhSource << "  bool bMsgAvailable = true;" << std::endl;
+
+    fhSource << "  while( bMsgAvailable )" << std::endl;
+    fhSource << "  {" << std::endl;
+    fhSource << "    int iBytesTotal = 0;" << std::endl;
+    fhSource << "    int key = -1;" << std::endl;
+    fhSource << "    int size = -1;" << std::endl;
+    fhSource << "    char* msgData = 0;" << std::endl;
+
+    fhSource << "    int iBytes = mSubscriber.receive(key, size, &msgData );" << std::endl;
+    fhSource << "    if( 0 < iBytes )" << std::endl;
+    fhSource << "    {" << std::endl;
+    fhSource << "      iMsgCnt++;" << std::endl;
+    fhSource << "      iBytesTotal += iBytes;" << std::endl;
+    fhSource << "    }" << std::endl;
+
+    fhSource << "    switch( key )" << std::endl;
+    fhSource << "    {" << std::endl;
+    for (const auto *resp : responses) {
+        std::string strResp;
+        strResp += "RESP_";
+        if (resp->Attribute("package")) {
+            strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
+        }
+        strResp += YaComponentCore::to_upper(resp->Attribute("id"));
+        fhSource << "    case " << strResp << ":" << std::endl;
+        fhSource << "      m" << resp->Attribute(" id ") << "ParseFromArray(msgData, size);"
+                 << std::endl;
+        fhSource << "      mCallbackHandler.onResponse( mId, m" << resp->Attribute(" id ") << ");"
+                 << std::endl;
+        fhSource << "      break;" << std::endl;
+    }
+
+    for (const auto *prop : properties) {
+        std::string strProp;
+        strProp += "PROP_";
+        if (prop->Attribute("package")) {
+            strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
+        }
+        strProp += YaComponentCore::to_upper(prop->Attribute("id"));
+        fhSource << "    case " << strProp << ":" << std::endl;
+        fhSource << "      mCallbackHandler.onProperty( mId, m" << prop->Attribute(" id ") << ");"
+                 << std::endl;
+        fhSource << "      break;" << std::endl;
+    }
+
+    fhSource << "    default:" << std::endl;
+    fhSource << "      if( -1 < key)" << std::endl;
+    fhSource << "      {" << std::endl;
+    fhSource << "        qDebug() << \"unknown key \" << key;";
+    fhSource << "        assert(0);";
+    fhSource << "      }" << std::endl;
+    fhSource << "      break;" << std::endl;
+    fhSource << "    }" << std::endl;
+    fhSource << "    if( 0 >= iBytesTotal ) bMsgAvailable = false;" << std::endl;
+
+    fhSource << "  }" << std::endl;
+
+    fhSource << "}" << std::endl;
+
+    fhHeader << "" << std::endl;
+
+    for (const auto *resp : responses) {
+        fhHeaderIfc << "    virtual void onResponse( int proxyId, const ";
+        if (resp->Attribute("package")) {
+            fhHeaderIfc << resp->Attribute("package") << "::";
+        }
+        fhHeaderIfc << resp->Attribute("id") << "& ) = 0;" << std::endl;
+    }
+
+    fhHeader << "private:" << std::endl;
+    fhHeader << " " << ifcName << "Proxy();" << std::endl;
+    fhHeader << "  I" << ifcName << "ProxyHandler& mCallbackHandler;" << std::endl;
+
+    for (const auto *prop : properties) {
+        fhHeader << "  ";
+        if (prop->Attribute("package")) {
+            fhHeader << prop->Attribute("package") << "::";
+        }
+        fhHeader << prop->Attribute("id");
+        fhHeader << " m" << prop->Attribute("id") << ";" << std::endl;
+    }
+    for (const auto *resp : responses) {
+        fhHeader << "  ";
+        if (resp->Attribute("package")) {
+            fhHeader << resp->Attribute("package") << "::";
+        }
+        fhHeader << resp->Attribute("id");
+        fhHeader << " m" << resp->Attribute("id") << ";" << std::endl;
+    }
+
+    fhHeader << "};" << std::endl;
+    fhHeaderIfc << "};" << std::endl;
+
+    fhHeader << "}" << std::endl;
+
+    fhHeader << "" << std::endl;
+    fhHeaderIfc << "" << std::endl;
+
+    fhSource << "\n}" << std::endl;
+
+    fhHeader.close();
+    fhSource.close();
+    fhHeaderIfc.close();
+}
+void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
+                                      const std::string &ifcName,
+                                      const ElementList &properties,
+                                      const ElementList &requests,
+                                      const ElementList &responses,
+                                      const ElementList &includes)
+{
+    std::ofstream fhSource;
+    std::ofstream fhHeaderIfc;
+    std::ofstream fhHeader;
+
+    auto sourceFilename = (codePath / (ifcName + "Stub.cpp")).string();
+    auto headerFilename = (codePath / (ifcName + "Stub.h")).string();
+    auto interfaceFilename = (codePath / (ifcName + "Stub.h")).string();
+
+    YaComponentCore::printDbg(
+        std::string("YaComponentCodeGen:: write interface stub source code file ") + sourceFilename);
+    fhSource.open(sourceFilename, std::ios::out | std::ios::trunc);
+    fhHeader.open(headerFilename, std::ios::out | std::ios::trunc);
+    fhHeaderIfc.open(interfaceFilename, std::ios::out | std::ios::trunc);
+
+    fhSource << "#include \"" << ifcName << "Stub.h\"\n";
+
+    fhHeader << "#pragma once\n";
+    fhHeaderIfc << "#pragma once\n";
+
+    for (const auto *include : includes) {
+        fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+    }
+
+    fhHeader << "#include \"I" << ifcName << "StubHandler.h\"\n";
+    fhHeader << "#include \"YaStubBase.h\"\n";
+    fhHeader << "#include <stdio.h>\n";
+
+    fhHeader << "#include \"YaPUBImpl.h\"\n";
+
+    fhHeader << "namespace YaComponent {\n";
+    fhHeaderIfc << "namespace YaComponent {\n";
+    fhSource << "namespace YaComponent {\n";
+
+    fhSource << ifcName + "Stub::" << ifcName << "Stub( void* context, int id, I" << ifcName
+             << "StubHandler& rCallbackHandler )\n";
+
+    fhHeaderIfc << "class I" << ifcName << "StubHandler\n";
+    fhHeaderIfc << "{\n";
+
+    fhHeader << "class " << ifcName << "Stub: public YaStubBase\n";
+    fhHeader << "{\n";
+    fhHeader << "  Q_OBJECT\n";
+    fhHeader << "  public:\n";
+    fhHeaderIfc << "  public:\n";
+    fhHeader << "    " << ifcName << "Stub( void* context, int id, I" << ifcName
+             << "StubHandler& );\n";
+    fhHeader << "    virtual ~" << ifcName << "Stub();\n";
+
+    fhHeaderIfc << "    I" << ifcName << "StubHandler() {}\n";
+    fhHeaderIfc << "    virtual ~I" << ifcName << "StubHandler() {}\n";
+
+    fhHeader << "    enum KEYS {\n";
+
+    for (const auto *prop : properties) {
+        std::string strProp;
+        strProp += "PROP_";
+        if (prop->Attribute("package")) {
+            strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
+        }
+        strProp += YaComponentCore::to_upper(prop->Attribute("id"));
+        fhHeader << "      " << strProp << ",\n";
+    }
+
+    for (const auto *req : requests) {
+        std::string strReq;
+        strReq += "REQ_";
+        if (req->Attribute("package")) {
+            strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
+        }
+        strReq += YaComponentCore::to_upper(req->Attribute("id"));
+        fhHeader << "      " << strReq << ",\n";
+    }
+
+    for (const auto *resp : responses) {
+        std::string strResp;
+        strResp += "RESP_";
+        if (resp->Attribute("package")) {
+            strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
+        }
+        strResp += YaComponentCore::to_upper(resp->Attribute("id"));
+        fhHeader << "      " << strResp << ",\n";
+    }
+    fhHeader << "    };\n\n";
+
+    for (const auto *prop : properties) {
+        std::string strMethod;
+        if (prop->Attribute("package")) {
+            strMethod += std::string(prop->Attribute("package")) + "::";
+        }
+        strMethod += prop->Attribute("id");
+        fhHeader << "    int send(int key, const " << strMethod << "&);\n";
+    }
+
+    for (const auto *req : requests) {
+        fhHeaderIfc << "    virtual void onRequest" << req->Attribute("id");
+        fhHeaderIfc << "( int id ";
+        std::string strPara;
+
+        auto *para = req->FirstChildElement("para");
+        while (para)
+
+        {
+            strPara += ", const ";
+            if (para->Attribute("package")) {
+                strPara += std::string(para->Attribute("package")) + "::";
+            }
+            strPara += std::string(para->Attribute(" id ")) + "&";
+            para = para->NextSiblingElement();
+        }
+
+        auto *resp = req->FirstChildElement("resp");
+        while (resp) {
+            strPara += ", ";
+            if (resp->Attribute("package")) {
+                strPara += std::string(resp->Attribute("package")) + "::";
+            }
+            strPara += std::string(resp->Attribute(" id ")) + "&";
+            resp = resp->NextSiblingElement();
+        }
+        if (!strPara.empty()) {
+            fhHeaderIfc << strPara << " ) = 0;\n";
+        } else {
+            fhHeaderIfc << " ) = 0;\n";
+        }
+    }
+
+    fhHeader << "\n";
+
+    for (const auto *resp : responses) {
+        fhHeader << "    int response( int key, const ";
+        if (resp->Attribute("package")) {
+            fhHeader << resp->Attribute("package") << "::";
+        }
+        fhHeader << resp->Attribute("id") << "&, const std::string& ident );\n";
+    }
+
+    fhHeader << "    void receive();\n";
+
+    fhHeader << "  protected:\n";
+
+    fhSource << " : YaStubBase( context, id )\n";
+    fhSource << " , mCallbackHandler( rCallbackHandler )\n";
+
+    fhSource << "{\n\n}\n\n";
+
+    for (const auto *resp : responses) {
+        fhSource << "int " << ifcName << "Stub::response( int key, const ";
+        if (resp->Attribute("package")) {
+            fhSource << resp->Attribute("package") << "::";
+        }
+        fhSource << resp->Attribute("id") << "& msg, const std::string& ident )\n";
+        fhSource << "{\n";
+        fhSource << "  return mPublisher.response(key, msg, ident);\n";
+        fhSource << "}\n\n";
+    }
+
+    fhSource << ifcName << "Stub::~" << ifcName << "Stub()\n";
+    fhSource << "{\n\n}\n\n";
+
+    for (const auto *prop : properties) {
+        std::string strMethod;
+        if (prop->Attribute("package")) {
+            strMethod += std::string(prop->Attribute("package")) + "::";
+        }
+        strMethod += prop->Attribute("id");
+        fhSource << "int " << ifcName << "Stub::send(int key, const " << strMethod
+                 << "& rMessage )\n{\n";
+        fhSource << "  return mPublisher.send(key, rMessage );\n";
+        fhSource << "}\n";
+    }
+
+    fhSource << "void " << ifcName << "Stub::receive()\n";
+    fhSource << "{\n";
+    fhSource << "  int iMsgCnt = 0;\n";
+    fhSource << "  bool bMsgAvailable = true;\n";
+    fhSource << "  std::string ident;\n";
+
+    fhSource << "  while( bMsgAvailable )\n";
+    fhSource << "  {\n";
+    fhSource << "    int iBytesTotal = 0;\n";
+    fhSource << "    int key = -1;\n";
+    fhSource << "    int size = -1;\n";
+    fhSource << "    char* msgData = 0;\n";
+    fhSource << "    ident.clear();\n";
+
+    fhSource << "    int iBytes = mPublisher.receive(key, size, &msgData, ident );\n";
+    fhSource << "    if( 0 < iBytes )\n";
+    fhSource << "    {\n";
+    fhSource << "      iBytesTotal += iBytes;\n";
+    fhSource << "      iMsgCnt++;\n";
+    fhSource << "    }\n";
+
+    fhSource << "    switch( key )\n";
+    fhSource << "    {\n";
+
+    for (const auto *req : requests) {
+        std::string strReq;
+        strReq += "REQ_";
+        if (req->Attribute("package")) {
+            strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
+        }
+        strReq += YaComponentCore::to_upper(req->Attribute("id"));
+        fhSource << "    case " << strReq << ":\n";
+        std::string strMember;
+
+        auto *para = req->FirstChildElement("para");
+        while (para) {
+            strMember += std::string("      m") + req->Attribute("id") + "_" + para->Attribute("id")
+                         + ".ParseFromArray(msgData, size);\n";
+            para = para->NextSiblingElement();
+        }
+
+        if (!strMember.empty()) {
+            fhSource << strMember;
+        }
+
+        auto *resp = req->FirstChildElement("resp");
+        while (resp) {
+            fhSource << "      m" << req->Attribute("id") << "_" << resp->Attribute("id")
+                     << ".Clear();\n";
+            resp = resp->NextSiblingElement();
+        }
+
+        fhSource << "      mCallbackHandler.onRequest" << req->Attribute("id") << "( mId";
+        std::string strPara;
+
+        para = req->FirstChildElement("para");
+        while (para)
+
+        {
+            strPara += std::string(", m") + req->Attribute("id") + "_" + para->Attribute("id");
+            para = para->NextSiblingElement();
+        }
+
+        resp = req->FirstChildElement("resp");
+        while (resp) {
+            strPara += std::string(", m") + req->Attribute("id") + "_" + resp->Attribute("id");
+            resp = resp->NextSiblingElement();
+        }
+        if (!strPara.empty()) {
+            fhSource << strPara << " );\n";
+        } else {
+            fhSource << " );\n";
+        }
+
+        resp = req->FirstChildElement("resp");
+        while (resp) {
+            std::string strResp;
+            strResp += "RESP_";
+            if (resp->Attribute("package")) {
+                strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
+            }
+            strResp += YaComponentCore::to_upper(resp->Attribute("id"));
+            fhSource << "      response( " << strResp << ", m" << req->Attribute("id") << "_"
+                     << resp->Attribute("id") << ", ident );\n";
+            resp = resp->NextSiblingElement();
+        }
+
+        fhSource << "      break;\n";
+    }
+
+    fhSource << "    default:\n";
+    fhSource << "      if( -1 < key)\n";
+    fhSource << "      {\n";
+    fhSource << "        qDebug() << \"unknown key \" << key;";
+    fhSource << "        assert(0);";
+    fhSource << "      }\n";
+    fhSource << "      break;\n";
+    fhSource << "    }\n";
+    fhSource << "    if( 0 >= iBytesTotal ) bMsgAvailable = false;\n";
+
+    fhSource << "  }\n";
+
+    fhSource << "}\n";
+
+    fhHeader << "    I" << ifcName << "StubHandler& mCallbackHandler;\n";
+
+    for (const auto *req : requests) {
+        std::string strPara;
+
+        auto *para = req->FirstChildElement("para");
+        while (para) {
+            strPara += "    ";
+            if (para->Attribute("package")) {
+                strPara += std::string(para->Attribute("package")) + "::";
+            }
+            strPara += std::string(para->Attribute(" id ")) + " m" + req->Attribute("id") + "_"
+                       + para->Attribute(" id ") + ";\n";
+            para = para->NextSiblingElement();
+        }
+
+        auto *resp = req->FirstChildElement("resp");
+        while (resp) {
+            strPara += "    ";
+            if (resp->Attribute("package")) {
+                strPara += std::string(resp->Attribute("package")) + "::";
+            }
+            strPara += std::string(resp->Attribute(" id ")) + " m" + req->Attribute("id") + "_"
+                       + resp->Attribute(" id ") + ";\n";
+            resp = resp->NextSiblingElement();
+        }
+
+        if (!strPara.empty()) {
+            fhHeader << strPara << std::endl;
+        }
+    }
+
+    fhHeader << "\n};\n";
+    fhHeaderIfc << "\n};\n";
+
+    fhHeader << "\n}\n";
+    fhHeaderIfc << "\n}\n";
+    fhSource << "}\n";
+
+    fhHeader << "\n";
+    fhHeaderIfc << "\n";
+
+    fhHeader.close();
+    fhSource.close();
+    fhHeaderIfc.close();
+}

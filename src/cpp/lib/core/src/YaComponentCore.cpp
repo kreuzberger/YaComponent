@@ -1,7 +1,9 @@
 #include "core/YaComponentCore.h"
 
-#include <sstream>
+#include <algorithm>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 #ifdef __unix__
 std::string YaComponentCore::SEP = "/";
@@ -27,6 +29,20 @@ std::vector<std::string> &YaComponentCore::split(const std::string &s,
     }
   }
   return elems;
+}
+
+std::string YaComponentCore::to_upper(const std::string &str)
+{
+    auto conv = str;
+    std::transform(conv.begin(), conv.end(), conv.begin(), ::toupper);
+    return conv;
+}
+
+std::string YaComponentCore::to_lower(const std::string &str)
+{
+    auto conv = str;
+    std::transform(conv.begin(), conv.end(), conv.begin(), ::tolower);
+    return conv;
 }
 
 std::vector<std::string> YaComponentCore::split(const std::string &s, char delim)
