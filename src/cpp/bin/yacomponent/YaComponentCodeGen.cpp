@@ -258,7 +258,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
 
     auto sourceFilename = (codePath / (ifcName + "Proxy.cpp")).string();
     auto headerFilename = (codePath / (ifcName + "Proxy.h")).string();
-    auto interfaceFilename = (codePath / (ifcName + "ProxyHandler.h")).string();
+    auto interfaceFilename = (codePath / ("I" + ifcName + "ProxyHandler.h")).string();
 
     YaComponentCore::printDbg(
         std::string("YaComponentCodeGen:: write interface proxy source code file ") + sourceFilename);
@@ -311,7 +311,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     for (const auto *prop : properties) {
         std::string strProp;
         strProp += "PROP_";
-        if (prop->Attribute("package")) {
+        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
             strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
         }
         strProp += YaComponentCore::to_upper(prop->Attribute("id"));
@@ -320,7 +320,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     for (const auto *req : requests) {
         std::string strReq;
         strReq += "REQ_";
-        if (req->Attribute("package")) {
+        if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
             strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
         }
 
@@ -330,7 +330,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     for (const auto *resp : responses) {
         std::string strResp;
         strResp += "RESP_";
-        if (resp->Attribute("package")) {
+        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
             strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
         }
         strResp += YaComponentCore::to_upper(resp->Attribute("id"));
@@ -340,7 +340,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
 
     for (const auto *prop : properties) {
         fhHeaderIfc << "    virtual void onProperty( int id, const ";
-        if (prop->Attribute("package")) {
+        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
             fhHeaderIfc << prop->Attribute("package") << "::";
         }
         fhHeaderIfc << prop->Attribute("id") << "& ) = 0;" << std::endl;
@@ -360,7 +360,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
         auto *para = req->FirstChildElement("para");
         while (para) {
             strPara += " const ";
-            if (para->Attribute("package")) {
+            if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
                 strPara += std::string(para->Attribute("package")) + "::";
             }
             strPara += std::string(para->Attribute("id")) + "&,";
@@ -375,7 +375,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
             fhSource << " )\n{" << std::endl;
         }
         fhSource << "  return mSubscriber.request( REQ_";
-        if (req->Attribute("package")) {
+        if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
             fhSource << YaComponentCore::to_upper(req->Attribute("package")) + "_";
         }
         fhSource << YaComponentCore::to_upper(req->Attribute("id"));
@@ -410,12 +410,12 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     for (const auto *resp : responses) {
         std::string strResp;
         strResp += "RESP_";
-        if (resp->Attribute("package")) {
+        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
             strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
         }
         strResp += YaComponentCore::to_upper(resp->Attribute("id"));
         fhSource << "    case " << strResp << ":" << std::endl;
-        fhSource << "      m" << resp->Attribute("id") << "ParseFromArray(msgData, size);"
+        fhSource << "      m" << resp->Attribute("id") << ".ParseFromArray(msgData, size);"
                  << std::endl;
         fhSource << "      mCallbackHandler.onResponse( mId, m" << resp->Attribute("id") << ");"
                  << std::endl;
@@ -425,7 +425,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     for (const auto *prop : properties) {
         std::string strProp;
         strProp += "PROP_";
-        if (prop->Attribute("package")) {
+        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
             strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
         }
         strProp += YaComponentCore::to_upper(prop->Attribute("id"));
@@ -453,7 +453,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
 
     for (const auto *resp : responses) {
         fhHeaderIfc << "    virtual void onResponse( int proxyId, const ";
-        if (resp->Attribute("package")) {
+        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
             fhHeaderIfc << resp->Attribute("package") << "::";
         }
         fhHeaderIfc << resp->Attribute("id") << "& ) = 0;" << std::endl;
@@ -465,7 +465,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
 
     for (const auto *prop : properties) {
         fhHeader << "  ";
-        if (prop->Attribute("package")) {
+        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
             fhHeader << prop->Attribute("package") << "::";
         }
         fhHeader << prop->Attribute("id");
@@ -473,7 +473,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     }
     for (const auto *resp : responses) {
         fhHeader << "  ";
-        if (resp->Attribute("package")) {
+        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
             fhHeader << resp->Attribute("package") << "::";
         }
         fhHeader << resp->Attribute("id");
@@ -507,7 +507,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     auto sourceFilename = (codePath / (ifcName + "Stub.cpp")).string();
     auto headerFilename = (codePath / (ifcName + "Stub.h")).string();
-    auto interfaceFilename = (codePath / (ifcName + "Stub.h")).string();
+    auto interfaceFilename = (codePath / ("I" + ifcName + "StubHandler.h")).string();
 
     YaComponentCore::printDbg(
         std::string("YaComponentCodeGen:: write interface stub source code file ") + sourceFilename);
@@ -558,7 +558,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     for (const auto *prop : properties) {
         std::string strProp;
         strProp += "PROP_";
-        if (prop->Attribute("package")) {
+        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
             strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
         }
         strProp += YaComponentCore::to_upper(prop->Attribute("id"));
@@ -568,7 +568,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     for (const auto *req : requests) {
         std::string strReq;
         strReq += "REQ_";
-        if (req->Attribute("package")) {
+        if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
             strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
         }
         strReq += YaComponentCore::to_upper(req->Attribute("id"));
@@ -578,7 +578,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     for (const auto *resp : responses) {
         std::string strResp;
         strResp += "RESP_";
-        if (resp->Attribute("package")) {
+        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
             strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
         }
         strResp += YaComponentCore::to_upper(resp->Attribute("id"));
@@ -588,7 +588,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     for (const auto *prop : properties) {
         std::string strMethod;
-        if (prop->Attribute("package")) {
+        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
             strMethod += std::string(prop->Attribute("package")) + "::";
         }
         strMethod += prop->Attribute("id");
@@ -605,7 +605,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
         {
             strPara += ", const ";
-            if (para->Attribute("package")) {
+            if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
                 strPara += std::string(para->Attribute("package")) + "::";
             }
             strPara += std::string(para->Attribute("id")) + "&";
@@ -615,7 +615,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
         auto *resp = req->FirstChildElement("resp");
         while (resp) {
             strPara += ", ";
-            if (resp->Attribute("package")) {
+            if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
                 strPara += std::string(resp->Attribute("package")) + "::";
             }
             strPara += std::string(resp->Attribute("id")) + "&";
@@ -632,7 +632,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     for (const auto *resp : responses) {
         fhHeader << "    int response( int key, const ";
-        if (resp->Attribute("package")) {
+        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
             fhHeader << resp->Attribute("package") << "::";
         }
         fhHeader << resp->Attribute("id") << "&, const std::string& ident );\n";
@@ -649,7 +649,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     for (const auto *resp : responses) {
         fhSource << "int " << ifcName << "Stub::response( int key, const ";
-        if (resp->Attribute("package")) {
+        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
             fhSource << resp->Attribute("package") << "::";
         }
         fhSource << resp->Attribute("id") << "& msg, const std::string& ident )\n";
@@ -663,7 +663,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     for (const auto *prop : properties) {
         std::string strMethod;
-        if (prop->Attribute("package")) {
+        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
             strMethod += std::string(prop->Attribute("package")) + "::";
         }
         strMethod += prop->Attribute("id");
@@ -700,7 +700,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     for (const auto *req : requests) {
         std::string strReq;
         strReq += "REQ_";
-        if (req->Attribute("package")) {
+        if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
             strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
         }
         strReq += YaComponentCore::to_upper(req->Attribute("id"));
@@ -751,7 +751,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
         while (resp) {
             std::string strResp;
             strResp += "RESP_";
-            if (resp->Attribute("package")) {
+            if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
                 strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
             }
             strResp += YaComponentCore::to_upper(resp->Attribute("id"));
@@ -785,7 +785,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
         auto *para = req->FirstChildElement("para");
         while (para) {
             strPara += "    ";
-            if (para->Attribute("package")) {
+            if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
                 strPara += std::string(para->Attribute("package")) + "::";
             }
             strPara += std::string(para->Attribute("id")) + " m" + req->Attribute("id") + "_"
@@ -796,7 +796,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
         auto *resp = req->FirstChildElement("resp");
         while (resp) {
             strPara += "    ";
-            if (resp->Attribute("package")) {
+            if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
                 strPara += std::string(resp->Attribute("package")) + "::";
             }
             strPara += std::string(resp->Attribute("id")) + " m" + req->Attribute("id") + "_"
