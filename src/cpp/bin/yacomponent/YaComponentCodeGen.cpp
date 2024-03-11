@@ -58,11 +58,11 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
     }
 
     for (const auto &p : proxies) {
-        fhHeader << "#include\"" << p.first << "Proxy.h\"" << std::endl;
+        fhHeader << "#include \"" << p.first << "Proxy.h\"" << std::endl;
     }
 
     for (const auto &s : stubs) {
-        fhHeader << "#include\"" << s.first << "Stub.h\"" << std::endl;
+        fhHeader << "#include \"" << s.first << "Stub.h\"" << std::endl;
     }
 
     fhHeader << "#include <QtCore/QObject>" << std::endl;
@@ -151,7 +151,7 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
                        + YaComponentCore::to_upper(ifc.at("id")) + ", r" + ifc.at("classname") + " )";
     }
 
-    strCtorImpl.pop_back();
+    // todo strCtorImpl.pop_back();
 
     fhSource << strCtorImpl << std::endl;
     fhSource << "{" << std::endl;
@@ -229,7 +229,7 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
 
     fhHeader << "" << std::endl;
 
-    fhSource << "}" << std::endl;
+    fhSource << "}" << std::endl; // closes the namespace
 
     fhSource.close();
     fhHeader.close();
@@ -527,9 +527,9 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     fhHeader << "#include \"I" << ifcName << "StubHandler.h\"\n";
     fhHeader << "#include \"YaStubBase.h\"\n";
-    fhHeader << "#include <stdio.h>\n";
-
     fhHeader << "#include \"YaPUBImpl.h\"\n";
+
+    fhHeader << "#include <stdio.h>\n";
 
     fhHeader << "namespace YaComponent {\n";
     fhHeaderIfc << "namespace YaComponent {\n";

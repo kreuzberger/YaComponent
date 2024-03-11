@@ -64,7 +64,8 @@ macro (YACOMPONENT_IFC_GENERATE outfiles)
 
     add_custom_command( OUTPUT ${outfile}
       COMMAND $<TARGET_FILE:yacomponent> --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --verbose
-      #COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --rootpath=${CMAKE_SOURCE_DIR} --verbose
+      #COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/${component}/codePerl
+      #COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/codePerl --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --rootpath=${CMAKE_SOURCE_DIR} --verbose
       COMMAND ${Java_JAVA_EXECUTABLE} -Dplantuml.include.path=${CMAKE_CURRENT_BINARY_DIR} -jar ${PLANTUML_JAR} -tpng ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.txt
 
       DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:yacomponent>
@@ -74,6 +75,7 @@ macro (YACOMPONENT_IFC_GENERATE outfiles)
 
     #QT5_WRAP_CPP(outfile_component_mocs ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h )
     #set( ${outfiles} ${${outfiles}} ${outfile_component_mocs} )
+    set( ${outfiles} ${${outfiles}} )
 
 
 
@@ -117,11 +119,13 @@ macro (YACOMPONENT_GENERATE outfiles)
     )
 
     add_custom_command( OUTPUT ${outfile}
-      COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --comp=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --rootpath=${CMAKE_SOURCE_DIR} --verbose
+      COMMAND $<TARGET_FILE:yacomponent> --component=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --verbose
+      #COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/${component}/codePerl
+      #COMMAND perl -I${YaComponent_GENERATOR_SOURCE_DIR} -f ${YaComponent_GENERATOR_SOURCE_DIR}/YaComponent.pl --comp=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/codePerl --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --rootpath=${CMAKE_SOURCE_DIR} --verbose
       COMMAND echo ${Java_JAVA_EXECUTABLE} -Dplantuml.include.path=${CMAKE_CURRENT_BINARY_DIR} -jar ${PLANTUML_JAR} -tpng ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.txt
       COMMAND ${Java_JAVA_EXECUTABLE} -Dplantuml.include.path=${CMAKE_CURRENT_BINARY_DIR} -jar ${PLANTUML_JAR} -tpng ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.txt
       #ARGS -o ${outfile} ${it}
-      DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR}
+      DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:yacomponent>
     )
 
     set( ${outfiles} ${${outfiles}} ${outfile})

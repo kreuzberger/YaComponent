@@ -82,10 +82,10 @@ YaComponentParser::parseComponentDefinitions(Element *component)
             entry.insert_or_assign("id", id);
             entry.insert_or_assign("classname", std::filesystem::path(xml).stem());
             ifcProvided.push_back(entry);
-            ifc = ifc->NextSiblingElement();
+            ifc = ifc->NextSiblingElement("interface");
         }
 
-        provides = provides->NextSiblingElement();
+        provides = provides->NextSiblingElement("provides");
     }
 
     auto *uses = component->FirstChildElement("uses");
@@ -104,10 +104,10 @@ YaComponentParser::parseComponentDefinitions(Element *component)
             entry.insert_or_assign("id", id);
             entry.insert_or_assign("classname", std::filesystem::path(xml).stem());
             ifcUsed.push_back(entry);
-            ifc = ifc->NextSiblingElement();
+            ifc = ifc->NextSiblingElement("interface");
         }
 
-        uses = uses->NextSiblingElement();
+        uses = uses->NextSiblingElement("uses");
     }
 
     return std::make_tuple(ifcProvided, ifcUsed);
