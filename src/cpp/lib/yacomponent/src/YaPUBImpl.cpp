@@ -1,9 +1,9 @@
-#include "YaPUBImpl.h"
 #include "zmq.h"
 #include <assert.h>
 #include <malloc.h>
 #include <math.h>
 #include <string.h>
+#include <yacomponent/YaPUBImpl.h>
 #include <QtCore/QtDebug>
 
 YaPUBImpl::YaPUBImpl(void *context)

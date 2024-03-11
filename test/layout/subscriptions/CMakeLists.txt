@@ -11,10 +11,6 @@ YACOMPONENT_GENERATE(GENERATED_COMP_SUB_SRC subscriber/SubscriberComp.xml)
 
 YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT_SRC PubSubUnittestMPMT.xml)
 
-QT5_WRAP_CPP( UNITTESTMPSUB_FAST_MOCS PubSubUnittestMP_fast_SUB.h )
-QT5_WRAP_CPP( UNITTESTMPSUB_SLOW_MOCS PubSubUnittestMP_slow_SUB.h)
-QT5_WRAP_CPP( UNITTESTMPPUB_MOCS PubSubUnittestMP_PUB.h )
-
 set( publisher_SRCS
   ${GENERATED_IFC_SRC_PUB}
   ${GENERATED_COMP_PUB_SRC}
@@ -23,7 +19,6 @@ set( publisher_SRCS
   publishercompunittest.cpp
   PubSubUnittestMP_PUB.cpp
   PubSubUnittestMP_PUB.h
-  ${UNITTESTMPPUB_MOCS}
 )
 
 set( subscriber_fast_SRCS
@@ -36,7 +31,6 @@ set( subscriber_fast_SRCS
   subscriber_fast_compunittest.cpp
   PubSubUnittestMP_fast_SUB.cpp
   PubSubUnittestMP_fast_SUB.h
-  ${UNITTESTMPSUB_FAST_MOCS}
 )
 
 set( subscriber_slow_SRCS
@@ -49,19 +43,14 @@ set( subscriber_slow_SRCS
   subscriber_slow_compunittest.cpp
   PubSubUnittestMP_slow_SUB.cpp
   PubSubUnittestMP_slow_SUB.h
-  ${UNITTESTMPSUB_SLOW_MOCS}
 )
 
-QT5_WRAP_CPP( UNITTESTMP_MOCS PubSubUnittestMP.h )
+#QT5_WRAP_CPP( UNITTESTMP_MOCS PubSubUnittestMP.h )
 
 set( pubsubunittestmp_SRCS
   PubSubUnittestMP.cpp
   PubSubUnittestMP.h
-  ${UNITTESTMP_MOCS}
 )
-
-
-
 
 add_executable( publisherMPMT  ${publisher_SRCS} )
 add_executable( subscriber_fast_MPMT  ${subscriber_fast_SRCS} )
@@ -69,9 +58,9 @@ add_executable( subscriber_slow_MPMT  ${subscriber_slow_SRCS} )
 add_executable( pubsubunittestmp ${pubsubunittestmp_SRCS} )
 
 
-target_link_libraries(publisherMPMT Qt5::Core Qt5::Test protobuf::lib libzmq::static)
-target_link_libraries(subscriber_fast_MPMT Qt5::Core Qt5::Test protobuf::lib libzmq::static)
-target_link_libraries(subscriber_slow_MPMT Qt5::Core Qt5::Test protobuf::lib libzmq::static)
-target_link_libraries(pubsubunittestmp Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(publisherMPMT PRIVATE YaComponentLib Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(subscriber_fast_MPMT PRIVATE YaComponentLib Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(subscriber_slow_MPMT PRIVATE YaComponentLib Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(pubsubunittestmp PRIVATE YaComponentLib Qt5::Core Qt5::Test protobuf::lib libzmq::static)
 
 add_test( NAME pubsubunittestmp COMMAND pubsubunittestmp )

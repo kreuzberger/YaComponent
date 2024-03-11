@@ -1,4 +1,4 @@
-#include "YaBuffer.h"
+#include <yacomponent/YaBuffer.h>
 
 #include <math.h>
 

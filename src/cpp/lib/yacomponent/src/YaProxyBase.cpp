@@ -1,4 +1,4 @@
-#include "YaProxyBase.h"
+#include <yacomponent/YaProxyBase.h>
 
 YaProxyBase::YaProxyBase(void *context, int id, QObject *parent)
     : QObject(parent)

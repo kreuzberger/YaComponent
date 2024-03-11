@@ -1,11 +1,8 @@
-#ifndef PUBSUBUNITTEST_MP_SLOW_SUB_H
-#define PUBSUBUNITTEST_MP_SLOW_SUB_H
-
+#pragma once
 #include <QObject>
 
-#include "YaComponent.h"
-#include "YaComponentThread.h"
-#include "publishercompunittest.h"
+#include <yacomponent/YaComponent.h>
+#include <yacomponent/YaComponentThread.h>
 #include "subscriber_slow_compunittest.h"
 
 class TextUnittestMPSub : public QObject
@@ -32,5 +29,3 @@ private:
     YaComponentThread *mpSubscriberThread;
     SubscriberComp *mpSubscriberComp;
 };
-
-#endif // TEXTUNITTEST_H

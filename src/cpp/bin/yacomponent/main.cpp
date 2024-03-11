@@ -13,6 +13,7 @@ void printHelp()
     std::cerr << "  --component <xml> component xml file name" << std::endl;
     std::cerr << "  --ifc <xml>       interface xml file name" << std::endl;
     std::cerr << "  --outcode <dir>   generated code directory" << std::endl;
+    std::cerr << "  --outdoc <dir>    generated documentation directory" << std::endl;
     std::cerr << "  --verbose         output parser info" << std::endl;
     std::cerr << "  --help           print help" << std::endl;
 }
@@ -22,6 +23,7 @@ int main(int argc, char** argv)
     auto componentPath = std::filesystem::path();
     auto ifcPath = std::filesystem::path();
     auto codePath = std::filesystem::path();
+    auto docPath = std::filesystem::path();
     auto verbose = false;
 
     for (int idx = 1; idx < argc; idx++) {
@@ -40,6 +42,11 @@ int main(int argc, char** argv)
             idx++;
         } else if (std::string(argv[idx]).rfind("--outcode=", 0) == 0) {
             codePath = std::string(argv[idx]).erase(0, std::string("--outcode=").length());
+        } else if (std::string(argv[idx]) == std::string("--outdoc")) {
+            docPath = argv[idx + 1];
+            idx++;
+        } else if (std::string(argv[idx]).rfind("--outdoc=", 0) == 0) {
+            docPath = std::string(argv[idx]).erase(0, std::string("--outdoc=").length());
         } else if (std::string(argv[idx]) == std::string("--verbose")) {
             YaComponentCore::VERBOSE = true;
         } else if (std::string(argv[idx]) == std::string("--help")) {
@@ -65,7 +72,7 @@ int main(int argc, char** argv)
     }
 
     YaComponentParser parser;
-    parser.init(codePath, verbose);
+    parser.init(codePath, docPath, verbose);
 
     if (!componentPath.empty()) {
         parser.parseComponent(componentPath);

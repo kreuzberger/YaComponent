@@ -1,12 +1,10 @@
-#ifndef TEXTUNITTEST_H
-#define TEXTUNITTEST_H
-
+#pragma once
 #include <QObject>
 
-#include "YaComponent.h"
-#include "YaComponentThread.h"
 #include "textgencompunittest.h"
 #include "textoutcompunittest.h"
+#include <yacomponent/YaComponent.h>
+#include <yacomponent/YaComponentThread.h>
 
 class TextUnittest : public QObject
 {
@@ -42,4 +40,3 @@ private:
     TextOutComp *mpTextOut;
 };
 
-#endif // TEXTUNITTEST_H

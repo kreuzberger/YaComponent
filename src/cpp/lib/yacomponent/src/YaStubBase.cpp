@@ -1,4 +1,4 @@
-#include "YaStubBase.h"
+#include <yacomponent/YaStubBase.h>
 
 YaStubBase::YaStubBase(void *context, int id, QObject *parent)
     : QObject(parent)

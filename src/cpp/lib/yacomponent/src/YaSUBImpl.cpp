@@ -1,4 +1,4 @@
-#include "YaSUBImpl.h"
+#include <yacomponent/YaSUBImpl.h>
 
 #include "zmq.h"
 #include <QtCore/QCoreApplication>

@@ -12,9 +12,7 @@ class YaComponentParser
 public:
     YaComponentParser();
 
-    void init(
-
-        const std::filesystem::path &code, bool verbose);
+    void init(const std::filesystem::path &code, const std::filesystem::path &doc, bool verbose);
     void parseComponent(const std::filesystem::path &component);
     void parseIfc(const std::filesystem::path &ifc);
 
@@ -32,9 +30,7 @@ private:
     std::filesystem::path mComponentPath = {};
     std::filesystem::path mIfcPath = {};
     std::filesystem::path mCodePath = {};
+    std::filesystem::path mDocPath = {};
     std::string mBaseName = {};
     bool mVerbose = false;
-    // ElementList mProcesses;
-    // std::list<std::filesystem::path> mIncludes;
-    // std::map<std::string, std::string> mAdresses;
 };

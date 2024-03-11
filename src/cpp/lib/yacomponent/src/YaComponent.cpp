@@ -1,4 +1,5 @@
-#include "YaComponent.h"
+#include <yacomponent/YaBuffer.h>
+
 #include "zmq.h"
 
 #if (defined(WIN32))

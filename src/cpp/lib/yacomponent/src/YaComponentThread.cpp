@@ -1,4 +1,4 @@
-#include "YaComponentThread.h"
+#include <yacomponent/YaComponentThread.h>
 
 YaComponentThread::YaComponentThread() {}
 

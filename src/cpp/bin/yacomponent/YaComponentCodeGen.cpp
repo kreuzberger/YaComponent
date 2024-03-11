@@ -1,21 +1,3 @@
-/*!
- * **********************************************************************************
- * Firma     PROCITEC GmbH    (C) Copyright PROCITEC GmbH 2022
- * **********************************************************************************
- * Dieses Computerprogramm ist urheberrechtlich geschuetzt(Paragraphen 69a ff UrhG).
- * Urheber ist die PROCITEC GmbH.
- *
- * Die Nutzung, Weitergabe und Vervielfaeltigung dieses Computerprogramms,
- * sowie Verwertung und Mitteilung seines Inhaltes ist durch den Vertrag
- * BWB E/UR1A/4A104/L5305 geregelt.
- *
- * Anderweitige Nutzung, Weitergabe und Vervielfaeltigung dieses Computer-
- * programms, sowie Verwertung und Mitteilung seines Inhaltes bedarf der
- * ausdruecklichen Zustimmung der PROCITEC GmbH.
- *
- * Zuwiderhandlung verpflichtet zum Schadensersatz.
- * **********************************************************************************
- */
 
 #include "YaComponentCodeGen.h"
 
@@ -93,12 +75,12 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
 
     fhHeader << "    virtual ~" << compName << "Impl();" << std::endl;
 
-    for (auto &ifc : providedIfc) {
+    for (const auto &ifc : providedIfc) {
         fhHeader << "    void setConnectionPara" << ifc.at("id")
                  << "( const char* address, int hwm = 0 );" << std::endl;
     }
 
-    for (auto &ifc : usedIfc) {
+    for (const auto &ifc : usedIfc) {
         fhHeader << "    void setConnectionPara" << ifc.at("id")
                  << "( const char* address, const char* ident );" << std::endl;
     }
@@ -121,7 +103,7 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
     fhHeader << "    enum PROXY_IDS {" << std::endl;
     fhHeader << "      PROXY_INVALID = -1" << std::endl;
 
-    for (auto &ifc : usedIfc) {
+    for (const auto &ifc : usedIfc) {
         fhHeader << "    , PROXY_" << YaComponentCore::to_upper(ifc.at("id")) << std::endl;
     }
 
@@ -129,7 +111,7 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
 
     fhHeader << "    enum STUB_IDS {" << std::endl;
     fhHeader << "      STUB_INVALID = -1" << std::endl;
-    for (auto &ifc : providedIfc) {
+    for (const auto &ifc : providedIfc) {
         fhHeader << "    , STUB_" << YaComponentCore::to_upper(ifc.at("id")) << std::endl;
     }
 
@@ -139,13 +121,13 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
 
     strCtorImpl += " :QObject()";
 
-    for (auto &ifc : usedIfc) {
+    for (const auto &ifc : usedIfc) {
         fhHeader << "  " << ifc.at("classname") << "Proxy m" << ifc.at("id") << ";" << std::endl;
         strCtorImpl += " , m" + ifc.at("id") + "( context, PROXY_"
                        + YaComponentCore::to_upper(ifc.at("id")) + ", r" + ifc.at("classname") + " )";
     }
 
-    for (auto &ifc : providedIfc) {
+    for (const auto &ifc : providedIfc) {
         fhHeader << "  " << ifc.at("classname") << "Stub m" << ifc.at("id") << ";" << std::endl;
         strCtorImpl += " , m" + ifc.at("id") + "( context, STUB_"
                        + YaComponentCore::to_upper(ifc.at("id")) + ", r" + ifc.at("classname") + " )";
@@ -174,11 +156,11 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
     fhSource << "{" << std::endl;
     fhSource << "  emit stopTimer( );" << std::endl;
 
-    for (auto &ifc : providedIfc) {
+    for (const auto &ifc : providedIfc) {
         fhSource << "  m" << ifc.at("id") << ".close();" << std::endl;
     }
 
-    for (auto &ifc : usedIfc) {
+    for (const auto &ifc : usedIfc) {
         fhSource << "  m" << ifc.at("id") << ".close();" << std::endl;
     }
 
@@ -190,7 +172,7 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
     fhSource << "  mpoTimer = nullptr;" << std::endl;
     fhSource << "}" << std::endl;
 
-    for (auto &ifc : providedIfc) {
+    for (const auto &ifc : providedIfc) {
         fhSource << "void " << compName << "Impl::setConnectionPara" << ifc.at("id")
                  << "( const char* address, int hwm )" << std::endl;
         fhSource << "{" << std::endl;
@@ -198,7 +180,7 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
         fhSource << "}" << std::endl;
     }
 
-    for (auto &ifc : usedIfc) {
+    for (const auto &ifc : usedIfc) {
         fhSource << "void " << compName << "Impl::setConnectionPara" << ifc.at("id")
                  << "( const char* address, const char* ident )" << std::endl;
         fhSource << "{" << std::endl;
@@ -208,10 +190,10 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
 
     fhSource << "void " << compName << "Impl::onTimer()" << std::endl;
     fhSource << "{" << std::endl;
-    for (auto &ifc : usedIfc) {
+    for (const auto &ifc : usedIfc) {
         fhSource << "  m" << ifc.at("id") << ".receive();" << std::endl;
     }
-    for (auto &ifc : providedIfc) {
+    for (const auto &ifc : providedIfc) {
         fhSource << "  m" << ifc.at("id") << ".receive();" << std::endl;
     }
 
@@ -287,8 +269,8 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     }
 
     fhHeader << "#include \"I" << ifcName << "ProxyHandler.h\"" << std::endl;
-    fhHeader << "#include \"YaProxyBase.h\"" << std::endl;
-    fhHeader << "#include \"YaSUBImpl.h\"" << std::endl;
+    fhHeader << "#include <yacomponent/YaProxyBase.h>" << std::endl;
+    fhHeader << "#include <yacomponent/YaSUBImpl.h>" << std::endl;
     fhHeader << "#include <QtCore/QObject>" << std::endl;
 
     fhHeader << "namespace YaComponent {" << std::endl;
@@ -526,8 +508,8 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     }
 
     fhHeader << "#include \"I" << ifcName << "StubHandler.h\"\n";
-    fhHeader << "#include \"YaStubBase.h\"\n";
-    fhHeader << "#include \"YaPUBImpl.h\"\n";
+    fhHeader << "#include <yacomponent/YaStubBase.h>\n";
+    fhHeader << "#include <yacomponent/YaPUBImpl.h>\n";
 
     fhHeader << "#include <stdio.h>\n";
 

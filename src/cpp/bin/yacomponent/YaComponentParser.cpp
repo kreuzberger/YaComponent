@@ -1,20 +1,27 @@
 
 #include "YaComponentParser.h"
 #include "YaComponentCodeGen.h"
+#include "YaComponentDocGen.h"
 
 #include <core/YaComponentCore.h>
 YaComponentParser::YaComponentParser() {}
 
 void YaComponentParser::init(
 
-    const std::filesystem::path &code, bool verbose)
+    const std::filesystem::path &code, const std::filesystem::path &doc, bool verbose)
 {
     if (!code.empty()) {
         mCodePath = std::filesystem::absolute(code);
     } else {
         mCodePath = std::filesystem::current_path() / mBaseName / std::filesystem::path("code");
     }
+    if (!doc.empty()) {
+        mDocPath = std::filesystem::absolute(doc);
+    } else {
+        mDocPath = std::filesystem::current_path() / mBaseName / std::filesystem::path("doc");
+    }
     std::filesystem::create_directories(mCodePath);
+    std::filesystem::create_directories(mDocPath);
     mVerbose = verbose;
 }
 
@@ -37,6 +44,8 @@ void YaComponentParser::parseComponent(const std::filesystem::path &componentPat
 
     YaComponentCodeGen code_writer;
     code_writer.writeComponent(mCodePath, mBaseName, providedIfc, usedIfc);
+    YaComponentDocGen doc_writer;
+    doc_writer.writeComponent(mDocPath, mBaseName, providedIfc, usedIfc);
 }
 
 void YaComponentParser::parseIfc(const std::filesystem::path &ifcPath)
@@ -58,6 +67,8 @@ void YaComponentParser::parseIfc(const std::filesystem::path &ifcPath)
 
     YaComponentCodeGen code_writer;
     code_writer.writeIfc(mCodePath, ifcBaseName, properties, requests, responses, includes);
+    YaComponentDocGen doc_writer;
+    doc_writer.writeIfc(mDocPath, ifcBaseName, properties, requests, responses, includes);
 }
 
 std::tuple<YaComponentParser::EntryList, YaComponentParser::EntryList>
