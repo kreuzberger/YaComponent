@@ -28,10 +28,10 @@ void YaComponentParser::init(
 void YaComponentParser::parseComponent(const std::filesystem::path &componentPath)
 {
     mComponentPath = std::filesystem::absolute(componentPath);
-    mBaseName = std::filesystem::absolute(mComponentPath).stem();
+    mBaseName = std::filesystem::absolute(mComponentPath).stem().string();
 
     tinyxml2::XMLDocument doc;
-    tinyxml2::XMLError load_state = doc.LoadFile(mComponentPath.c_str());
+    tinyxml2::XMLError load_state = doc.LoadFile(mComponentPath.string().c_str());
     if (tinyxml2::XML_SUCCESS == load_state) {
     } else {
         YaComponentCore::printFatal("cannot read xml file " + mComponentPath.string());
@@ -51,10 +51,10 @@ void YaComponentParser::parseComponent(const std::filesystem::path &componentPat
 void YaComponentParser::parseIfc(const std::filesystem::path &ifcPath)
 {
     mIfcPath = std::filesystem::absolute(ifcPath);
-    auto ifcBaseName = std::filesystem::absolute(mIfcPath).stem();
+    auto ifcBaseName = std::filesystem::absolute(mIfcPath).stem().string();
 
     tinyxml2::XMLDocument doc;
-    tinyxml2::XMLError load_state = doc.LoadFile(mIfcPath.c_str());
+    tinyxml2::XMLError load_state = doc.LoadFile(mIfcPath.string().c_str());
     if (tinyxml2::XML_SUCCESS == load_state) {
     } else {
         YaComponentCore::printFatal("cannot read xml file " + mIfcPath.string());
@@ -91,7 +91,7 @@ YaComponentParser::parseComponentDefinitions(Element *component)
             YaComponentCore::printDbg(std::string("YaComponentParser: id:") + id + ", xml:" + xml);
             Entry entry;
             entry.insert_or_assign("id", id);
-            entry.insert_or_assign("classname", std::filesystem::path(xml).stem());
+            entry.insert_or_assign("classname", std::filesystem::path(xml).stem().string());
             ifcProvided.push_back(entry);
             ifc = ifc->NextSiblingElement("interface");
         }
@@ -113,7 +113,7 @@ YaComponentParser::parseComponentDefinitions(Element *component)
             YaComponentCore::printDbg(std::string("YaComponentParser: id:") + id + ", xml:" + xml);
             Entry entry;
             entry.insert_or_assign("id", id);
-            entry.insert_or_assign("classname", std::filesystem::path(xml).stem());
+            entry.insert_or_assign("classname", std::filesystem::path(xml).stem().string());
             ifcUsed.push_back(entry);
             ifc = ifc->NextSiblingElement("interface");
         }

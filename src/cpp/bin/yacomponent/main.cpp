@@ -63,11 +63,11 @@ int main(int argc, char** argv)
     }
 
     if (!componentPath.empty() && !std::filesystem::exists(componentPath)) {
-        YaComponentCore::printFatal(std::string("given component xml file ") + componentPath.c_str()
+        YaComponentCore::printFatal(std::string("given component xml file ") + componentPath.u8string()
                                     + std::string(" not found"));
     }
     if (!ifcPath.empty() && !std::filesystem::exists(ifcPath)) {
-        YaComponentCore::printFatal(std::string("given ifc xml file ") + ifcPath.c_str()
+        YaComponentCore::printFatal(std::string("given ifc xml file ") + ifcPath.u8string()
                                     + std::string(" not found"));
     }
 

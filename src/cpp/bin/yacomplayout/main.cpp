@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
     } else {
         if (!std::filesystem::exists(layoutPath)) {
-            YaComponentCore::printFatal(std::string("given layout xml file ") + layoutPath.c_str()
+            YaComponentCore::printFatal(std::string("given layout xml file ") + layoutPath.string()
                                         + std::string(" not found"));
         } else {
             YaCompLayoutParser parser;

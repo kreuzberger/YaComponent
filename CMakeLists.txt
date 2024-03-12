@@ -13,6 +13,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
+set(CMAKE_DISABLE_PRECOMPILE_HEADERS ON)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake" )
 
 set( WITH_FETCH ON)
@@ -21,6 +23,7 @@ set( CMAKE_POSITION_INDEPENDENT_CODE ON)
 include(FetchContent)
 
 option( ZMQ_BUILD_TESTS OFF FORCE)
+option( ENABLE_PRECOMPILED OFF)
 FetchContent_Declare(
     zeromq
     URL "${CMAKE_SOURCE_DIR}/bin/zeromq-4.3.5.tar.gz"

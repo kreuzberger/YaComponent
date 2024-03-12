@@ -10,7 +10,7 @@ void YaCompLayoutParser::init(const std::filesystem::path &layout,
                               bool verbose)
 {
     mLayoutPath = std::filesystem::absolute(layout);
-    mBaseName = std::filesystem::absolute(mLayoutPath).stem();
+    mBaseName = std::filesystem::absolute(mLayoutPath).stem().string();
     if (!mCodePath.empty()) {
         mCodePath = std::filesystem::absolute(code);
     } else {
@@ -23,7 +23,7 @@ void YaCompLayoutParser::init(const std::filesystem::path &layout,
 void YaCompLayoutParser::parse()
 {
     tinyxml2::XMLDocument doc;
-    tinyxml2::XMLError load_state = doc.LoadFile(mLayoutPath.c_str());
+    tinyxml2::XMLError load_state = doc.LoadFile(mLayoutPath.string().c_str());
     if (tinyxml2::XML_SUCCESS == load_state) {
     } else {
         YaComponentCore::printFatal("cannot read xml file " + mLayoutPath.string());
