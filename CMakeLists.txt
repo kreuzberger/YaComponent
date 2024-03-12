@@ -44,7 +44,8 @@ include(ProcessorCount)
 ProcessorCount(N)
 
 set(ABSL_PROPAGATE_CXX_STD ON CACHE INTERNAL "ABSL_FLAGS")
-set( ABSL_ENABLE_INSTALL ON)
+set(ABSL_ENABLE_INSTALL ON)
+set(ABSL_CMAKE_BUILD_SHARED OFF)
 
 FetchContent_Declare(
     abseil
@@ -55,6 +56,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(abseil)
 
 set( ABSL_ROOT_DIR ${abseil_SOURCE_DIR})
+set( protobuf_MSVC_STATIC_RUNTIME OFF )
 set( protobuf_ABSL_PROVIDER module)
 set( protobuf_BUILD_TESTS off)
 
