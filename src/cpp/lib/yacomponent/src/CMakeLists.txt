@@ -19,5 +19,6 @@ target_sources( YaComponentLib PRIVATE
     ${YaComponentLib_SOURCE_DIR}/include/yacomponent/YaComponent.h
 )
 
-target_link_libraries( YaComponentLib Qt5::Core libzmq::static protobuf::lib)
+#target_link_libraries( YaComponentLib PUBLIC Qt5::Core libzmq-static protobuf::libprotobuf absl::log absl::log_internal_check_op absl::node_hash_set absl::status absl::statusor absl::cord absl::strings)
+target_link_libraries( YaComponentLib PUBLIC Qt5::Core libzmq-static libprotobuf)
 target_include_directories( YaComponentLib PUBLIC "${YaComponentLib_SOURCE_DIR}/include")

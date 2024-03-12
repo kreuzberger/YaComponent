@@ -18,4 +18,4 @@ add_library ( wavplayerlib  ${GENERATED_IFC_AUDIOPLAYER}
                             ${ProtoHeadersAudioPlayer}
 )
 
-target_link_libraries(wavplayerlib  PRIVATE YaComponentLib Qt5::Core libzmq::static protobuf::lib )
+target_link_libraries(wavplayerlib  PRIVATE YaComponentLib )
