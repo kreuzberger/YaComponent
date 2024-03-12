@@ -1,5 +1,4 @@
 #include "PubSubUnittestMP.h"
-#include "zmq.h"
 
 QTEST_MAIN(PubSubUnittestMP);
 

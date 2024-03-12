@@ -1,11 +1,9 @@
-#ifndef TEXTUNITTEST_MP_SUB_H
-#define TEXTUNITTEST_MP_SUB_H
+#pragma once
 
 #include <QObject>
 
-#include "YaComponent.h"
-#include "YaComponentThread.h"
-#include "textgencompunittest.h"
+#include <yacomponent/YaComponent.h>
+#include <yacomponent/YaComponentThread.h>
 #include "textoutcompunittest.h"
 
 class TextUnittestMPSub : public QObject
@@ -32,5 +30,3 @@ private:
     YaComponentThread *mpTextOutThread;
     TextOutComp *mpTextOut;
 };
-
-#endif // TEXTUNITTEST_H

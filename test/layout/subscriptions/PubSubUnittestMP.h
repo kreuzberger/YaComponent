@@ -15,19 +15,19 @@ signals:
 public slots:
     void finishedPub(int exitCode, QProcess::ExitStatus exitStatus)
     {
-        qDebug() << "process pub finished";
+        qDebug() << "process pub finished with" << exitCode;
         miExitCodePub = exitCode;
         QVERIFY(exitStatus != QProcess::CrashExit);
     }
     void finishedSubFast(int exitCode, QProcess::ExitStatus exitStatus)
     {
-        qDebug() << "process subfast finished";
+        qDebug() << "process subfast finished with" << exitCode;
         miExitCodeSubFast = exitCode;
         QVERIFY(exitStatus != QProcess::CrashExit);
     }
     void finishedSubSlow(int exitCode, QProcess::ExitStatus exitStatus)
     {
-        qDebug() << "process subslow finished";
+        qDebug() << "process subslow finished with" << exitCode;
         miExitCodeSubSlow = exitCode;
         QVERIFY(exitStatus != QProcess::CrashExit);
     }

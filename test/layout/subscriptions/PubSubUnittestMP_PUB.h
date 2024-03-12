@@ -1,10 +1,8 @@
-#ifndef PUBSUBUNITTESTMP_PUB_H
-#define PUBSUBUNITTESTMP_PUB_H
-
+#pragma once
 #include <QObject>
 
-#include "YaComponent.h"
-#include "YaComponentThread.h"
+#include <yacomponent/YaComponent.h>
+#include <yacomponent/YaComponentThread.h>
 #include "publishercompunittest.h"
 
 class PubSubUnittestMPPub : public QObject
@@ -31,5 +29,3 @@ private:
     YaComponentThread *mpPublisherThread;
     PublisherComp *mpPublisher;
 };
-
-#endif // TEXTUNITTEST_H

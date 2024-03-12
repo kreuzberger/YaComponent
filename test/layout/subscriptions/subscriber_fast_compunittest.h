@@ -1,6 +1,4 @@
-#ifndef SUBSCRIBER_FAST_COMPUNITTEST_H
-#define SUBSCRIBER_FAST_COMPUNITTEST_H
-
+#pragma once
 #include "IPublisherIfcProxyHandler.h"
 #include "SubscriberCompImpl.h"
 
@@ -26,4 +24,3 @@ private:
     SubscriberComp &self() { return *this; }
 };
 
-#endif // TEXTOUTCOMP_H

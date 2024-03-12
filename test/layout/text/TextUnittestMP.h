@@ -1,6 +1,4 @@
-#ifndef TEXTUNITTESTMP_H
-#define TEXTUNITTESTMP_H
-
+#pragma once
 #include <QObject>
 
 #include <QtCore/QProcess>
@@ -24,5 +22,3 @@ private:
     QProcess moProcessTextGen;
     QProcess moProcessTextOut;
 };
-
-#endif // TEXTUNITTEST_H

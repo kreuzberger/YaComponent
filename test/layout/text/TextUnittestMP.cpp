@@ -1,5 +1,4 @@
 #include "TextUnittestMP.h"
-#include "zmq.h"
 #include <QtTest>
 
 QTEST_MAIN(TextUnittestMP);
@@ -18,9 +17,9 @@ void TextUnittestMP::testMPMT()
     textgen = "textgenMPMT";
     textout = "textoutMPMT";
 #endif
-    moProcessTextGen.start(textgen);
+    moProcessTextGen.start(textgen, QStringList());
     QVERIFY(moProcessTextGen.waitForStarted());
-    moProcessTextOut.start(textout);
+    moProcessTextOut.start(textout, QStringList());
     QVERIFY(moProcessTextOut.waitForStarted());
 
     QVERIFY(moProcessTextOut.waitForFinished());

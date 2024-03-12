@@ -1,11 +1,9 @@
-#ifndef TEXTUNITTESTMP_PUB_H
-#define TEXTUNITTESTMP_PUB_H
-
+#pragma once
 #include <QObject>
 
-#include "YaComponent.h"
-#include "YaComponentThread.h"
 #include "textgencompunittest.h"
+#include <yacomponent/YaComponent.h>
+#include <yacomponent/YaComponentThread.h>
 
 class TextUnittestMPPub : public QObject
 {
@@ -31,5 +29,3 @@ private:
     YaComponentThread *mpTextGenThread;
     TextGenComp *mpTextGen1;
 };
-
-#endif // TEXTUNITTEST_H

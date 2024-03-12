@@ -12,9 +12,6 @@ YACOMPONENT_GENERATE(GENERATED_COMP_OUT_SRC textout/TextOutComp.xml)
 YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT_SRC TextExampleMPMT.xml)
 YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT_SRC_SPMT TextExampleSPMT.xml)
 
-QT5_WRAP_CPP( UNITTESTMPSUB_MOCS TextUnittestMP_SUB.h )
-QT5_WRAP_CPP( UNITTESTMPPUB_MOCS TextUnittestMP_PUB.h )
-
 set( textgen_SRCS
   ${GENERATED_IFC_SRC}
   ${GENERATED_COMP_GEN_SRC}
@@ -39,8 +36,6 @@ set( textout_SRCS
   ${UNITTESTMPSUB_MOCS}
 )
 
-QT5_WRAP_CPP( UNITTEST_MOCS TextUnittest.h )
-
 set( textunittest_SRCS
   ${GENERATED_IFC_SRC}
   ${GENERATED_IFC_SRC_OUT}
@@ -54,8 +49,6 @@ set( textunittest_SRCS
   TextUnittest.h
   ${UNITTEST_MOCS}
 )
-
-QT5_WRAP_CPP( UNITTESTMP_MOCS TextUnittestMP.h )
 
 set( textunittestmp_SRCS
   TextUnittestMP.cpp
@@ -72,10 +65,10 @@ add_executable( textunittest ${textunittest_SRCS} )
 add_executable( textunittestmp ${textunittestmp_SRCS} )
 
 
-target_link_libraries(textgenMPMT Qt5::Core Qt5::Test protobuf::lib libzmq::static)
-target_link_libraries(textoutMPMT Qt5::Core Qt5::Test protobuf::lib libzmq::static)
-target_link_libraries(textunittest Qt5::Core Qt5::Test protobuf::lib libzmq::static)
-target_link_libraries(textunittestmp Qt5::Core Qt5::Test protobuf::lib libzmq::static)
+target_link_libraries(textgenMPMT PRIVATE YaComponentLib Qt5::Test)
+target_link_libraries(textoutMPMT PRIVATE YaComponentLib Qt5::Test)
+target_link_libraries(textunittest PRIVATE YaComponentLib Qt5::Test)
+target_link_libraries(textunittestmp PRIVATE YaComponentLib Qt5::Test)
 
 add_test( NAME textunittest COMMAND textunittest )
 add_test( NAME textunittestmp COMMAND textunittestmp )

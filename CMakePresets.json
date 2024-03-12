@@ -1,0 +1,75 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 22,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default Release Config",
+            "description": "Default Release build using Ninja generator",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "release",
+            "inherits": "default"
+        },
+        {
+            "name": "debug",
+            "inherits": "default",
+            "displayName": "Debug Config",
+            "description": "Default Debug build using Ninja generator",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default"
+        },
+        {
+            "name": "release",
+            "inherits": "default"
+        },
+        {
+            "name": "debug",
+            "configurePreset": "debug"
+        }
+
+    ],
+    "testPresets": [
+        {
+            "name": "default",
+            "hidden": true,
+            "configurePreset": "default",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false,
+                "scheduleRandom": true,
+                "timeout": 360
+            }
+        },
+        {
+            "name": "release",
+            "inherits": "default"
+        },
+        {
+            "name": "debug",
+            "inherits": "default",
+            "configurePreset": "debug"
+        }
+    ]
+}
