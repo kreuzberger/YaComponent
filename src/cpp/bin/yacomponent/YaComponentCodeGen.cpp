@@ -420,8 +420,8 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     fhSource << "    default:" << std::endl;
     fhSource << "      if( -1 < key)" << std::endl;
     fhSource << "      {" << std::endl;
-    fhSource << "        qDebug() << \"unknown key \" << key;";
-    fhSource << "        assert(0);";
+    fhSource << "        qDebug() << \"unknown key \" << key;" << std::endl;
+    fhSource << "        assert(0);" << std::endl;
     fhSource << "      }" << std::endl;
     fhSource << "      break;" << std::endl;
     fhSource << "    }" << std::endl;
@@ -659,10 +659,10 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhSource << "{\n";
     fhSource << "  int iMsgCnt = 0;\n";
     fhSource << "  bool bMsgAvailable = true;\n";
-    fhSource << "  std::string ident;\n";
 
     fhSource << "  while( bMsgAvailable )\n";
     fhSource << "  {\n";
+    fhSource << "    std::string ident;\n";
     fhSource << "    int iBytesTotal = 0;\n";
     fhSource << "    int key = -1;\n";
     fhSource << "    int size = -1;\n";
@@ -673,11 +673,10 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhSource << "    if( 0 < iBytes )\n";
     fhSource << "    {\n";
     fhSource << "      iBytesTotal += iBytes;\n";
-    fhSource << "      iMsgCnt++;\n";
-    fhSource << "    }\n";
+    fhSource << "      iMsgCnt++;\n\n";
 
-    fhSource << "    switch( key )\n";
-    fhSource << "    {\n";
+    fhSource << "      switch( key )\n";
+    fhSource << "      {\n";
 
     for (const auto *req : requests) {
         std::string strReq;
@@ -686,13 +685,13 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
             strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
         }
         strReq += YaComponentCore::to_upper(req->Attribute("id"));
-        fhSource << "    case " << strReq << ":\n";
+        fhSource << "      case " << strReq << ":\n";
         std::string strMember;
 
         auto *para = req->FirstChildElement("para");
         while (para) {
-            strMember += std::string("      m") + req->Attribute("id") + "_" + para->Attribute("id")
-                         + ".ParseFromArray(msgData, size);\n";
+            strMember += std::string("        m") + req->Attribute("id") + "_"
+                         + para->Attribute("id") + ".ParseFromArray(msgData, size);\n";
             para = para->NextSiblingElement("para");
         }
 
@@ -702,12 +701,12 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
         auto *resp = req->FirstChildElement("resp");
         while (resp) {
-            fhSource << "      m" << req->Attribute("id") << "_" << resp->Attribute("id")
+            fhSource << "        m" << req->Attribute("id") << "_" << resp->Attribute("id")
                      << ".Clear();\n";
             resp = resp->NextSiblingElement("resp");
         }
 
-        fhSource << "      mCallbackHandler.onRequest" << req->Attribute("id") << "( mId";
+        fhSource << "        mCallbackHandler.onRequest" << req->Attribute("id") << "( mId";
         std::string strPara;
 
         para = req->FirstChildElement("para");
@@ -737,22 +736,24 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
                 strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
             }
             strResp += YaComponentCore::to_upper(resp->Attribute("id"));
-            fhSource << "      response( " << strResp << ", m" << req->Attribute("id") << "_"
+            fhSource << "        response( " << strResp << ", m" << req->Attribute("id") << "_"
                      << resp->Attribute("id") << ", ident );\n";
             resp = resp->NextSiblingElement("resp");
         }
 
-        fhSource << "      break;\n";
+        fhSource << "        break;\n";
     }
 
-    fhSource << "    default:\n";
-    fhSource << "      if( -1 < key)\n";
-    fhSource << "      {\n";
-    fhSource << "        qDebug() << \"unknown key \" << key;";
-    fhSource << "        assert(0);";
+    fhSource << "      default:\n";
+    fhSource << "        if( -1 < key)\n";
+    fhSource << "        {\n";
+    fhSource << "          qDebug() << \"unknown key \" << key;\n";
+    fhSource << "          assert(0);\n";
+    fhSource << "        }\n";
+    fhSource << "        break;\n";
     fhSource << "      }\n";
-    fhSource << "      break;\n";
     fhSource << "    }\n";
+
     fhSource << "    if( 0 >= iBytesTotal ) bMsgAvailable = false;\n";
 
     fhSource << "  }\n";

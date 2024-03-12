@@ -69,6 +69,9 @@ int YaSUBImpl::send(int key, int size, const char *data)
         assert(-1 != rc);
         if (0 != size && 0 != data) {
             rc = zmq_send(mpReqRespSocket, data, size, 0);
+            if (-1 == rc) {
+                fprintf(stderr, "error: %s\n", zmq_strerror(zmq_errno()));
+            }
         }
     }
 

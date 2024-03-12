@@ -34,8 +34,6 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
     int iBytes = 0;
     char address[YaComponent::MaxIdentSize + 1];
     memset(address, 0, YaComponent::MaxIdentSize + 1);
-    int addressSize = 0;
-    int rc = -1;
     int more = -1;
     size_t moreSize = sizeof(more);
     memset(mcKeyReq, 0, YaComponent::KeySize + 1);
@@ -46,10 +44,10 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
         items[0].events = ZMQ_POLLIN;
         items[0].revents = -1;
 
-        rc = zmq_poll(items, 1, 0);
+        auto rc = zmq_poll(items, 1, 0);
 
         if (-1 < rc && 0 < items[0].revents) {
-            int addressSize = zmq_recv(mpReqRespSocket, address, YaComponent::MaxIdentSize, ZMQ_NOBLOCK);
+            auto addressSize = zmq_recv(mpReqRespSocket, address, YaComponent::MaxIdentSize, ZMQ_NOBLOCK);
             if (0 < addressSize) {
                 ident = address;
                 // identifier or address received
@@ -62,10 +60,11 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                 iBytes = zmq_recv(mpReqRespSocket, mcKeyReq, YaComponent::KeySize, ZMQ_NOBLOCK);
                 if (0 < iBytes) {
                     assert(iBytes == YaComponent::KeySize);
-                    sscanf(mcKeyReq, YaComponent::KeyFmt, &key);
-                    {
+                    auto ok = sscanf(mcKeyReq, YaComponent::KeyFmt, &key);
+                    // TODO ok failes sometimes, mcKeyReq is empty but 4 bytes received. WHY?
+                    if (0 < ok) {
                         if (0 <= key) {
-                            qDebug() << "peer " << ident.c_str() << " with key " << key;
+                            qDebug() << "peer" << ident.c_str() << "with key" << key;
 
                             rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                             if (-1 < rc && more) {
@@ -98,7 +97,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                                 assert(0);
                             }
                         } else if (YaComponent::KeySetNotification == key) {
-                            qDebug() << "peer " << ident.c_str() << " setNotification";
+                            qDebug() << "peer" << ident.c_str() << "setNotification";
                             char cNotKey[YaComponent::KeySize + 1];
                             memset(cNotKey, 0, YaComponent::KeySize + 1);
                             iBytes = zmq_recv(mpReqRespSocket, cNotKey, YaComponent::KeySize, ZMQ_NOBLOCK);
@@ -106,7 +105,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                             if (0 < iBytes) {
                                 int notKey = -1;
                                 sscanf(cNotKey, YaComponent::KeyFmt, &notKey);
-                                qDebug() << "peer " << ident.c_str() << " setNotification property "
+                                qDebug() << "peer" << ident.c_str() << "setNotification property "
                                          << notKey;
                                 mPeerMap[ident][notKey] = 1;
                                 rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
@@ -137,9 +136,13 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                             }
 
                         } else {
-                            qDebug() << "unknown key " << key;
+                            qDebug() << "unknown key " << key << "from" << iBytes << "Bytes and '"
+                                     << std::string(mcKeyReq).c_str() << "'";
                             assert(0);
                         }
+                    } else {
+                        // TODO something went wrong,
+                        iBytes = 0;
                     }
                 }
             }
