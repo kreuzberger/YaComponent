@@ -1,3 +1,3 @@
-project( YaComponentLib )
+project( YaComponentLib)
 
 add_subdirectory(src)

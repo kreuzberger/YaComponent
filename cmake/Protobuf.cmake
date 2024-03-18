@@ -57,8 +57,9 @@ function(PROTOBUF_GENERATE_CPP SRCS HDRS)
     add_custom_command(
       OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc"
              "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h"
+             "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}_pb2.py"
       COMMAND  protobuf::protoc
-      ARGS --cpp_out  ${CMAKE_CURRENT_BINARY_DIR} ${_protobuf_include_path} ${ABS_FIL}
+      ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR} --python_out ${CMAKE_CURRENT_BINARY_DIR} ${_protobuf_include_path} ${ABS_FIL}
       DEPENDS ${ABS_FIL} protobuf::protoc
       COMMENT "Running C++ protocol buffer compiler on ${FIL}"
       VERBATIM )

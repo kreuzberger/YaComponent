@@ -1,30 +1,32 @@
-  message AudioData {
-    required double samplerate = 1;
-    required int32 samplecount = 2;
-    required int32 channels = 3;
-    required bool complex = 4;
-    required bool interleaved = 5;
+syntax = "proto3";
+
+message AudioData {
+  double samplerate = 1;
+  int32 samplecount = 2;
+  int32 channels = 3;
+  bool complex = 4;
+  bool interleaved = 5;
   
-    enum Format {
-      INTEGER_SIGNED_16_BIT = 0;
-      INTEGER_SIGNED_8_BIT = 1;
-      FLOAT_LITTLE_ENDIAN = 2;
-      DOUBLE_LITTLE_ENDIAN = 3;
-    }
+  enum Format {
+    INTEGER_SIGNED_16_BIT = 0;
+    INTEGER_SIGNED_8_BIT = 1;
+    FLOAT_LITTLE_ENDIAN = 2;
+    DOUBLE_LITTLE_ENDIAN = 3;
+  }
     
-    required Format format = 6;
-    required bytes data = 7;
-  }
+  Format format = 6;
+  repeated bytes data = 7;
+}
 
 
-  message StartData {
-  }
-  
-  message StopData {
-  }
-  
-  message StoppedData {
-  }
-  
-  message StartedData {
-  } 
+message StartData {
+}
+
+message StopData {
+}
+
+message StoppedData {
+}
+
+message StartedData {
+}

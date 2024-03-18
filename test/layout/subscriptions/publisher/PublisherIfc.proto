@@ -1,9 +1,10 @@
+syntax = "proto3";
 
 message Data {
-  required int64 timeSeconds = 1;
-  required double timeFraction = 2;
-  required int32  counter = 3;
-  repeated float samples = 4 [packed=true];
+  int64 timeSeconds = 1;
+  double timeFraction = 2;
+  int32  counter = 3;
+  repeated float samples = 4;
 }
 
 message StartData {
