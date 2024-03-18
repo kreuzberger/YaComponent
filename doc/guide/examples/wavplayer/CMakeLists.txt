@@ -18,4 +18,4 @@ add_library ( wavplayerlib  ${GENERATED_IFC_AUDIOPLAYER}
                             ${ProtoHeadersAudioPlayer}
 )
 
-target_link_libraries(wavplayerlib  PRIVATE YaComponentLib )
+target_link_libraries(wavplayerlib  PRIVATE YaComponent::YaComponent )

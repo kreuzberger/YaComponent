@@ -58,9 +58,9 @@ add_executable( subscriber_slow_MPMT  ${subscriber_slow_SRCS} )
 add_executable( pubsubunittestmp ${pubsubunittestmp_SRCS} )
 
 
-target_link_libraries(publisherMPMT PRIVATE YaComponentLib Qt5::Test)
-target_link_libraries(subscriber_fast_MPMT PRIVATE YaComponentLib Qt5::Test)
-target_link_libraries(subscriber_slow_MPMT PRIVATE YaComponentLib Qt5::Test)
-target_link_libraries(pubsubunittestmp PRIVATE YaComponentLib Qt5::Test)
+target_link_libraries(publisherMPMT PRIVATE YaComponent Qt5::Test)
+target_link_libraries(subscriber_fast_MPMT PRIVATE YaComponent Qt5::Test)
+target_link_libraries(subscriber_slow_MPMT PRIVATE YaComponent Qt5::Test)
+target_link_libraries(pubsubunittestmp PRIVATE YaComponent Qt5::Test)
 
 add_test( NAME pubsubunittestmp COMMAND pubsubunittestmp )

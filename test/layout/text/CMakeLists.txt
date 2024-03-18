@@ -65,10 +65,10 @@ add_executable( textunittest ${textunittest_SRCS} )
 add_executable( textunittestmp ${textunittestmp_SRCS} )
 
 
-target_link_libraries(textgenMPMT PRIVATE YaComponentLib Qt5::Test)
-target_link_libraries(textoutMPMT PRIVATE YaComponentLib Qt5::Test)
-target_link_libraries(textunittest PRIVATE YaComponentLib Qt5::Test)
-target_link_libraries(textunittestmp PRIVATE YaComponentLib Qt5::Test)
+target_link_libraries(textgenMPMT PRIVATE YaComponent Qt5::Test)
+target_link_libraries(textoutMPMT PRIVATE YaComponent Qt5::Test)
+target_link_libraries(textunittest PRIVATE YaComponent Qt5::Test)
+target_link_libraries(textunittestmp PRIVATE YaComponent Qt5::Test)
 
 add_test( NAME textunittest COMMAND textunittest )
 add_test( NAME textunittestmp COMMAND textunittestmp )

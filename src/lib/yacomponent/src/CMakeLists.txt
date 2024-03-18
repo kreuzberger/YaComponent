@@ -1,4 +1,4 @@
-add_library( YaComponentLib STATIC )
+add_library( YaComponent STATIC )
 
 set( YaComponentLib_PUBLIC_HEADERS
     ${YaComponentLib_SOURCE_DIR}/include/yacomponent/YaComponentThread.h
@@ -10,7 +10,7 @@ set( YaComponentLib_PUBLIC_HEADERS
     ${YaComponentLib_SOURCE_DIR}/include/yacomponent/YaComponent.h
 )
 
-target_sources( YaComponentLib PRIVATE
+target_sources( YaComponent PRIVATE
     YaBuffer.cpp
     YaComponent.cpp
     YaComponentThread.cpp
@@ -22,8 +22,8 @@ target_sources( YaComponentLib PRIVATE
 )
 
 #target_link_libraries( YaComponentLib PUBLIC Qt5::Core libzmq-static protobuf::libprotobuf absl::log absl::log_internal_check_op absl::node_hash_set absl::status absl::statusor absl::cord absl::strings)
-target_link_libraries( YaComponentLib PUBLIC Qt5::Core libzmq-static protobuf::libprotobuf)
-target_include_directories( YaComponentLib
+target_link_libraries( YaComponent PUBLIC Qt5::Core libzmq-static protobuf::libprotobuf)
+target_include_directories( YaComponent
     PUBLIC # where top-level project will look for the library's public headers
            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
            # where external projects will look for the library's public headers
@@ -32,7 +32,7 @@ target_include_directories( YaComponentLib
 
 
 install(
-    TARGETS YaComponentLib
+    TARGETS YaComponent
     EXPORT YaComponentTargets
     DESTINATION "lib"
     COMPONENT "yacomponent"
@@ -44,3 +44,4 @@ install(
     COMPONENT "yacomponent"
 )
 
+add_library(YaComponent::YaComponent ALIAS YaComponent)
