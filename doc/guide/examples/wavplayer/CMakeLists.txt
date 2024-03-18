@@ -1,9 +1,10 @@
 project ( WavPlayer )
 
-PROTOBUF_GENERATE_CPP(ProtoSourcesAudioPlayer ProtoHeadersAudioPlayer AudioPlayerIfc.proto)
+#PROTOBUF_GENERATE_CPP(ProtoSourcesAudioPlayer ProtoHeadersAudioPlayer AudioPlayerIfc.proto)
+
+PROTOBUF_GENERATE(OUT_VAR ProtoSourcesAudioPlayer LANGUAGE cpp PROTOS AudioPlayerIfc.proto APPEND_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 YACOMPONENT_IFC_GENERATE(GENERATED_IFC_AUDIOPLAYER AudioPlayerIfc.xml )
-
 
 YACOMPONENT_GENERATE(GENERATED_COMP_WAV_SRC WavFilePlayerComponent.xml)
 YACOMPONENT_GENERATE(GENERATED_COMP_SOUND_SRC SoundOutComponent.xml)

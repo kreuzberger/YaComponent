@@ -1,10 +1,9 @@
 project ( TextExample)
 
-PROTOBUF_GENERATE_CPP(ProtoSourcesTextGen ProtoHeadersTextGen textgen/TextGenIfc.proto)
+PROTOBUF_GENERATE(OUT_VAR ProtoSourcesTextGen LANGUAGE cpp PROTOS textgen/TextGenIfc.proto APPEND_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 YACOMPONENT_IFC_GENERATE(GENERATED_IFC_SRC textgen/TextGenIfc.xml textout/TextOutIfc.xml)
 YACOMPONENT_IFC_GENERATE(GENERATED_IFC_SRC_OUT textout/TextOutIfc.xml)
-
 
 YACOMPONENT_GENERATE(GENERATED_COMP_GEN_SRC textgen/TextGenComp.xml)
 YACOMPONENT_GENERATE(GENERATED_COMP_OUT_SRC textout/TextOutComp.xml)

@@ -18,3 +18,7 @@ if(NOT TARGET YaComponent::YaComponent)
 endif()
 
 find_dependency(Qt5 @QT_VERSION@ COMPONENTS Core REQUIRED)
+
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/YaComponent.cmake)
+    include(${CMAKE_CURRENT_LIST_DIR}/YaComponent.cmake)
+endif()

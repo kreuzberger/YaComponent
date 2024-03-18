@@ -59,6 +59,9 @@ if(WITH_BUNDLED_EXTERNALS)
     )
 
     FetchContent_MakeAvailable(abseil protobuf)
+
+    include(${protobuf_BINARY_DIR}/cmake/protobuf/protobuf-generate.cmake)
+
 else()
     find_package(ZeroMQ REQUIRED PATHS ${ZeroMQ_DIR} NO_DEFAULT_PATH)
     find_package(absl REQUIRED PATHS ${absl_DIR} NO_DEFAULT_PATH)
@@ -77,7 +80,7 @@ ProcessorCount(N)
 set(CMAKE_INSTALL_MESSAGE "LAZY") # one of NEVER, LAZY, ALWAYS
 
 
-include(${CMAKE_SOURCE_DIR}/cmake/Protobuf.cmake)
+#include(${CMAKE_SOURCE_DIR}/cmake/Protobuf.cmake)
 add_definitions(-DZMQ_STATIC)
 
 #installation default prefix like for old buildsys

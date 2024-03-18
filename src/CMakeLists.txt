@@ -33,6 +33,13 @@ install(
     COMPONENT "yacomponent"
 )
 
+install(
+    FILES ${CMAKE_SOURCE_DIR}/cmake/YaComponent.cmake
+    DESTINATION lib/cmake/YaComponent
+    COMPONENT "yacomponent"
+)
+
+
 add_subdirectory(tinyxml2)
 add_subdirectory(lib)
 add_subdirectory(bin)

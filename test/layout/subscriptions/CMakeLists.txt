@@ -1,6 +1,8 @@
 project ( SubscriptionsTest)
 
-PROTOBUF_GENERATE_CPP(ProtoSourcesTextGen ProtoHeadersTextGen publisher/PublisherIfc.proto)
+PROTOBUF_GENERATE(OUT_VAR ProtoSourcesTextGen LANGUAGE cpp PROTOS publisher/PublisherIfc.proto APPEND_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+#PROTOBUF_GENERATE_CPP(ProtoSourcesTextGen ProtoHeadersTextGen publisher/PublisherIfc.proto)
 
 YACOMPONENT_IFC_GENERATE(GENERATED_IFC_SRC_PUB publisher/PublisherIfc.xml)
 YACOMPONENT_IFC_GENERATE(GENERATED_IFC_SRC_SUB subscriber/SubscriberIfc.xml)
