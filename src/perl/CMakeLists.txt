@@ -1,2 +1,0 @@
-project(YaComponent_GENERATOR)
-
