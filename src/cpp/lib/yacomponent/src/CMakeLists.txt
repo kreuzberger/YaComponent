@@ -35,13 +35,13 @@ install(
     TARGETS YaComponentLib
     EXPORT YaComponentTargets
     EXCLUDE_FROM_ALL
-    DESTINATION "yacomponent/lib"
+    DESTINATION "lib"
     COMPONENT "yacomponent"
 )
 
 install(
-    DIRECTORY "${YaComponentLib_SOURCE_DIR}/include/yacomponent" EXCLUDE_FROM_ALL
-    DESTINATION "yacomponent/include"
+    DIRECTORY "${YaComponentLib_SOURCE_DIR}/include/yacomponent"
+    DESTINATION "include"
     COMPONENT "yacomponent"
 )
 

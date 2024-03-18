@@ -11,7 +11,6 @@ target_link_libraries( yacomponent YaComponentCore tinyxml2)
 install(
     TARGETS yacomponent
     EXPORT YaComponentTargets
-    EXCLUDE_FROM_ALL
-    DESTINATION "yacomponent/bin"
+    DESTINATION "bin"
     COMPONENT "yacomponent"
 )

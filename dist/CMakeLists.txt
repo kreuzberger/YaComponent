@@ -43,30 +43,32 @@ add_custom_target(dist-src COMMAND cpack --config ${CMAKE_BINARY_DIR}/CPackSourc
 add_custom_target(dist COMMAND cpack --config ${CMAKE_BINARY_DIR}/CPackConfig.cmake)
 
 if( WITH_BUNDLED_EXTERNALS)
-    add_custom_target(
-        install-yacomponent
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="yacomponent" -P ${CMAKE_BINARY_DIR}/cmake_install.cmake
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="Unspecified" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${ZeroMQ_BINARY_DIR}/cmake_install.cmake
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="protoc" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="libprotobuf" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="libprotobuf-lite" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="protobuf-headers" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="protobuf-export" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
+    #add_custom_target(
+        #install-yacomponent
+        #COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="yacomponent" -P ${CMAKE_BINARY_DIR}/cmake_install.cmake
+        #COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="Unspecified" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${ZeroMQ_BINARY_DIR}/cmake_install.cmake
+        #COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="protoc" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
+        #COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="libprotobuf" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
+        #COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="libprotobuf-lite" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
+        #COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="protobuf-headers" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
+        #COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="protobuf-export" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
 
-        # for utf8_range
-        #COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="Unspecified" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
-        #for abseil
-        #COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="Unspecified" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${absl_BINARY_DIR}/cmake_install.cmake
+        ## for utf8_range
+        ##COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="Unspecified" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${protobuf_BINARY_DIR}/cmake_install.cmake
+        ##for abseil
+        ##COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="Unspecified" -D"CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/yacomponent" -P${absl_BINARY_DIR}/cmake_install.cmake
 
-        # COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT=${MODULE_FRAMEWORK_NAME}-modules -P
-        # ${CMAKE_BINARY_DIR}/cmake_install.cmake
-    )
+        ## COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT=${MODULE_FRAMEWORK_NAME}-modules -P
+        ## ${CMAKE_BINARY_DIR}/cmake_install.cmake
+    #)
 else()
-    add_custom_target(
-        install-yacomponent
-        COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="yacomponent" -P ${CMAKE_BINARY_DIR}/cmake_install.cmake
-        # COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT=${MODULE_FRAMEWORK_NAME}-modules -P
-        # ${CMAKE_BINARY_DIR}/cmake_install.cmake
-    )
+    set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME yacomponent)
+
+    #add_custom_target(
+        #install-yacomponent
+        #COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT="yacomponent" -P ${CMAKE_BINARY_DIR}/cmake_install.cmake
+        ## COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_COMPONENT=${MODULE_FRAMEWORK_NAME}-modules -P
+        ## ${CMAKE_BINARY_DIR}/cmake_install.cmake
+    #)
 endif()
 include(CPack)

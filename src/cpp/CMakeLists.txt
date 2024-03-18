@@ -23,15 +23,13 @@ install(
     EXPORT "YaComponentTargets"
     FILE "YaComponentTargets${LIBRARY_SYSTEM_NAME}.cmake"
     NAMESPACE YaComponent::
-    EXCLUDE_FROM_ALL
-    DESTINATION yacomponent/lib/cmake/YaComponent
+    DESTINATION lib/cmake/YaComponent
     COMPONENT "yacomponent"
 )
 
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/YaComponentConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/YaComponentConfigVersion.cmake
-    EXCLUDE_FROM_ALL
-    DESTINATION yacomponent/lib/cmake/YaComponent
+    DESTINATION lib/cmake/YaComponent
     COMPONENT "yacomponent"
 )
 

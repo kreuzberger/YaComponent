@@ -7,8 +7,7 @@ target_link_libraries(yacomplayout PRIVATE YaComponentCore tinyxml2)
 install(
     TARGETS yacomplayout
     EXPORT YaComponentTargets
-    EXCLUDE_FROM_ALL
-    DESTINATION "yacomponent/bin"
+    DESTINATION "bin"
     COMPONENT "yacomponent"
 )
 
