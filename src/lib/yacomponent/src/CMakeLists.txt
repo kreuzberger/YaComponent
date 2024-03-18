@@ -34,7 +34,6 @@ target_include_directories( YaComponentLib
 install(
     TARGETS YaComponentLib
     EXPORT YaComponentTargets
-    EXCLUDE_FROM_ALL
     DESTINATION "lib"
     COMPONENT "yacomponent"
 )
