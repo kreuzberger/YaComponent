@@ -14,3 +14,5 @@ install(
     DESTINATION "bin"
     COMPONENT "yacomponent"
 )
+
+add_executable(YaComponent::yacomponent ALIAS yacomponent)

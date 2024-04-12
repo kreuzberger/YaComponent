@@ -11,3 +11,4 @@ install(
     COMPONENT "yacomponent"
 )
 
+add_executable(YaComponent::yacomplayout ALIAS yacomplayout)
