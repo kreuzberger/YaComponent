@@ -25,7 +25,7 @@ target_sources( YaComponent PRIVATE
 target_link_libraries( YaComponent PUBLIC Qt5::Core libzmq-static protobuf::libprotobuf)
 target_include_directories( YaComponent
     PUBLIC # where top-level project will look for the library's public headers
-           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
+           $<BUILD_INTERFACE:${YaComponentLib_SOURCE_DIR}/include> $<BUILD_INTERFACE:${YaComponentLib_SOURCE_DIR}/include>
            # where external projects will look for the library's public headers
            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )

@@ -49,7 +49,8 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
 
     fhHeader << "#include <QtCore/QObject>" << std::endl;
     fhHeader << "#include <QtCore/QTimer>" << std::endl;
-    fhHeader << "#include <stdio.h>" << std::endl;
+    //fhHeader << "#include <stdio.h>" << std::endl;
+    fhHeader << std::endl;
 
     fhHeader << "namespace YaComponent {" << std::endl;
 
@@ -378,17 +379,17 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     fhSource << "    int iBytesTotal = 0;" << std::endl;
     fhSource << "    int key = -1;" << std::endl;
     fhSource << "    int size = -1;" << std::endl;
-    fhSource << "    char* msgData = 0;" << std::endl;
+    fhSource << "    char* msgData = nullptr;" << std::endl;
 
     fhSource << "    int iBytes = mSubscriber.receive(key, size, &msgData );" << std::endl;
     fhSource << "    if( 0 < iBytes )" << std::endl;
     fhSource << "    {" << std::endl;
     fhSource << "      iMsgCnt++;" << std::endl;
     fhSource << "      iBytesTotal += iBytes;" << std::endl;
-    fhSource << "    }" << std::endl;
+    //  fhSource << "    }" << std::endl;
 
-    fhSource << "    switch( key )" << std::endl;
-    fhSource << "    {" << std::endl;
+    fhSource << "      switch( key )" << std::endl;
+    fhSource << "      {" << std::endl;
     for (const auto *resp : responses) {
         std::string strResp;
         strResp += "RESP_";
@@ -396,12 +397,12 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
             strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
         }
         strResp += YaComponentCore::to_upper(resp->Attribute("id"));
-        fhSource << "    case " << strResp << ":" << std::endl;
-        fhSource << "      m" << resp->Attribute("id") << ".ParseFromArray(msgData, size);"
+        fhSource << "      case " << strResp << ":" << std::endl;
+        fhSource << "        m" << resp->Attribute("id") << ".ParseFromArray(msgData, size);"
                  << std::endl;
-        fhSource << "      mCallbackHandler.onResponse( mId, m" << resp->Attribute("id") << ");"
+        fhSource << "        mCallbackHandler.onResponse( mId, m" << resp->Attribute("id") << ");"
                  << std::endl;
-        fhSource << "      break;" << std::endl;
+        fhSource << "        break;" << std::endl;
     }
 
     for (const auto *prop : properties) {
@@ -411,20 +412,29 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
             strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
         }
         strProp += YaComponentCore::to_upper(prop->Attribute("id"));
-        fhSource << "    case " << strProp << ":" << std::endl;
-        fhSource << "      mCallbackHandler.onProperty( mId, m" << prop->Attribute("id") << ");"
+        fhSource << "      case " << strProp << ":" << std::endl;
+        fhSource << "        if(msgData && 0 <= size)" << std::endl;
+        fhSource << "        {" << std::endl;
+        fhSource << "          m" << prop->Attribute("id") << ".ParseFromArray(msgData, size);"
                  << std::endl;
-        fhSource << "      break;" << std::endl;
+        fhSource << "          mCallbackHandler.onProperty( mId, m" << prop->Attribute("id") << ");"
+                 << std::endl;
+        fhSource << "        }" << std::endl;
+        // fhSource << "      else {" << std::endl;
+        // fhSource << "      }" << std::endl;
+
+        fhSource << "        break;" << std::endl;
     }
 
-    fhSource << "    default:" << std::endl;
-    fhSource << "      if( -1 < key)" << std::endl;
-    fhSource << "      {" << std::endl;
-    fhSource << "        qDebug() << \"unknown key \" << key;" << std::endl;
-    fhSource << "        assert(0);" << std::endl;
+    fhSource << "      default:" << std::endl;
+    fhSource << "        if( -1 < key)" << std::endl;
+    fhSource << "        {" << std::endl;
+    fhSource << "          qFatal(\"unknown key '%d'\",key);" << std::endl;
+    fhSource << "        }" << std::endl;
+    fhSource << "        break;" << std::endl;
     fhSource << "      }" << std::endl;
-    fhSource << "      break;" << std::endl;
     fhSource << "    }" << std::endl;
+
     fhSource << "    if( 0 >= iBytesTotal ) bMsgAvailable = false;" << std::endl;
 
     fhSource << "  }" << std::endl;
@@ -511,7 +521,8 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhHeader << "#include <yacomponent/YaStubBase.h>\n";
     fhHeader << "#include <yacomponent/YaPUBImpl.h>\n";
 
-    fhHeader << "#include <stdio.h>\n";
+    //fhHeader << "#include <stdio.h>\n";
+    fhHeader << std::endl;
 
     fhHeader << "namespace YaComponent {\n";
     fhHeaderIfc << "namespace YaComponent {\n";
@@ -747,8 +758,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhSource << "      default:\n";
     fhSource << "        if( -1 < key)\n";
     fhSource << "        {\n";
-    fhSource << "          qDebug() << \"unknown key \" << key;\n";
-    fhSource << "          assert(0);\n";
+    fhSource << "          qFatal(\"unknown key '%d'\",key);" << std::endl;
     fhSource << "        }\n";
     fhSource << "        break;\n";
     fhSource << "      }\n";

@@ -11,7 +11,7 @@ TextUnittestMPSub::TextUnittestMPSub(QObject *parent)
     , mpSubscriberComp(0)
 {}
 
-void TextUnittestMPSub::initComponentsMPMT()
+void TextUnittestMPSub::initTestCase()
 {
     mpContext = YaComponent::context_new();
     mpSubscriberThread = new YaComponentThread();
@@ -23,9 +23,7 @@ void TextUnittestMPSub::initComponentsMPMT()
     mpSubscriberComp->moveToThread(mpSubscriberThread);
 }
 
-void TextUnittestMPSub::cleanupTestCase() {}
-
-void TextUnittestMPSub::cleanupComponents()
+void TextUnittestMPSub::cleanupTestCase()
 {
     mpSubscriberComp->close();
 
@@ -46,11 +44,9 @@ void TextUnittestMPSub::cleanupComponents()
 
 void TextUnittestMPSub::testMPMTSub()
 {
-    initComponentsMPMT();
 
     testRoutine();
 
-    cleanupComponents();
 }
 
 void TextUnittestMPSub::testRoutine()
@@ -60,11 +56,63 @@ void TextUnittestMPSub::testRoutine()
     QTest::qWait(500);
     rc = mpSubscriberComp->requestStart();
     QVERIFY(-1 != rc);
-
+    auto expectedRuntime = 5000 / YaComponent::TimeOut;
+    auto loops = 0;
     do {
         QTest::qWait(YaComponent::TimeOut);
+        loops++;
 
-    } while (mpSubscriberComp->miPropertiesCnt <= 12522);
+    } while (loops < expectedRuntime);
 
-    QCOMPARE(mpSubscriberComp->miPropertiesCnt, 12522 + 1);
+    mpSubscriberComp->clearNotifications();
+    mpSubscriberComp->requestStop();
+}
+
+#include "PublisherIfcProxy.h"
+#include <thread>
+#include <QtCore/QtDebug>
+
+SubscriberComp::SubscriberComp(void *context)
+    : IPublisherIfcProxyHandler(self())
+    , YaComponent::SubscriberCompImpl(context, static_cast<IPublisherIfcProxyHandler &>(self()))
+    , miPropertiesCnt(0)
+{
+    //  setNotification(YaComponent::TextGenIfcProxy::PROP_TEXTGEN_TEXT);
+}
+
+void SubscriberComp::init()
+{
+    SubscriberCompImpl::init();
+}
+
+int SubscriberComp::setNotifications()
+{
+    return mData.setNotification(YaComponent::PublisherIfcProxy::PROP_DATA);
+}
+
+int SubscriberComp::clearNotifications()
+{
+    int rc = -1;
+    rc = mData.clearNotification(YaComponent::PublisherIfcProxy::PROP_DATA);
+    return rc;
+}
+
+int SubscriberComp::requestStart()
+{
+    return mData.requestStartData();
+}
+
+int SubscriberComp::requestStop()
+{
+    return mData.requestStopData();
+}
+
+void SubscriberComp::onProperty(int proxyId, const Data &data)
+{
+    assert(PROXY_DATA == proxyId);
+    miPropertiesCnt++;
+    if (miPropertiesCnt % 100 == 0) {
+        qDebug() << "slow received " << miPropertiesCnt << "last counter" << data.counter();
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
 }

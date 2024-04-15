@@ -13,6 +13,5 @@ static const int KeyEnd = -3;
 static const int KeySetNotification = -4;
 static const int KeyClearNotification = -5;
 static const int TimeOut = 20;
-void sleep(int msecs);
 void *context_new();
 } // namespace YaComponent

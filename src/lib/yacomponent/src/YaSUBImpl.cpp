@@ -5,13 +5,13 @@
 #include <QtCore/QtDebug>
 
 #include <assert.h>
-#include <memory.h>
+#include <thread>
 
 YaSUBImpl::YaSUBImpl(void *context)
 {
     assert(0 != context);
     if (0 != context) {
-        YaComponent::sleep(1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
         mpReqRespSocket = zmq_socket(context, ZMQ_DEALER);
     } else {
         fprintf(stderr, "error: invalid context\n");
@@ -22,11 +22,13 @@ YaSUBImpl::YaSUBImpl(void *context)
 void YaSUBImpl::close()
 {
     zmq_close(mpReqRespSocket);
+    mpReqRespSocket = nullptr;
 }
 
 YaSUBImpl::~YaSUBImpl()
 {
     zmq_close(mpReqRespSocket);
+    mpReqRespSocket = nullptr;
 }
 
 int YaSUBImpl::setNotification(int key)
@@ -80,11 +82,12 @@ int YaSUBImpl::send(int key, int size, const char *data)
 
 int YaSUBImpl::clearNotification(int key)
 {
-    int rc = -1;
+    //int rc = -1;
     char cKey[YaComponent::KeySize + 1];
     sprintf(cKey, YaComponent::KeyFmt, key);
 
-    rc = send(YaComponent::KeyClearNotification, YaComponent::KeySize, cKey);
+    /*rc = */
+    send(YaComponent::KeyClearNotification, YaComponent::KeySize, cKey);
     return -1;
 }
 
@@ -93,10 +96,9 @@ void YaSUBImpl::setConnectionPara(const char *address, const char *ident)
     assert(0 != mpReqRespSocket && 0 != address);
 
     assert(strlen(ident) < YaComponent::MaxIdentSize);
-    strcpy(mcIdent, ident);
+    strncpy(mcIdent, ident, strlen(ident));
 
     if (mpReqRespSocket && !mbConnected) {
-        int rc = -1;
         zmq_setsockopt(mpReqRespSocket, ZMQ_IDENTITY, mcIdent, strlen(mcIdent));
         int timeout = 0;
         zmq_setsockopt(mpReqRespSocket, ZMQ_RCVTIMEO, &timeout, sizeof(timeout));
@@ -104,11 +106,11 @@ void YaSUBImpl::setConnectionPara(const char *address, const char *ident)
             mbConnected = true;
             char cKey[YaComponent::KeySize + 1];
             sprintf(cKey, YaComponent::KeyFmt, YaComponent::KeySync);
-            rc = zmq_send(mpReqRespSocket, 0, 0, ZMQ_SNDMORE);
+            auto rc = zmq_send(mpReqRespSocket, 0, 0, ZMQ_SNDMORE);
             assert(-1 != rc);
             rc = zmq_send(mpReqRespSocket, cKey, YaComponent::KeySize, 0);
             assert(-1 != rc);
-            YaComponent::sleep(20);
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
             bool bSync = false;
             do {
                 QCoreApplication::processEvents();
@@ -122,8 +124,6 @@ void YaSUBImpl::setConnectionPara(const char *address, const char *ident)
             fprintf(stderr, "error: already connected!\n");
         }
     }
-
-    // return mbConnected;
 }
 
 bool YaSUBImpl::checkSync()
@@ -160,7 +160,6 @@ bool YaSUBImpl::checkSync()
 int YaSUBImpl::receive(int &key, int &size, char **pcData)
 {
     int iBytes = 0;
-    int rc = -1;
     int more = -1;
     size_t moreSize = sizeof(more);
     memset(mcKey, 0, YaComponent::KeySize + 1);
@@ -172,7 +171,7 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
         items[0].events = ZMQ_POLLIN;
         items[0].revents = -1;
 
-        rc = zmq_poll(items, 1, 0);
+        auto rc = zmq_poll(items, 1, 0);
 
         if (-1 < rc && 0 < items[0].revents) {
             iBytes = zmq_recv(mpReqRespSocket, 0, 0, ZMQ_NOBLOCK);
@@ -182,7 +181,7 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
 
             sscanf(mcKey, YaComponent::KeyFmt, &key);
             if (0 <= key) {
-                rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
+                zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                 if (more) {
                     iBytes = zmq_recv(mpReqRespSocket,
                                       mMsgRespBuffer.data(),
@@ -195,7 +194,7 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
                     rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                     if (more) {
                         if (-1 < rc && more) {
-                            assert(0);
+                            qFatal("YaSUBImpl::receive: KeyFmt unexpected end of message");
                         }
                     }
                 }
@@ -216,7 +215,7 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
                                      : false;
                         rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                         if (-1 < rc && more) {
-                            assert(0);
+                            qFatal("YaSUBImpl::receive: KeySync unexpected end of message");
                         }
                     }
                 }
@@ -224,11 +223,10 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
                 iBytes = 0;
                 rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                 if (-1 < rc && more) {
-                    assert(0);
+                    qFatal("YaSUBImpl::receive: KeyEnd unexpected end of message");
                 }
             } else {
-                qDebug() << "unknown key " << key;
-                assert(0);
+                qFatal("%s", qPrintable(QString("YaSUBImpl::receive %1").arg(key)));
             }
             miMessageCnt++;
         }

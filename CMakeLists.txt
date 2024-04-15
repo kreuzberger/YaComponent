@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(YaComponent)
+project(yacomponent)
 
 find_package( Qt5 COMPONENTS Core Test REQUIRED)
 include(GNUInstallDirs)

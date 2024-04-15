@@ -1,9 +1,7 @@
-#include "zmq.h"
+#include "yacomponent/YaPUBImpl.h"
 #include <assert.h>
 #include <malloc.h>
-#include <math.h>
-#include <string.h>
-#include <yacomponent/YaPUBImpl.h>
+#include <zmq.h>
 #include <QtCore/QtDebug>
 
 YaPUBImpl::YaPUBImpl(void *context)
@@ -61,6 +59,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                 if (0 < iBytes) {
                     assert(iBytes == YaComponent::KeySize);
                     auto ok = sscanf(mcKeyReq, YaComponent::KeyFmt, &key);
+
                     // TODO ok failes sometimes, mcKeyReq is empty but 4 bytes received. WHY?
                     if (0 < ok) {
                         if (0 <= key) {
@@ -78,7 +77,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                                 }
                                 rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                                 if (-1 < rc && more) {
-                                    assert(0);
+                                    qFatal("YaPUBImpl::receive KeySize unexpected end");
                                 }
                             }
                         } else if (YaComponent::KeySync == key) {
@@ -94,7 +93,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                             iBytes = 0;
                             rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                             if (-1 < rc && more) {
-                                assert(0);
+                                qFatal("YaPUBImpl::receive KeySync unexpected end");
                             }
                         } else if (YaComponent::KeySetNotification == key) {
                             qDebug() << "peer" << ident.c_str() << "setNotification";
@@ -110,7 +109,11 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                                 mPeerMap[ident][notKey] = 1;
                                 rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                                 if (-1 < rc && more) {
-                                    assert(0);
+                                    qFatal("YaPUBImpl::receive KeySetNotification unexpected end");
+                                }
+                                // send values from LVC Cache
+                                if (mLVC.find(notKey) != mLVC.end()) {
+                                    send(notKey, mLVC[notKey].msgSize, mLVC[notKey].msg.c_str());
                                 }
                             }
                         } else if (YaComponent::KeyClearNotification == key) {
@@ -124,7 +127,8 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                                 mPeerMap[ident][notKey] = 0;
                                 rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                                 if (-1 < rc && more) {
-                                    assert(0);
+                                    qFatal(
+                                        "YaPUBImpl::receive KeyClearNotification unexpected end");
                                 }
                             }
                         } else if (YaComponent::KeyEnd == key) {
@@ -132,17 +136,27 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                             mPeerMap.erase(ident);
                             rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                             if (-1 < rc && more) {
-                                assert(0);
+                                qFatal("YaPUBImpl::receive KeyEnd unexpected end");
                             }
 
                         } else {
-                            qDebug() << "unknown key " << key << "from" << iBytes << "Bytes and '"
-                                     << std::string(mcKeyReq).c_str() << "'";
-                            assert(0);
+                            qFatal("%s",
+                                   qPrintable(QString("unknown key %1 from iBytes %2 to '%3'")
+                                                  .arg(key)
+                                                  .arg(iBytes)
+                                                  .arg(mcKeyReq)));
                         }
                     } else {
                         // TODO something went wrong,
+                        qFatal("%s",
+                               qPrintable(QString("YaPUBImpl::receive: seemed to receive partial "
+                                                  "message key %1 from iBytes %2 to '%3'")
+                                              .arg(key)
+                                              .arg(iBytes)
+                                              .arg(mcKeyReq)));
+
                         iBytes = 0;
+                        key = -1;
                     }
                 }
             }
@@ -209,9 +223,9 @@ int YaPUBImpl::send(int key, int msgSize, const char *msgData)
     int rc = -1;
 
     if (0 != mpReqRespSocket) {
-        for (std::map<std::string, std::map<int, int>>::const_iterator it = mPeerMap.begin();
-             it != mPeerMap.end();
-             ++it) {
+        mLVC[key] = {msgSize, msgData};
+
+        for (auto it = mPeerMap.begin(); it != mPeerMap.end(); ++it) {
             if (1 == mPeerMap[it->first][key]) {
                 rc = zmq_send(mpReqRespSocket, it->first.c_str(), it->first.length(), ZMQ_SNDMORE);
                 if (-1 == rc) {
@@ -230,15 +244,18 @@ int YaPUBImpl::send(int key, int msgSize, const char *msgData)
                     rc = zmq_send(mpReqRespSocket, msgData, msgSize, 0);
                     assert(msgSize == rc);
                 }
+
+                if (-1 == rc) {
+                    if (errno != EAGAIN) {
+                        fprintf(stderr,
+                                "YaPUBImpl::send::received error %s from sending to peer %s\n",
+                                zmq_strerror(errno),
+                                it->first.c_str());
+                    }
+                    assert(errno == EAGAIN);
+                }
             }
         }
-    }
-
-    if (-1 == rc) {
-        if (errno != EAGAIN) {
-            fprintf(stderr, "received error %s, exiting with error\n", zmq_strerror(errno));
-        }
-        assert(errno == EAGAIN);
     }
 
     return rc;
@@ -246,7 +263,6 @@ int YaPUBImpl::send(int key, int msgSize, const char *msgData)
 
 int YaPUBImpl::send(int key, int msgSize, const char *msgData, const std::string &ident)
 {
-    char cKey[YaComponent::KeySize + 1];
     int rc = -1;
 
     assert(0 != mpReqRespSocket);
@@ -268,6 +284,7 @@ int YaPUBImpl::send(int key, int msgSize, const char *msgData, const std::string
 
         for (std::map<std::string, std::map<int, int>>::const_iterator it = itStart; it != itEnd;
              ++it) {
+            char cKey[YaComponent::KeySize + 1];
             sprintf(cKey, YaComponent::KeyFmt, key);
             // internal used sync key!
             rc = zmq_send(mpReqRespSocket, it->first.c_str(), it->first.length(), ZMQ_SNDMORE);

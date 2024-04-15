@@ -1,5 +1,4 @@
-#ifndef SUBSCRIBER_SLOW_COMPUNITTEST_H
-#define SUBSCRIBER_SLOW_COMPUNITTEST_H
+#pragma once
 
 #include "IPublisherIfcProxyHandler.h"
 #include "SubscriberCompImpl.h"
@@ -22,8 +21,8 @@ public:
 
     int miPropertiesCnt;
 
+    Data mLastData;
+
 private:
     SubscriberComp &self() { return *this; }
 };
-
-#endif // TEXTOUTCOMP_H

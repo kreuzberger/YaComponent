@@ -4,7 +4,31 @@
 
 #include <yacomponent/YaComponent.h>
 #include <yacomponent/YaComponentThread.h>
-#include "subscriber_fast_compunittest.h"
+
+#include "IPublisherIfcProxyHandler.h"
+#include "SubscriberCompImpl.h"
+
+class SubscriberComp : public YaComponent::SubscriberCompImpl, public IPublisherIfcProxyHandler
+{
+public:
+    SubscriberComp(void *context);
+    virtual ~SubscriberComp() {}
+
+    void onProperty(int, const Data &);
+
+    virtual void init();
+
+    int setNotifications();
+    int clearNotifications();
+
+    int requestStart();
+    int requestStop();
+
+    int miPropertiesCnt;
+
+private:
+    SubscriberComp &self() { return *this; }
+};
 
 class TextUnittestMPSub : public QObject
 {
@@ -17,13 +41,11 @@ signals:
 
 private slots:
 
-    void initTestCase() {}
+    void initTestCase();
     void cleanupTestCase();
     void testMPMTSub();
 
 private:
-    void initComponentsMPMT();
-    void cleanupComponents();
     void testRoutine();
 
     void *mpContext;

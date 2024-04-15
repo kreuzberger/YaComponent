@@ -8,14 +8,10 @@ YACOMPONENT_IFC_GENERATE(GENERATED_IFC_SRC_OUT textout/TextOutIfc.xml)
 YACOMPONENT_GENERATE(GENERATED_COMP_GEN_SRC textgen/TextGenComp.xml)
 YACOMPONENT_GENERATE(GENERATED_COMP_OUT_SRC textout/TextOutComp.xml)
 
-YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT_SRC TextExampleMPMT.xml)
-YACOMPONENT_LAYOUT_GENERATE(GENERATED_LAYOUT_SRC_SPMT TextExampleSPMT.xml)
-
 set( textgen_SRCS
   ${GENERATED_IFC_SRC}
   ${GENERATED_COMP_GEN_SRC}
   ${ProtoSourcesTextGen}
-  ${GENERATED_LAYOUT_SRC}
   textgencompunittest.cpp
   TextUnittestMP_PUB.cpp
   TextUnittestMP_PUB.h
@@ -28,7 +24,6 @@ set( textout_SRCS
   ${GENERATED_COMP_GEN_SRC}
   ${GENERATED_COMP_OUT_SRC}
   ${ProtoSourcesTextGen}
-  ${GENERATED_LAYOUT_SRC}
   textoutcompunittest.cpp
   TextUnittestMP_SUB.cpp
   TextUnittestMP_SUB.h
@@ -41,7 +36,6 @@ set( textunittest_SRCS
   ${GENERATED_COMP_GEN_SRC}
   ${GENERATED_COMP_OUT_SRC}
   ${ProtoSourcesTextGen}
-  ${GENERATED_LAYOUT_SRC_SPMT}
   textoutcompunittest.cpp
   textgencompunittest.cpp
   TextUnittest.cpp
@@ -54,9 +48,6 @@ set( textunittestmp_SRCS
   TextUnittestMP.h
   ${UNITTESTMP_MOCS}
 )
-
-
-
 
 add_executable( textgenMPMT  ${textgen_SRCS} )
 add_executable( textoutMPMT  ${textout_SRCS} )

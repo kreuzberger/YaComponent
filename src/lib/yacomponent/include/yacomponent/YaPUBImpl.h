@@ -4,11 +4,12 @@
 #include <google/protobuf/message_lite.h>
 
 #include <map>
+#include <unordered_map>
 
 class YaPUBImpl
 {
 public:
-    YaPUBImpl(void *context);
+    explicit YaPUBImpl(void *context);
     virtual ~YaPUBImpl();
     //  bool bind( const char* address, const char* syncaddress) {
     //  setConnectionPara(address,syncaddress,5000); }
@@ -22,6 +23,12 @@ public:
     void close();
 
 private:
+    struct LVC
+    {
+        int msgSize = 0;
+        std::string msg = {};
+    };
+
     YaPUBImpl();
     YaPUBImpl(const YaPUBImpl &);
     YaPUBImpl &operator=(const YaPUBImpl &);
@@ -36,4 +43,7 @@ private:
     char mcKeyReq[YaComponent::KeySize + 1] = {};
     std::map<std::string, std::map<int, int>> mPeerMap = {};
     //  char mcSize[YaComponent::MessageSize];
+
+    // LastValueCaching
+    std::unordered_map<int, LVC> mLVC;
 };

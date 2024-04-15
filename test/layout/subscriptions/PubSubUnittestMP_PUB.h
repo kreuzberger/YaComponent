@@ -1,9 +1,33 @@
 #pragma once
 #include <QObject>
 
+#include "IPublisherIfcStubHandler.h"
+#include "PublisherCompImpl.h"
 #include <yacomponent/YaComponent.h>
 #include <yacomponent/YaComponentThread.h>
-#include "publishercompunittest.h"
+
+class PublisherComp : public YaComponent::PublisherCompImpl, public YaComponent::IPublisherIfcStubHandler
+{
+public:
+    PublisherComp(void *context);
+    virtual ~PublisherComp() {}
+
+    virtual void onRequestStartData(int id);
+    virtual void onRequestStopData(int id);
+    virtual void init();
+    int miTimerID;
+    int mConsumers = 0;
+    bool mbFinished;
+
+    void sendResponseStop();
+
+protected:
+    virtual void timerEvent(QTimerEvent *);
+
+private:
+    PublisherComp &self() { return *this; }
+    Data moData;
+};
 
 class PubSubUnittestMPPub : public QObject
 {

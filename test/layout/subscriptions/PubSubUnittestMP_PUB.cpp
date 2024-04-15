@@ -21,7 +21,6 @@ void PubSubUnittestMPPub::initComponentsMPMT()
 
     mpPublisher->init();
     mpPublisher->setConnectionParaReceiverData("tcp://*:42163", 5000);
-    mpPublisher->miMaxMessageCnt = 12522;
     mpPublisher->moveToThread(mpPublisherThread);
 }
 void PubSubUnittestMPPub::cleanupTestCase() {}
@@ -55,11 +54,80 @@ void PubSubUnittestMPPub::testMPMTPub()
 
 void PubSubUnittestMPPub::testRoutine()
 {
-    QVERIFY(0 == mpPublisher->miRequestStop);
     do {
-        QTest::qWait(10);
-
+        QTest::qWait(YaComponent::TimeOut);
     } while (!mpPublisher->mbFinished);
 
     QTest::qWait(1000);
+}
+
+#include <QtCore/QtDebug>
+
+PublisherComp::PublisherComp(void *context)
+    : YaComponent::PublisherCompImpl(context, static_cast<IPublisherIfcStubHandler &>(self()))
+    , IPublisherIfcStubHandler(self())
+    , miTimerID(-1)
+    , moData()
+    , mbFinished(false)
+{}
+
+void PublisherComp::init()
+{
+    PublisherCompImpl::init();
+    moData.mutable_samples()->Reserve(4096);
+    mConsumers = 0;
+}
+
+void PublisherComp::onRequestStartData(int id)
+{
+    mConsumers++;
+    assert(mConsumers <= 2);
+    if (mConsumers > 2) {
+        qFatal("maximum number of consumers greater than expected 2");
+    }
+    qDebug() << "received onRequestStartData, start sending, consumers currently" << mConsumers;
+    if (0 < miTimerID) {
+        qDebug() << "already started";
+    } else {
+        miTimerID = QObject::startTimer(YaComponent::TimeOut);
+    }
+}
+
+void PublisherComp::onRequestStopData(int id)
+{
+    mConsumers--;
+    qDebug() << "received onRequestStopData, actual consumers" << mConsumers;
+    if (0 == mConsumers) {
+        qInfo() << "no more consumers, stop and exit";
+        mbFinished = true;
+
+        if (0 < miTimerID) {
+            QObject::killTimer(miTimerID);
+            miTimerID = 0;
+        }
+    }
+}
+
+void PublisherComp::timerEvent(QTimerEvent *)
+{
+    int rc = -1;
+    static int messageCount = 0;
+
+    do {
+        //moText.set_text(qPrintable(oText.arg(miMessageCnt)));
+        moData.set_timeseconds(0);
+        moData.set_timefraction(0.0);
+        moData.set_counter(messageCount);
+        messageCount++;
+        // for (int idx = 0; idx < 2048; idx++) {
+        //     //moData.set_samples(idx, rand() / std::numeric_limits<int>::max() );
+        // }
+
+        rc = mReceiverData.send(YaComponent::PublisherIfcStub::PROP_DATA, moData);
+        messageCount++;
+        if (messageCount % 10 == 0) {
+            break;
+        }
+
+    } while (rc != -1);
 }
