@@ -30,7 +30,7 @@ void TextUnittestMPPub::cleanupComponents()
 {
     mpTextGen1->close();
 
-    zmq_ctx_term(mpContext);
+    YaComponent::context_term(mpContext);
 
     if (mpTextGenThread) {
         mpTextGenThread->quit();

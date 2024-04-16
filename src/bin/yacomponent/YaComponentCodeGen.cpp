@@ -275,6 +275,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     fhHeader << "#include <QtCore/QObject>" << std::endl;
 
     fhHeader << "namespace YaComponent {" << std::endl;
+    fhHeaderIfc << "namespace YaComponent {" << std::endl;
 
     fhHeader << "class " << ifcName << "Proxy: public YaProxyBase" << std::endl;
     fhHeader << "{" << std::endl;
@@ -477,6 +478,7 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     fhHeaderIfc << "};" << std::endl;
 
     fhHeader << "}" << std::endl;
+    fhHeaderIfc << "}" << std::endl;
 
     fhHeader << "" << std::endl;
     fhHeaderIfc << "" << std::endl;

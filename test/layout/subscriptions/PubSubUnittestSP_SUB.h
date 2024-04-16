@@ -3,7 +3,8 @@
 #include "IPublisherIfcProxyHandler.h"
 #include "SubscriberCompImpl.h"
 
-class SubscriberComp : public YaComponent::SubscriberCompImpl, public IPublisherIfcProxyHandler
+class SubscriberComp : public YaComponent::SubscriberCompImpl,
+                       public YaComponent::IPublisherIfcProxyHandler
 {
 public:
     SubscriberComp(void *context);

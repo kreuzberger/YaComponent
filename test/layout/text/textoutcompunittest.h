@@ -4,7 +4,7 @@
 #include "ITextGenIfcProxyHandler.h"
 #include "TextOutCompImpl.h"
 
-class TextOutComp : public YaComponent::TextOutCompImpl, public ITextGenIfcProxyHandler
+class TextOutComp : public YaComponent::TextOutCompImpl, public YaComponent::ITextGenIfcProxyHandler
 {
 public:
     TextOutComp(void *context);

@@ -1,50 +1,5 @@
 #include "PubSubUnittestSP_PUB.h"
-#include "zmq.h"
 #include <QtTest>
-
-// void PubSubUnittestSPPub::initComponentsMPMT()
-// {
-//     mpContext = YaComponent::context_new();
-//     mpPublisher = new PublisherComp(mpContext);
-//     mpPublisherThread = new YaComponentThread();
-
-//     mpPublisherThread->start();
-
-//     mpPublisher->init();
-//     mpPublisher->setConnectionParaReceiverData("tcp://*:42163", 5000);
-//     mpPublisher->miMaxMessageCnt = 12522;
-//     mpPublisher->moveToThread(mpPublisherThread);
-// }
-
-// void PubSubUnittestSPPub::cleanupComponents()
-// {
-//     mpPublisher->close();
-
-//     zmq_ctx_term(mpContext);
-
-//     if (mpPublisherThread) {
-//         mpPublisherThread->quit();
-//         QTest::qWait(100);
-//         QVERIFY(mpPublisherThread->isFinished());
-//     }
-
-//     mpContext = 0;
-//     delete mpPublisherThread;
-//     mpPublisherThread = 0;
-//     delete mpPublisher;
-//     mpPublisher = 0;
-// }
-
-// void PubSubUnittestSPPub::testRoutine()
-// {
-//     QVERIFY(0 == mpPublisher->miRequestStop);
-//     do {
-//         QTest::qWait(10);
-
-//     } while (!mpPublisher->mbFinished);
-
-//     QTest::qWait(1000);
-// }
 
 #include <QtCore/QtDebug>
 

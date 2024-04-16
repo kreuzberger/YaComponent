@@ -29,7 +29,7 @@ void PubSubUnittestMPPub::cleanupComponents()
 {
     mpPublisher->close();
 
-    zmq_ctx_term(mpContext);
+    YaComponent::context_term(mpContext);
 
     if (mpPublisherThread) {
         mpPublisherThread->quit();
@@ -58,7 +58,8 @@ void PubSubUnittestMPPub::testRoutine()
         QTest::qWait(YaComponent::TimeOut);
     } while (!mpPublisher->mbFinished);
 
-    QTest::qWait(1000);
+    qInfo() << "PubSubUnittestMPPub::testRoutine finished";
+    QTest::qWait(500);
 }
 
 #include <QtCore/QtDebug>

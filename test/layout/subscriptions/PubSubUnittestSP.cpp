@@ -50,7 +50,7 @@ void PubSubUnittestSP::cleanupComponents()
     QTest::qWait(100);
     QVERIFY(mPublisherThread->isFinished());
     QVERIFY(mSubscriperThread->isFinished());
-    zmq_ctx_term(mContext);
+    YaComponent::context_term(mContext);
 }
 
 void PubSubUnittestSP::testConnect()

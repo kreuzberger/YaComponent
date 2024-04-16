@@ -88,7 +88,7 @@ void TextUnittest::cleanupComponents()
     mpTextOut = 0;
     delete mpTextOutThread;
     mpTextOutThread = 0;
-    zmq_ctx_term(mpContext);
+    YaComponent::context_term(mpContext);
     mpContext = 0;
 }
 

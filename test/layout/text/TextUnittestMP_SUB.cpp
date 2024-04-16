@@ -29,7 +29,7 @@ void TextUnittestMPSub::cleanupComponents()
 {
     mpTextOut->close();
 
-    zmq_ctx_term(mpContext);
+    YaComponent::context_term(mpContext);
 
     if (mpTextOutThread) {
         mpTextOutThread->quit();
