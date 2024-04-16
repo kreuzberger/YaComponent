@@ -1,5 +1,4 @@
 #include "TextUnittest.h"
-#include "zmq.h"
 #include <QtTest>
 
 QTEST_MAIN(TextUnittest);

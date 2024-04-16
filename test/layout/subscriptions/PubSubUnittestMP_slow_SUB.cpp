@@ -1,5 +1,4 @@
 #include "PubSubUnittestMP_slow_SUB.h"
-#include "zmq.h"
 #include <QtTest>
 
 QTEST_MAIN(TextUnittestMPSub);

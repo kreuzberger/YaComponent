@@ -1,5 +1,4 @@
 #include "PubSubUnittestMP_fast_SUB.h"
-#include "zmq.h"
 #include <QtTest>
 
 QTEST_MAIN(TextUnittestMPSub);
@@ -27,7 +26,7 @@ void TextUnittestMPSub::cleanupTestCase()
 {
     mpSubscriberComp->close();
 
-    zmq_ctx_term(mpContext);
+    YaComponent::context_term(mpContext);
 
     if (mpSubscriberThread) {
         mpSubscriberThread->quit();

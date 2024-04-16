@@ -1,5 +1,4 @@
 #include "TextUnittestMP_PUB.h"
-#include "zmq.h"
 #include <QtTest>
 
 QTEST_MAIN(TextUnittestMPPub);
