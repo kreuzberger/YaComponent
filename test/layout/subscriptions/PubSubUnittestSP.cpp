@@ -34,7 +34,6 @@ void PubSubUnittestSP::initComponents()
     mSubScriber->init();
     mPublisher->init();
     mPublisher->setConnectionParaReceiverData("inproc://testinprocsubpub", 3000);
-    mPublisher->miMaxMessageCnt = 12 * 1024;
 
     mSubScriber->setConnectionParaData("inproc://testinprocsubpub", "subscriber_sp");
     mPublisher->moveToThread(mPublisherThread.get());

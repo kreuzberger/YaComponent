@@ -5,8 +5,8 @@
 #include <QtCore/QtDebug>
 
 SubscriberComp::SubscriberComp(void *context)
-    : IPublisherIfcProxyHandler(self())
-    , YaComponent::SubscriberCompImpl(context, static_cast<IPublisherIfcProxyHandler &>(self()))
+    : IPublisherIfcProxyHandler(*this)
+    , YaComponent::SubscriberCompImpl(context, static_cast<IPublisherIfcProxyHandler &>(*this))
     , miPropertiesCnt(0)
 {
     //  setNotification(YaComponent::TextGenIfcProxy::PROP_TEXTGEN_TEXT);

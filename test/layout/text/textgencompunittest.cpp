@@ -1,8 +1,8 @@
 #include "textgencompunittest.h"
 
 TextGenComp::TextGenComp(void *context)
-    : YaComponent::TextGenCompImpl(context, static_cast<ITextGenIfcStubHandler &>(self()))
-    , ITextGenIfcStubHandler(self())
+    : YaComponent::TextGenCompImpl(context, static_cast<ITextGenIfcStubHandler &>(*this))
+    , ITextGenIfcStubHandler(*this)
     , miRequestStop(0)
     , miTimerID(-1)
     , miMessageCnt(0)

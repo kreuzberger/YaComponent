@@ -28,7 +28,6 @@ public:
     int miResponseStopCnt;
 
 private:
-    TextOutComp &self() { return *this; }
 };
 
 #endif // TEXTOUTCOMP_H

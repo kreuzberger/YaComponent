@@ -70,7 +70,7 @@ int YaSUBImpl::send(int key, int size, const char *data)
         int flags = send_more ? ZMQ_SNDMORE : 0;
         char ckey[YaComponent::KeySize + 1];
         sprintf(ckey, YaComponent::KeyFmt, key);
-        qDebug() << "YaSUBImpl::send: key " << ckey << "from key value" << key;
+        //qDebug() << "YaSUBImpl::send: key " << ckey << "from key value" << key;
         rc = zmq_send(mpReqRespSocket, ckey, YaComponent::KeySize, flags);
         assert(-1 != rc);
         if (send_more) {

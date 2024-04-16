@@ -111,7 +111,13 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                                 }
                                 // send values from LVC Cache
                                 if (mLVC.find(notKey) != mLVC.end()) {
-                                    send(notKey, mLVC[notKey].msgSize, mLVC[notKey].msg.c_str());
+                                    auto lvc = mLVC[notKey];
+                                    if (0 < lvc.msgSize && !lvc.msg.empty()) {
+                                        qDebug()
+                                            << "YaPUBImpl::receive: sending LVC cache values on "
+                                               "setNotification";
+                                        send(notKey, lvc.msgSize, lvc.msg.c_str());
+                                    }
                                 }
                             }
                         } else if (YaComponent::KeyClearNotification == key) {

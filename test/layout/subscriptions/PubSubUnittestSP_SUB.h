@@ -25,5 +25,4 @@ public:
     Data mLastData;
 
 private:
-    SubscriberComp &self() { return *this; }
 };

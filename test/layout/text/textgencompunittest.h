@@ -23,6 +23,5 @@ protected:
     virtual void timerEvent(QTimerEvent *);
 
 private:
-    TextGenComp &self() { return *this; }
     TextGen::Text moText;
 };

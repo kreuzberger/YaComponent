@@ -2,8 +2,8 @@
 #include "TextGenIfcProxy.h"
 
 TextOutComp::TextOutComp(void *context)
-    : YaComponent::TextOutCompImpl(context, static_cast<ITextGenIfcProxyHandler &>(self()))
-    , ITextGenIfcProxyHandler(self())
+    : YaComponent::TextOutCompImpl(context, static_cast<ITextGenIfcProxyHandler &>(*this))
+    , ITextGenIfcProxyHandler(*this)
     , miPropertiesCnt(0)
     , miResponseStartCnt(0)
     , miResponseStopCnt(0)
