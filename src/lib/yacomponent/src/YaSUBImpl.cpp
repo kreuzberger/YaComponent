@@ -60,16 +60,20 @@ int YaSUBImpl::request(int key)
 
 int YaSUBImpl::send(int key, int size, const char *data)
 {
-    sprintf(mcKey, YaComponent::KeyFmt, key);
     int rc = -1;
     assert(0 != mpReqRespSocket);
-    int flags = (0 != size && 0 != data) ? ZMQ_SNDMORE : 0;
     if (0 != mpReqRespSocket) {
         rc = zmq_send(mpReqRespSocket, 0, 0, ZMQ_SNDMORE);
         assert(-1 != rc);
-        rc = zmq_send(mpReqRespSocket, mcKey, YaComponent::KeySize, flags);
+
+        auto send_more = (0 != size && data);
+        int flags = send_more ? ZMQ_SNDMORE : 0;
+        char ckey[YaComponent::KeySize + 1];
+        sprintf(ckey, YaComponent::KeyFmt, key);
+        qDebug() << "YaSUBImpl::send: key " << ckey << "from key value" << key;
+        rc = zmq_send(mpReqRespSocket, ckey, YaComponent::KeySize, flags);
         assert(-1 != rc);
-        if (0 != size && 0 != data) {
+        if (send_more) {
             rc = zmq_send(mpReqRespSocket, data, size, 0);
             if (-1 == rc) {
                 fprintf(stderr, "error: %s\n", zmq_strerror(zmq_errno()));
@@ -162,7 +166,6 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
     int iBytes = 0;
     int more = -1;
     size_t moreSize = sizeof(more);
-    memset(mcKey, 0, YaComponent::KeySize + 1);
 
     assert(0 != mpReqRespSocket);
     if (0 != mpReqRespSocket) {
@@ -176,10 +179,11 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
         if (-1 < rc && 0 < items[0].revents) {
             iBytes = zmq_recv(mpReqRespSocket, 0, 0, ZMQ_NOBLOCK);
             assert(0 == iBytes);
-            iBytes = zmq_recv(mpReqRespSocket, mcKey, YaComponent::KeySize, ZMQ_NOBLOCK);
+            char ckey[YaComponent::KeySize + 1];
+            iBytes = zmq_recv(mpReqRespSocket, ckey, YaComponent::KeySize, ZMQ_NOBLOCK);
             assert(iBytes == YaComponent::KeySize);
+            sscanf(ckey, YaComponent::KeyFmt, &key);
 
-            sscanf(mcKey, YaComponent::KeyFmt, &key);
             if (0 <= key) {
                 zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                 if (more) {
@@ -192,10 +196,8 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
                         *pcData = mMsgRespBuffer.data();
                     }
                     rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
-                    if (more) {
-                        if (-1 < rc && more) {
-                            qFatal("YaSUBImpl::receive: KeyFmt unexpected end of message");
-                        }
+                    if (more && -1 < rc) {
+                        qFatal("YaSUBImpl::receive: KeyFmt unexpected end of message");
                     }
                 }
             } else if (YaComponent::KeySync == key) {

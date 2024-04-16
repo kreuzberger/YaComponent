@@ -429,7 +429,8 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     fhSource << "      default:" << std::endl;
     fhSource << "        if( -1 < key)" << std::endl;
     fhSource << "        {" << std::endl;
-    fhSource << "          qFatal(\"unknown key '%d'\",key);" << std::endl;
+    fhSource << "          qFatal(\"" << ifcName << "Proxy::receive(): unknown key '%d'\",key);"
+             << std::endl;
     fhSource << "        }" << std::endl;
     fhSource << "        break;" << std::endl;
     fhSource << "      }" << std::endl;
@@ -758,7 +759,8 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhSource << "      default:\n";
     fhSource << "        if( -1 < key)\n";
     fhSource << "        {\n";
-    fhSource << "          qFatal(\"unknown key '%d'\",key);" << std::endl;
+    fhSource << "          qFatal(\"" << ifcName << "Stub::receive() unknown key '%d'\",key);"
+             << std::endl;
     fhSource << "        }\n";
     fhSource << "        break;\n";
     fhSource << "      }\n";

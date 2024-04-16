@@ -7,7 +7,7 @@
 class YaSUBImpl
 {
 public:
-    YaSUBImpl(void *context);
+    explicit YaSUBImpl(void *context);
     virtual ~YaSUBImpl();
     virtual void setConnectionPara(const char *address, const char *ident);
     virtual int receive(int &key, int &size, char **pcData);
@@ -29,8 +29,6 @@ private:
 
     void *mpReqRespSocket = nullptr;
     bool mbConnected = false;
-    char mcKey[YaComponent::KeySize + 1];
-    char mcKeyReq[YaComponent::KeySize + 1];
     char mcIdent[YaComponent::MaxIdentSize];
     YaBuffer mMsgOutBuffer = YaBuffer(YaComponent::MessageSize);
     YaBuffer mMsgRespBuffer = YaBuffer(YaComponent::MaxMessageSize);

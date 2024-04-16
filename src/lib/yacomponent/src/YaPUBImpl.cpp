@@ -59,8 +59,6 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                 if (0 < iBytes) {
                     assert(iBytes == YaComponent::KeySize);
                     auto ok = sscanf(mcKeyReq, YaComponent::KeyFmt, &key);
-
-                    // TODO ok failes sometimes, mcKeyReq is empty but 4 bytes received. WHY?
                     if (0 < ok) {
                         if (0 <= key) {
                             qDebug() << "peer" << ident.c_str() << "with key" << key;
@@ -147,13 +145,13 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                                                   .arg(mcKeyReq)));
                         }
                     } else {
-                        // TODO something went wrong,
                         qFatal("%s",
-                               qPrintable(QString("YaPUBImpl::receive: seemed to receive partial "
-                                                  "message key %1 from iBytes %2 to '%3'")
-                                              .arg(key)
-                                              .arg(iBytes)
-                                              .arg(mcKeyReq)));
+                               qPrintable(
+                                   QString("YaPUBImpl::receive: seemed to receive partial "
+                                           "message key %1 from iBytes %2 to '%3' from ident %4")
+                                       .arg(key)
+                                       .arg(iBytes)
+                                       .arg(mcKeyReq, address)));
 
                         iBytes = 0;
                         key = -1;
@@ -235,12 +233,14 @@ int YaPUBImpl::send(int key, int msgSize, const char *msgData)
                 rc = zmq_send(mpReqRespSocket, 0, 0, ZMQ_SNDMORE);
                 assert(-1 != rc);
 
-                int flags = (0 != msgSize && 0 != msgData) ? ZMQ_SNDMORE : 0;
+                auto send_more = (0 != msgSize && 0 != msgData);
+
+                int flags = send_more ? ZMQ_SNDMORE : 0;
 
                 rc = zmq_send(mpReqRespSocket, mcKey, YaComponent::KeySize, flags);
                 assert(YaComponent::KeySize == rc);
 
-                if (0 != msgSize && 0 != msgData) {
+                if (send_more) {
                     rc = zmq_send(mpReqRespSocket, msgData, msgSize, 0);
                     assert(msgSize == rc);
                 }
@@ -294,10 +294,11 @@ int YaPUBImpl::send(int key, int msgSize, const char *msgData, const std::string
             assert(it->first.length() == rc);
             rc = zmq_send(mpReqRespSocket, 0, 0, ZMQ_SNDMORE);
             assert(-1 != rc);
-            int flags = (0 != msgSize && 0 != msgData) ? ZMQ_SNDMORE : 0;
+            auto send_more = (0 != msgSize && 0 != msgData);
+            int flags = send_more ? ZMQ_SNDMORE : 0;
             rc = zmq_send(mpReqRespSocket, cKey, YaComponent::KeySize, flags);
             assert(YaComponent::KeySize == rc);
-            if (0 != msgSize && 0 != msgData) {
+            if (send_more) {
                 rc = zmq_send(mpReqRespSocket, msgData, msgSize, 0);
                 assert(msgSize == rc);
             }
