@@ -11,7 +11,7 @@ class SubscriberComp : public YaComponent::SubscriberCompImpl,
                        public YaComponent::IPublisherIfcProxyHandler
 {
 public:
-    SubscriberComp(void *context);
+    explicit SubscriberComp(void *context);
     virtual ~SubscriberComp() {}
 
     void onProperty(int, const Data &);
@@ -26,8 +26,6 @@ public:
 
     int miPropertiesCnt;
 
-private:
-    SubscriberComp &self() { return *this; }
 };
 
 class TextUnittestMPSub : public QObject

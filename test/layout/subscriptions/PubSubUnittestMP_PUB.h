@@ -25,7 +25,6 @@ protected:
     virtual void timerEvent(QTimerEvent *);
 
 private:
-    PublisherComp &self() { return *this; }
     Data moData;
 };
 

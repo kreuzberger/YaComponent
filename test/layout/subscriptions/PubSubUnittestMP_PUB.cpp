@@ -64,8 +64,8 @@ void PubSubUnittestMPPub::testRoutine()
 #include <QtCore/QtDebug>
 
 PublisherComp::PublisherComp(void *context)
-    : YaComponent::PublisherCompImpl(context, static_cast<IPublisherIfcStubHandler &>(self()))
-    , IPublisherIfcStubHandler(self())
+    : YaComponent::PublisherCompImpl(context, dynamic_cast<IPublisherIfcStubHandler &>(*this))
+    , IPublisherIfcStubHandler(*this)
     , miTimerID(-1)
     , moData()
     , mbFinished(false)
