@@ -89,6 +89,42 @@ set( CMAKE_INSTALL_MESSAGE "LAZY" ) # one of NEVER, LAZY, ALWAYS
 
 include( cmake/YaComponent.cmake)
 
+# use address sanitizer (needs gcc >= 4.8)
+set(SANI_DEFAULT OFF)
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" AND UNIX)
+    set(SANI_DEFAULT ON)
+endif()
+
+option(WITH_ASAN "Build with address sanitizer (export ASAN_OPTIONS=leak_check_at_exit=0)" ${SANI_DEFAULT})
+if(WITH_ASAN AND (CMAKE_CXX_COMPILER_ID STREQUAL Clang OR (CMAKE_CXX_COMPILER_ID STREQUAL GNU
+                                                           AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8))
+)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-omit-frame-pointer -fsanitize=address")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fsanitize=address")
+    # usually no symlink to soname, so list some of these as well
+    find_library(LIBASAN NAMES asan libasan.so.8 libasan.so.7 libasan.so.6 libasan.so.5 libasan.so.4)
+else()
+    unset(LIBASAN CACHE)
+endif()
+
+# use undefined behavior sanitizer (gcc >= 4.9, clang >= ?)
+option(WITH_UBSAN "Build with undefined behavior sanitizer" ${SANI_DEFAULT})
+if(WITH_UBSAN)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL Clang OR (CMAKE_CXX_COMPILER_ID STREQUAL GNU AND CMAKE_CXX_COMPILER_VERSION
+                                                                                       VERSION_GREATER_EQUAL 4.9)
+    )
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined")
+        # This is supposed to fix false-positives when using a derived class through a base class pointer (base class is
+        # virtual); see links below. However, -fsanatize=vptr errors still remain.
+        # https://stackoverflow.com/questions/57294792/c-ubsan-produces-false-positives-with-derived-objects
+        # https://bugs.llvm.org/show_bug.cgi?id=39191 https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80963 string(REPLACE
+        # "-fvisibility=hidden" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}") string(REPLACE "-fvisibility=hidden" ""
+        # CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+    endif()
+endif()
+
+
 add_subdirectory(src)
 add_subdirectory(doc)
 add_subdirectory(test)
