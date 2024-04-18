@@ -15,7 +15,11 @@
     </req>
   </requests>
   <responses>
-    <resp id="startedText" package="TextGen"/>
-    <resp id="stoppedText" package="TextGen"/>
+    <resp id="startedText" package="TextGen">
+      <para id="startedText" package="TextGen"/>
+    </resp>
+    <resp id="stoppedText" package="TextGen">
+      <para id="stoppedText" package="TextGen"/>
+    </resp>
   </responses>
 </interface>

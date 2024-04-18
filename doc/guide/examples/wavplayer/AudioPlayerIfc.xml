@@ -15,7 +15,11 @@
     </req>
   </requests>
   <responses>
-    <resp id="StartedData" package=""/>
-    <resp id="StoppedData" package=""/>
+    <resp id="StartedData" package="">
+      <para id="StartedData"/>
+    </resp>
+    <resp id="StoppedData" package="">
+        <para id="StoppedData"/>
+    </resp>
   </responses>
 </interface>

@@ -401,7 +401,22 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
         fhSource << "      case " << strResp << ":" << std::endl;
         fhSource << "        m" << resp->Attribute("id") << ".ParseFromArray(msgData, size);"
                  << std::endl;
-        fhSource << "        mCallbackHandler.onResponse( mId, m" << resp->Attribute("id") << ");"
+
+        std::string strPara;
+
+        auto *para = resp->FirstChildElement("para");
+        while (para) {
+            strPara += ", ";
+            // if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
+            //     strPara += std::string(para->Attribute("package")) + "::";
+            // }
+            strPara += "m" + std::string(para->Attribute("id"));
+            para = para->NextSiblingElement("para");
+        }
+
+        // fhSource << "        mCallbackHandler.onResponse( mId, m" << resp->Attribute("id") << ");"
+        //          << std::endl;
+        fhSource << "        mCallbackHandler.onResponse( mId, " << strResp << strPara << ");"
                  << std::endl;
         fhSource << "        break;" << std::endl;
     }
@@ -445,16 +460,37 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
 
     fhHeader << "" << std::endl;
 
+    bool empty_response_handled = false;
+
     for (const auto *resp : responses) {
-        fhHeaderIfc << "    virtual void onResponse( int proxyId, const ";
-        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-            fhHeaderIfc << resp->Attribute("package") << "::";
+        std::string strPara;
+        auto *para = resp->FirstChildElement("para");
+        while (para) {
+            strPara += ", const ";
+            if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
+                strPara += std::string(para->Attribute("package")) + "::";
+            }
+            strPara += std::string(para->Attribute("id")) + "&";
+            para = para->NextSiblingElement("para");
         }
-        fhHeaderIfc << resp->Attribute("id") << "& ) = 0;" << std::endl;
+        // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+        //     fhHeaderIfc << resp->Attribute("package") << "::";
+        // }
+        //fhHeaderIfc << resp->Attribute("id") << "& ) = 0;" << std::endl;
+        fhHeaderIfc << "    virtual void onResponse( int proxyId, int key";
+        if (!strPara.empty()) {
+            fhHeaderIfc << strPara << ") = 0;" << std::endl;
+        } else if (!empty_response_handled) {
+            fhHeaderIfc << ") = 0;" << std::endl;
+        }
+
+        if (strPara.empty()) {
+            empty_response_handled = true;
+        }
     }
 
     fhHeader << "private:" << std::endl;
-    fhHeader << " " << ifcName << "Proxy();" << std::endl;
+    fhHeader << "  " << ifcName << "Proxy();" << std::endl;
     fhHeader << "  I" << ifcName << "ProxyHandler& mCallbackHandler;" << std::endl;
 
     for (const auto *prop : properties) {

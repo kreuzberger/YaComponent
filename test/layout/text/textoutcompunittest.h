@@ -12,8 +12,8 @@ public:
 
     void onProperty(int, const TextGen::Text &);
 
-    virtual void onResponse(int, const TextGen::startedText &);
-    virtual void onResponse(int, const TextGen::stoppedText &);
+    virtual void onResponse(int, int key, const TextGen::startedText &);
+    virtual void onResponse(int, int key, const TextGen::stoppedText &);
 
     virtual void init();
 
