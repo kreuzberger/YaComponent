@@ -28,6 +28,33 @@ Script to add Yet Another Component xml definitions to the build process.
 
 include(CMakeParseArguments)
 
+macro (YACOMPONENT_LAYOUT_GENERATE outfiles)
+  foreach( it ${ARGN})
+    get_filename_component( it ${it} ABSOLUTE )
+    get_filename_component( layout ${it} NAME_WE )
+
+    set(outfile ${CMAKE_CURRENT_BINARY_DIR}/${layout}/doc/${layout}.txt
+    )
+
+    get_property(inc_dirs DIRECTORY ${YaComponent_GENERATOR_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+#    message("include dirs ${inc_dirs}")
+
+    add_custom_command( OUTPUT ${outfile}
+      COMMAND $<TARGET_FILE:YaComponent::yacomplayout> --layout=${it} --outcode=${CMAKE_CURRENT_BINARY_DIR}/${layout}/code
+      DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomplayout>
+    )
+
+   set( ${outfiles} ${${outfiles}} ${outfile})
+   INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${layout}/code )
+  endforeach( it )
+
+  set( ${outfiles} ${${outfiles}}  )
+
+  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
+
+endmacro( YACOMPONENT_LAYOUT_GENERATE )
+
+
 macro (YACOMPONENT_IFC_GENERATE outfiles)
 
    set( outfiles )

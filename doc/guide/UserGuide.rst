@@ -36,6 +36,7 @@ The YaComponent framework consists of three parts:
 
   - Interface
   - Component
+  - Layout
 
 A basic example will show you the meanings in the next chapter. In this example we have one interface
 called AudioPlayer, and two components callee WavFileReader and SoundOut
@@ -133,6 +134,23 @@ The reusability of your component depends on the number of interfaces and the da
 
 The main goal of the YaComponent framework is to hide any thread and process dependencies from your code.
 This does not mean that the usage of Threads inbetween the components is not allowed, but should be safely considered.
+
+Layout
+------
+
+A YaComponent Layout describes which components are used by which applications (processes), how the components
+are organized in threads inbetween the processes and which kind of communication between the components is used.
+
+There is code generated during the component build also for layouts, but this code could not be used directly.
+It is just an example, how you should code it in your main() function.
+
+Currently there is no intention to fully generate code for processes, cause many things must be done here
+depending on your applications definition
+
+  - command line argument handling
+  - printing copyright informations or other company dependend stuff
+  - implementing signalhandler and other stuff.
+
 
 
 Introduction by Example
