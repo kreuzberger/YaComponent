@@ -1,5 +1,5 @@
 project (CommunicationSlides)
 
-if(USE_DOC_HIEROGLYPH)
-    SPHINX_SLIDE_GENERATE(CommunicationSlides)
+if(USE_DOC_SPHINX)
+    SPHINX_DOC_GENERATE(CommunicationSlides BUILDERS REVEALJS)
 endif()
