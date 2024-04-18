@@ -14,8 +14,7 @@ void YaCompLayoutCodeGen::write(const std::filesystem::path &codePath,
     for (auto *process : processes) {
         std::ofstream fhSource;
 
-        auto filename = (codePath / (componentName + std::string(process->Attribute("name")) + ".cpp"))
-                            .string();
+        auto filename = (codePath / (componentName + ".cpp")).string();
         YaComponentCore::printDbg(std::string("write code file ") + filename);
         fhSource.open(filename, std::ios::out | std::ios::trunc);
 
@@ -27,15 +26,13 @@ void YaCompLayoutCodeGen::write(const std::filesystem::path &codePath,
             YaComponentCore::printDbg(std::string("write code for thread ")
                                       + thread->Attribute("name"));
             fhSource << "    YaComponentThread " << thread->Attribute("name") << ";" << std::endl;
-            fhSource << "    printf(\"starting thread\\n\");" << std::endl;
             fhSource << "    " << thread->Attribute("name") << ".start();" << std::endl;
 
             auto *component = thread->FirstChildElement("component");
             while (component) {
                 writeComponentParts(fhSource, component, adresses);
                 fhSource << "    " << component->Attribute("name")
-                         << ".moveToThread(&$thread->{name});" << std::endl;
-                fhSource << "    printf(\"calling move to thread\\n\");" << std::endl;
+                         << ".moveToThread(&thread->{name});" << std::endl;
                 component = component->NextSiblingElement("component");
             }
 

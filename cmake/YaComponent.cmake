@@ -3,54 +3,52 @@
 YaComponent
 ************
 
-Script to add Yet Another Component xml definitions to the build process.
+Script to generate example source code for layouts
 
-.. command:: yacomponent_ifc_generate
+.. command:: yacomponent_layout_generate
 
-  Macro to generate source code files from component xml definition
+  Macro to generate source code files from layout xml definition
 
   ::
 
-    yacomponent_ifc_generate( outfiles
+    yacomponent_layout_generate( outfiles
                         <xml input files>
     )
 
   The options are:
 
-    ``outfiles``
-      The generated cpp files that could be added to a target.
-
-    ``Component xml``
-      Full path to the XML file describing the Component(s)
+    ``Layout xml``
+      Full path to the XML file describing the Layout(s)
 
 #]=======================================================================]
 
 
 include(CMakeParseArguments)
 
-macro (YACOMPONENT_LAYOUT_GENERATE outfiles)
+macro (YACOMPONENT_LAYOUT_GENERATE)
   foreach( it ${ARGN})
     get_filename_component( it ${it} ABSOLUTE )
     get_filename_component( layout ${it} NAME_WE )
 
-    set(outfile ${CMAKE_CURRENT_BINARY_DIR}/${layout}/doc/${layout}.txt
+    set(_outfile ${CMAKE_CURRENT_BINARY_DIR}/${layout}/code/${layout}.cpp
     )
 
     get_property(inc_dirs DIRECTORY ${YaComponent_GENERATOR_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 #    message("include dirs ${inc_dirs}")
 
-    add_custom_command( OUTPUT ${outfile}
+    add_custom_command( OUTPUT ${_outfile}
       COMMAND $<TARGET_FILE:YaComponent::yacomplayout> --layout=${it} --outcode=${CMAKE_CURRENT_BINARY_DIR}/${layout}/code
       DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomplayout>
     )
 
-   set( ${outfiles} ${${outfiles}} ${outfile})
-   INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${layout}/code )
+    list( APPEND _outfiles ${_outfile})
+    INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${layout}/code )
   endforeach( it )
 
-  set( ${outfiles} ${${outfiles}}  )
+  add_custom_target(layouts_${PROJECT_NAME} ALL DEPENDS ${_outfiles}
+                    COMMENT "Generating layout for ${PROJECT_NAME}")
 
-  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
+  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${_outfiles}" )
 
 endmacro( YACOMPONENT_LAYOUT_GENERATE )
 
