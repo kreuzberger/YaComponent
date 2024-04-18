@@ -18,7 +18,7 @@ void TextUnittestMPSub::initComponentsMPMT()
 
     mpTextOutThread->start();
     mpTextOut->init();
-    mpTextOut->setConnectionParaXml("tcp://127.0.0.1:42163", "TextOut");
+    mpTextOut->setConnectionParaXml("tcp://127.0.0.1:42164", "TextOut");
     mpTextOut->moveToThread(mpTextOutThread);
 }
 
