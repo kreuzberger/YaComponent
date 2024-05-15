@@ -15,6 +15,7 @@ public:
     virtual ~SubscriberComp() {}
 
     void onProperty(int, const Data &);
+    void onProperty(int, const Time &);
 
     virtual void init();
 

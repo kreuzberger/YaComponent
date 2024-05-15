@@ -7,6 +7,12 @@ message Data {
   repeated float samples = 4;
 }
 
+message Time{
+  int64 timeSeconds = 1;
+  double timeFraction = 2;
+  int32  counter = 3;
+}
+
 message StartData {
 }
 

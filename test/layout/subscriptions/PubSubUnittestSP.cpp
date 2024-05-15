@@ -110,3 +110,53 @@ void PubSubUnittestSP::testSendLVCConnectEmpty()
     QCOMPARE(mSubScriber->miPropertiesCnt, 0);
     QCOMPARE(mSubScriber->mLastData.counter(), 0);
 }
+
+void PubSubUnittestSP::testSendOnChangeOff()
+{
+    int rc = -1;
+    rc = mSubScriber->setNotifications();
+    QVERIFY(-1 != rc);
+    QTest::qWait(50);
+
+    Data data;
+    data.set_timeseconds(0);
+    data.set_timefraction(0.0);
+    data.set_counter(123);
+    rc = mPublisher->sendData(data);
+    QVERIFY(-1 != rc);
+    QTest::qWait(50);
+    QCOMPARE(mSubScriber->miPropertiesCnt, 1);
+    QCOMPARE(mSubScriber->mLastData.counter(), 123);
+    mSubScriber->mLastData.Clear();
+
+    rc = mPublisher->sendData(data);
+    QVERIFY(-1 != rc);
+    QTest::qWait(50);
+    QCOMPARE(mSubScriber->miPropertiesCnt, 2);
+    QCOMPARE(mSubScriber->mLastData.counter(), 123);
+}
+
+void PubSubUnittestSP::testSendOnChangeOn()
+{
+    int rc = -1;
+    rc = mSubScriber->setNotifications();
+    QVERIFY(-1 != rc);
+    QTest::qWait(50);
+
+    Time time;
+    time.set_timeseconds(0);
+    time.set_timefraction(0.0);
+    time.set_counter(1);
+    rc = mPublisher->sendTime(time);
+    QVERIFY(-1 != rc);
+    QTest::qWait(50);
+    QCOMPARE(mSubScriber->miPropertiesTimeCnt, 1);
+    QCOMPARE(mSubScriber->mLastTime.counter(), 1);
+    mSubScriber->mLastTime.Clear();
+    // resend time to check
+    rc = mPublisher->sendTime(time);
+    QVERIFY(-1 != rc);
+    QTest::qWait(50);
+    QCOMPARE(mSubScriber->miPropertiesTimeCnt, 1);
+    QCOMPARE(mSubScriber->mLastTime.counter(), 0);
+}

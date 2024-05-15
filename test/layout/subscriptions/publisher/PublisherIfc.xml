@@ -2,7 +2,8 @@
   <version maj="1" min="1" rev="0"/>
   <include file="PublisherIfc.pb.h"/>
   <properties>
-    <prop id="Data" package=""/>
+      <prop id="Data" package=""/>
+      <prop id="Time" onChange="1" package=""/>
   </properties>
   <requests>
     <req id="StartData" package="">

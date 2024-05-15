@@ -114,3 +114,11 @@ void SubscriberComp::onProperty(int proxyId, const Data &data)
         qDebug() << "fast received " << miPropertiesCnt << "last counter" << data.counter();
     }
 }
+void SubscriberComp::onProperty(int proxyId, const Time &data)
+{
+    assert(PROXY_DATA == proxyId);
+    // miPropertiesCnt++;
+    // if (miPropertiesCnt % 100 == 0) {
+    //     qDebug() << "fast received " << miPropertiesCnt << "last counter" << data.counter();
+    // }
+}

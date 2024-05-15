@@ -25,6 +25,8 @@ private slots:
     void testSendWithoutSubscriptions();
     void testSendLVCConnect();
     void testSendLVCConnectEmpty();
+    void testSendOnChangeOff();
+    void testSendOnChangeOn();
 
 private:
     void initComponents();

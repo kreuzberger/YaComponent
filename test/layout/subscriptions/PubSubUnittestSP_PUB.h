@@ -18,6 +18,9 @@ public:
     void init() override;
     void sendResponseStop();
     int sendData(const Data &data);
+    int sendTime(const Time &time);
+
 public:
-    Data moData;
+    Data mData;
+    Time mTime;
 };

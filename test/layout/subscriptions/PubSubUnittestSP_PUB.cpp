@@ -6,13 +6,14 @@
 PublisherComp::PublisherComp(void *context)
     : YaComponent::PublisherCompImpl(context, static_cast<IPublisherIfcStubHandler &>(*this))
     , IPublisherIfcStubHandler(*this)
-    , moData()
+    , mData()
+    , mTime()
 {}
 
 void PublisherComp::init()
 {
     PublisherCompImpl::init();
-    moData.mutable_samples()->Reserve(4096);
+    mData.mutable_samples()->Reserve(4096);
 }
 
 void PublisherComp::onRequestStartData(int id)
@@ -27,6 +28,12 @@ void PublisherComp::onRequestStopData(int id)
 
 int PublisherComp::sendData(const Data &data)
 {
-    moData = data;
+    mData = data;
     return mReceiverData.send(YaComponent::PublisherIfcStub::PROP_DATA, data);
+}
+
+int PublisherComp::sendTime(const Time &time)
+{
+    mTime = time;
+    return mReceiverData.send(YaComponent::PublisherIfcStub::PROP_TIME, time);
 }

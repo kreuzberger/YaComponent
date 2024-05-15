@@ -115,3 +115,13 @@ void SubscriberComp::onProperty(int proxyId, const Data &data)
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
+
+void SubscriberComp::onProperty(int proxyId, const Time &data)
+{
+    assert(PROXY_DATA == proxyId);
+    // miPropertiesCnt++;
+    // if (miPropertiesCnt % 100 == 0) {
+    //     qDebug() << "slow received " << miPropertiesCnt << "last counter" << data.counter();
+    //     std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    // }
+}

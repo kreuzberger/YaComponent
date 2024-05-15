@@ -559,6 +559,7 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhHeader << "#include \"I" << ifcName << "StubHandler.h\"\n";
     fhHeader << "#include <yacomponent/YaStubBase.h>\n";
     fhHeader << "#include <yacomponent/YaPUBImpl.h>\n";
+    fhHeader << "#include <google/protobuf/util/message_differencer.h>\n";
 
     //fhHeader << "#include <stdio.h>\n";
     fhHeader << std::endl;
@@ -701,8 +702,24 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
         strMethod += prop->Attribute("id");
         fhSource << "int " << ifcName << "Stub::send(int key, const " << strMethod
                  << "& rMessage )\n{\n";
-        fhSource << "  return mPublisher.send(key, rMessage );\n";
+
+        bool onChange = std::string(prop->Attribute("onChange")) == "0" ? false : true;
+
+        if (onChange) {
+            fhSource << "  auto rc = 0;\n";
+            fhSource << "  if ( !google::protobuf::util::MessageDifferencer::Equals(m"
+                     << prop->Attribute("id") << " , rMessage) ) {\n";
+            fhSource << "    rc = mPublisher.send(key, rMessage );\n";
+            fhSource << "    m" << prop->Attribute("id") << " = rMessage;\n";
+            fhSource << "  }\n";
+            fhSource << "  return rc;\n";
+        } else {
+            fhSource << "  return mPublisher.send(key, rMessage );\n";
+        }
+
         fhSource << "}\n";
+
+        fhHeader << "    " << strMethod << " m" << prop->Attribute("id") << ";\n";
     }
 
     fhSource << "void " << ifcName << "Stub::receive()\n";
