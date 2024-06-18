@@ -19,7 +19,7 @@ public:
     int clearNotification(int key);
 
     void close();
-    int getMessageCnt() { return miMessageCnt; }
+    //int getMessageCnt() { return miMessageCnt; }
     bool checkSync();
 
 private:
@@ -32,6 +32,6 @@ private:
     char mcIdent[YaComponent::MaxIdentSize];
     YaBuffer mMsgOutBuffer = YaBuffer(YaComponent::MessageSize);
     YaBuffer mMsgRespBuffer = YaBuffer(YaComponent::MaxMessageSize);
-    int miMessageCnt = 0;
+    //int miMessageCnt = 0;
     bool mbSync = false;
 };

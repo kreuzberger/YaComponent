@@ -1,0 +1,19 @@
+# leak:fontconfig
+# leak:libGLX_mesa
+# leak:UTF-16
+# leak:QIconvCodec::convertToUnicode
+# leak:QIconvCodec::convertFromUnicode
+# leak:QIconvCodec::createIconv_t
+# leak:__gconv_find_transform
+# leak:gcmodule.c
+# leak:unicode_decode_utf8
+# leak:_PyObject_New
+# leak:_PyUnicode_FromUCS1
+leak:libpython
+# leak:libcrypto
+# leak:_decimal
+# leak:_rust.abi3
+# leak:libpdfium.so
+# leak:<unknown module>
+# leak:_pydantic_core
+# leak:_multiarray_umath

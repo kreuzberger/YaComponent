@@ -1,0 +1,30 @@
+<componentlayout>
+<processes>
+<process name="PublisherProcess">
+  <description></description>
+<!--  <thread name="PublisherThread">-->
+    <component name="Publisher" xml="publisher/PublisherComp.xml">
+      <provides>
+        <interface id="ReceiverData" address="inproc:///tmp/receiverdata" hwm="100"/>
+      </provides>
+    </component>
+<!--  </thread>-->
+</process>
+<process name="SubScriberFast">
+  <description></description>
+  <component name="SubscriberFast" xml="subscriber/SubscriberComp.xml">
+    <uses>
+      <interface id="SignalData" sub="Publisher.ReceiverData"/>
+    </uses>
+  </component>
+</process>
+<process name="SubScriberSlow">
+  <description></description>
+  <component name="SubscriberSlow" xml="subscriber/SubscriberComp.xml">
+    <uses>
+      <interface id="SignalData" sub="Publisher.ReceiverData"/>
+    </uses>
+  </component>
+</process>
+</processes>
+</componentlayout>

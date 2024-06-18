@@ -230,7 +230,7 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
             } else {
                 qFatal("%s", qPrintable(QString("YaSUBImpl::receive %1").arg(key)));
             }
-            miMessageCnt++;
+            //miMessageCnt++;
         }
     }
 

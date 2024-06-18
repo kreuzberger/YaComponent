@@ -1,0 +1,12 @@
+KeySize = 4
+MessageSize = 8
+KeyFmt = "%4d"
+MessageSizeFmt = "%8d"
+MaxMessageSize = 20 * 1024
+MaxIdentSize = 512
+SynAck = "SYNC_ACK"
+KeySync = -2
+KeyEnd = -3
+KeySetNotification = -4
+KeyClearNotification = -5
+TimeOut = 20
