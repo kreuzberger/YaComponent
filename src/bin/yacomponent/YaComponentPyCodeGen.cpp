@@ -243,18 +243,23 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     fhSource.open(sourceFilename, std::ios::out | std::ios::trunc);
     fhHeaderIfc.open(ifcFilename, std::ios::out | std::ios::trunc);
 
-    fhSource << "import " << ifcName << "Proxy" << std::endl;
-    fhSource << "import " << ifcName << "ProxyHandler" << std::endl;
-    fhSource << "import yacomponent" << std::endl;
+    //fhSource << "import " << ifcName << "Proxy" << std::endl;
+    fhSource << "# import " << ifcName << "ProxyHandler" << std::endl;
+    fhSource << "import zmq" << std::endl;
+    fhSource << "from yacomponent import Proxy, Stub" << std::endl;
 
     //fhSource << "#include <yacomponent/YaProxyBase.h>" << std::endl;
     //fhSource << "#include <yacomponent/YaSUBImpl.h>" << std::endl;
     fhSource << "from PySide2.QtCore import QObject" << std::endl;
+    fhSource << "from enum import Enum, auto" << std::endl;
 
     for (const auto *include : includes) {
-        fhSource << "# todo what do we include/import in python" << std::endl;
-        fhSource << "# include \"" << include->Attribute("file") << "\"" << std::endl;
-        fhSource << "# include \"" << include->Attribute("file") << "\"" << std::endl;
+        auto filename = std::string(include->Attribute("file"));
+        auto suffix = std::string(".py");
+        if (filename.size() >= suffix.size()
+            && filename.compare(filename.size() - suffix.size(), suffix.size(), suffix) == 0) {
+            fhSource << "import " << filename.erase(filename.find(suffix)) << std::endl;
+        }
     }
 
     // fhSource << ifcName << "Proxy::" << ifcName << "Proxy( void* context, int id, I" << ifcName
@@ -269,49 +274,79 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     // fhHeader << "namespace YaComponent {" << std::endl;
     // fhHeaderIfc << "namespace YaComponent {" << std::endl;
 
-    // fhHeader << "class " << ifcName << "Proxy: public YaProxyBase" << std::endl;
-    // fhHeader << "{" << std::endl;
-    // fhHeader << "  public:" << std::endl;
-    // fhHeader << "    " << ifcName << "Proxy( void* context, int id, I" << ifcName
-    //          << "ProxyHandler& );" << std::endl;
-    // fhHeader << "    virtual ~" << ifcName << "Proxy();\n" << std::endl;
-    // fhHeader << "    virtual void receive();" << std::endl;
+    fhSource << std::endl;
+    fhSource << std::endl;
 
+    fhSource << "class " << ifcName << "Proxy( Proxy ):" << std::endl << std::endl;
+    fhSource << "    _callback = None" << std::endl;
+
+    for (const auto *prop : properties) {
+        fhSource << "    ";
+        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
+            fhHeader << prop->Attribute("package") << "::";
+        }
+        //fhSource << prop->Attribute("id");
+        fhSource << "_" << prop->Attribute("id") << " = None" << std::endl;
+    }
+    for (const auto *resp : responses) {
+        fhHeader << "    ";
+        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+            fhHeader << resp->Attribute("package") << "::";
+        }
+        //fhSource << resp->Attribute("id");
+        fhSource << "_" << resp->Attribute("id") << " = None" << std::endl;
+    }
+
+    fhSource << std::endl;
+
+    fhSource << "    class KEYS(Enum):" << std::endl;
+
+    for (const auto *prop : properties) {
+        std::string strProp;
+        strProp += "PROP_";
+        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
+            strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
+        }
+        strProp += YaComponentCore::to_upper(prop->Attribute("id"));
+        fhSource << "        " << strProp << " = auto()" << std::endl;
+    }
+    for (const auto *req : requests) {
+        std::string strReq;
+        strReq += "REQ_";
+        if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
+            strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
+        }
+
+        strReq += YaComponentCore::to_upper(req->Attribute("id"));
+        fhSource << "        " << strReq << " = auto()" << std::endl;
+    }
+    for (const auto *resp : responses) {
+        std::string strResp;
+        strResp += "RESP_";
+        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+            strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
+        }
+        strResp += YaComponentCore::to_upper(resp->Attribute("id"));
+        fhSource << "        " << strResp << " = auto()" << std::endl;
+    }
+
+    fhSource << std::endl << std::endl;
+
+    fhSource << "    def __init__(self, context: zmq.Context, id: int, callback ): # todo callback "
+                "handler"
+             << std::endl;
+
+    fhSource << "        super().__init__(self,context,id)" << std::endl;
+    fhSource << "        _callback = callback" << std::endl;
+
+    // fhHeader << "    virtual ~" << ifcName << "Proxy();\n" << std::endl;
+    fhSource << std::endl << std::endl;
     // fhHeaderIfc << "class I" << ifcName << "ProxyHandler" << std::endl;
     // fhHeaderIfc << "{" << std::endl;
     // fhHeaderIfc << "  public:" << std::endl;
     // fhHeaderIfc << "    I" << ifcName << "ProxyHandler() {}" << std::endl;
     // fhHeaderIfc << "    virtual ~I" << ifcName << "ProxyHandler() {}\n" << std::endl;
 
-    // fhHeader << "    enum KEYS {" << std::endl;
-    // for (const auto *prop : properties) {
-    //     std::string strProp;
-    //     strProp += "PROP_";
-    //     if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
-    //         strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
-    //     }
-    //     strProp += YaComponentCore::to_upper(prop->Attribute("id"));
-    //     fhHeader << "      " << strProp << "," << std::endl;
-    // }
-    // for (const auto *req : requests) {
-    //     std::string strReq;
-    //     strReq += "REQ_";
-    //     if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
-    //         strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
-    //     }
-
-    //     strReq += YaComponentCore::to_upper(req->Attribute("id"));
-    //     fhHeader << "      " << strReq << "," << std::endl;
-    // }
-    // for (const auto *resp : responses) {
-    //     std::string strResp;
-    //     strResp += "RESP_";
-    //     if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-    //         strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
-    //     }
-    //     strResp += YaComponentCore::to_upper(resp->Attribute("id"));
-    //     fhHeader << "      " << strResp << "," << std::endl;
-    // }
     // fhHeader << "    };\n" << std::endl;
 
     // for (const auto *prop : properties) {
@@ -326,170 +361,134 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     // fhHeaderIfc << "" << std::endl;
     // fhSource << strDtor << "\n}\n" << std::endl;
 
-    // for (const auto *req : requests) {
-    //     fhHeader << "    int request" << req->Attribute("id");
-    //     fhSource << "int " << ifcName << "Proxy::request" << req->Attribute("id");
-    //     fhHeader << "( ";
-    //     fhSource << "( ";
-    //     std::string strPara;
+    for (const auto *req : requests) {
+        //     fhHeader << "    int request" << req->Attribute("id");
+        std::string strPara;
+        auto *para = req->FirstChildElement("para");
+        auto has_para = para != nullptr;
+        while (para) {
+            strPara += ", ";
+            if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
+                strPara += std::string(para->Attribute("package")) + ".";
+            }
+            strPara += std::string(para->Attribute("id"));
+            para = para->NextSiblingElement("para");
+        }
+        if (!strPara.empty()) {
+            strPara.pop_back();
+            strPara += ", msg) -> int:";
+        } else {
+            strPara = ") -> int:";
+        }
+        fhSource << "    def request" << req->Attribute("id") << "(self" << strPara << std::endl;
 
-    //     auto *para = req->FirstChildElement("para");
-    //     while (para) {
-    //         strPara += " const ";
-    //         if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
-    //             strPara += std::string(para->Attribute("package")) + "::";
-    //         }
-    //         strPara += std::string(para->Attribute("id")) + "&,";
-    //         para = para->NextSiblingElement("para");
-    //     }
-    //     if (!strPara.empty()) {
-    //         strPara.pop_back();
-    //         fhHeader << strPara << ");" << std::endl;
-    //         fhSource << strPara << " msg )\n{" << std::endl;
-    //     } else {
-    //         fhHeader << " );" << std::endl;
-    //         fhSource << " )\n{" << std::endl;
-    //     }
-    //     fhSource << "  return mSubscriber.request( REQ_";
-    //     if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
-    //         fhSource << YaComponentCore::to_upper(req->Attribute("package")) + "_";
-    //     }
-    //     fhSource << YaComponentCore::to_upper(req->Attribute("id"));
-    //     if (!strPara.empty()) {
-    //         fhSource << ", msg";
-    //     }
-    //     fhSource << " );" << std::endl;
-    //     fhSource << "}" << std::endl;
-    // }
+        fhSource << "        return super()._Subscriber.request( REQ_";
+        if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
+            fhSource << YaComponentCore::to_upper(req->Attribute("package")) + "_";
+        }
+        fhSource << YaComponentCore::to_upper(req->Attribute("id"));
+        if (has_para) {
+            fhSource << ", msg";
+        }
+        fhSource << " )" << std::endl;
+        fhSource << std::endl << std::endl;
+    }
 
-    // fhSource << "void " << ifcName << "Proxy::receive()" << std::endl;
-    // fhSource << "{" << std::endl;
-    // fhSource << "  int iMsgCnt = 0;" << std::endl;
-    // fhSource << "  bool bMsgAvailable = true;" << std::endl;
+    fhSource << "    def receive(self) -> None:" << std::endl;
+    fhSource << "        msgCnt = 0" << std::endl;
+    fhSource << "        msgAvailable = True" << std::endl;
 
-    // fhSource << "  while( bMsgAvailable )" << std::endl;
-    // fhSource << "  {" << std::endl;
-    // fhSource << "    int iBytesTotal = 0;" << std::endl;
-    // fhSource << "    int key = -1;" << std::endl;
-    // fhSource << "    int size = -1;" << std::endl;
-    // fhSource << "    char* msgData = nullptr;" << std::endl;
+    fhSource << "        while bMsgAvailable:" << std::endl;
+    fhSource << "            bytesTotal = 0" << std::endl;
+    fhSource << "            key = -1" << std::endl;
+    fhSource << "            size = -1" << std::endl;
+    fhSource << "            msgData = None" << std::endl;
 
-    // fhSource << "    int iBytes = mSubscriber.receive(key, size, &msgData );" << std::endl;
-    // fhSource << "    if( 0 < iBytes )" << std::endl;
-    // fhSource << "    {" << std::endl;
-    // fhSource << "      iMsgCnt++;" << std::endl;
-    // fhSource << "      iBytesTotal += iBytes;" << std::endl;
-    // //  fhSource << "    }" << std::endl;
+    fhSource << "            bytes = super()._Subscriber.receive(key, size, msgData );" << std::endl;
+    fhSource << "            if 0 < bytes:" << std::endl;
+    fhSource << "                msgCnt += 1" << std::endl;
+    fhSource << "                bytesTotal += iBytes;" << std::endl;
 
-    // fhSource << "      switch( key )" << std::endl;
-    // fhSource << "      {" << std::endl;
-    // for (const auto *resp : responses) {
-    //     std::string strResp;
-    //     strResp += "RESP_";
-    //     if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-    //         strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
-    //     }
-    //     strResp += YaComponentCore::to_upper(resp->Attribute("id"));
-    //     fhSource << "      case " << strResp << ":" << std::endl;
-    //     fhSource << "        m" << resp->Attribute("id") << ".ParseFromArray(msgData, size);"
-    //              << std::endl;
+    fhSource << "            match key:" << std::endl;
+    for (const auto *resp : responses) {
+        std::string strResp;
+        strResp += "RESP_";
+        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+            strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
+        }
+        strResp += YaComponentCore::to_upper(resp->Attribute("id"));
+        fhSource << "                case KEYS." << strResp << ":" << std::endl;
+        fhSource << "                    self._" << resp->Attribute("id")
+                 << ".ParseFromArray(msgData, size)" << std::endl;
 
-    //     std::string strPara;
+        std::string strPara;
 
-    //     auto *para = resp->FirstChildElement("para");
-    //     while (para) {
-    //         strPara += ", ";
-    //         strPara += "m" + std::string(para->Attribute("id"));
-    //         para = para->NextSiblingElement("para");
-    //     }
+        auto *para = resp->FirstChildElement("para");
+        while (para) {
+            strPara += ", ";
+            strPara += "m" + std::string(para->Attribute("id"));
+            para = para->NextSiblingElement("para");
+        }
 
-    //     fhSource << "        mCallbackHandler.onResponse( mId, " << strResp << strPara << ");"
-    //              << std::endl;
-    //     fhSource << "        break;" << std::endl;
-    // }
+        fhSource << "                    self._callback.onResponse( mId, " << strResp << strPara
+                 << ")" << std::endl;
+    }
 
-    // for (const auto *prop : properties) {
-    //     std::string strProp;
-    //     strProp += "PROP_";
-    //     if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
-    //         strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
-    //     }
-    //     strProp += YaComponentCore::to_upper(prop->Attribute("id"));
-    //     fhSource << "      case " << strProp << ":" << std::endl;
-    //     fhSource << "        if(msgData && 0 <= size)" << std::endl;
-    //     fhSource << "        {" << std::endl;
-    //     fhSource << "          m" << prop->Attribute("id") << ".ParseFromArray(msgData, size);"
-    //              << std::endl;
-    //     fhSource << "          mCallbackHandler.onProperty( mId, m" << prop->Attribute("id") << ");"
-    //              << std::endl;
-    //     fhSource << "        }" << std::endl;
+    for (const auto *prop : properties) {
+        std::string strProp;
+        strProp += "PROP_";
+        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
+            strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
+        }
+        strProp += YaComponentCore::to_upper(prop->Attribute("id"));
+        fhSource << "                case KEYS." << strProp << ":" << std::endl;
+        fhSource << "                    if msgData and 0 <= size:" << std::endl;
+        fhSource << "                        self._" << prop->Attribute("id")
+                 << ".ParseFromArray(msgData, size)" << std::endl;
+        fhSource << "                        self._callback.onProperty( mId, m"
+                 << prop->Attribute("id") << ")" << std::endl;
+    }
 
-    //     fhSource << "        break;" << std::endl;
-    // }
-
-    // fhSource << "      default:" << std::endl;
-    // fhSource << "        if( -1 < key)" << std::endl;
-    // fhSource << "        {" << std::endl;
-    // fhSource << "          qFatal(\"" << ifcName << "Proxy::receive(): unknown key '%d'\",key);"
-    //          << std::endl;
-    // fhSource << "        }" << std::endl;
-    // fhSource << "        break;" << std::endl;
+    fhSource << "                case _:" << std::endl;
+    fhSource << "                    if -1 < key:" << std::endl;
+    fhSource << "                        raise RuntimeError(f\"" << ifcName
+             << "Proxy::receive(): unknown key '{key}'\")" << std::endl;
     // fhSource << "      }" << std::endl;
     // fhSource << "    }" << std::endl;
 
-    // fhSource << "    if( 0 >= iBytesTotal ) bMsgAvailable = false;" << std::endl;
+    fhSource << "        if 0 >= bytesTotal:" << std::endl;
+    fhSource << "            bMsgAvailable = False" << std::endl;
 
-    // fhSource << "  }" << std::endl;
+    fhSource << std::endl << std::endl;
 
-    // fhSource << "}" << std::endl;
+    bool empty_response_handled = false;
 
-    // fhHeader << "" << std::endl;
+    for (const auto *resp : responses) {
+        std::string strPara;
+        auto *para = resp->FirstChildElement("para");
+        while (para) {
+            strPara += ", const ";
+            if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
+                strPara += std::string(para->Attribute("package")) + "::";
+            }
+            strPara += std::string(para->Attribute("id")) + "&";
+            para = para->NextSiblingElement("para");
+        }
+        //     fhHeaderIfc << "    virtual void onResponse( int proxyId, int key";
+        if (!strPara.empty()) {
+            //       fhHeaderIfc << strPara << ") = 0;" << std::endl;
+        } else if (!empty_response_handled) {
+            //        fhHeaderIfc << ") = 0;" << std::endl;
+        }
 
-    // bool empty_response_handled = false;
-
-    // for (const auto *resp : responses) {
-    //     std::string strPara;
-    //     auto *para = resp->FirstChildElement("para");
-    //     while (para) {
-    //         strPara += ", const ";
-    //         if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
-    //             strPara += std::string(para->Attribute("package")) + "::";
-    //         }
-    //         strPara += std::string(para->Attribute("id")) + "&";
-    //         para = para->NextSiblingElement("para");
-    //     }
-    //     fhHeaderIfc << "    virtual void onResponse( int proxyId, int key";
-    //     if (!strPara.empty()) {
-    //         fhHeaderIfc << strPara << ") = 0;" << std::endl;
-    //     } else if (!empty_response_handled) {
-    //         fhHeaderIfc << ") = 0;" << std::endl;
-    //     }
-
-    //     if (strPara.empty()) {
-    //         empty_response_handled = true;
-    //     }
-    // }
+        if (strPara.empty()) {
+            empty_response_handled = true;
+        }
+    }
 
     // fhHeader << "private:" << std::endl;
     // fhHeader << "  " << ifcName << "Proxy();" << std::endl;
     // fhHeader << "  I" << ifcName << "ProxyHandler& mCallbackHandler;" << std::endl;
-
-    // for (const auto *prop : properties) {
-    //     fhHeader << "  ";
-    //     if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
-    //         fhHeader << prop->Attribute("package") << "::";
-    //     }
-    //     fhHeader << prop->Attribute("id");
-    //     fhHeader << " m" << prop->Attribute("id") << ";" << std::endl;
-    // }
-    // for (const auto *resp : responses) {
-    //     fhHeader << "  ";
-    //     if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-    //         fhHeader << resp->Attribute("package") << "::";
-    //     }
-    //     fhHeader << resp->Attribute("id");
-    //     fhHeader << " m" << resp->Attribute("id") << ";" << std::endl;
-    // }
 
     // fhHeader << "};" << std::endl;
     // fhHeaderIfc << "};" << std::endl;
@@ -528,8 +527,13 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhHeaderIfc << "#pragma once\n";
 
     for (const auto *include : includes) {
-        fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
-        fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        auto filename = std::string(include->Attribute("file"));
+        auto suffix = std::string(".py");
+        if (filename.size() >= suffix.size()
+            && filename.compare(filename.size() - suffix.size(), suffix.size(), suffix) == 0) {
+            fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+            fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        }
     }
 
     fhHeader << "#include \"I" << ifcName << "StubHandler.h\"\n";
@@ -712,7 +716,7 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhSource << "    char* msgData = 0;\n";
     fhSource << "    ident.clear();\n";
 
-    fhSource << "    int iBytes = mPublisher.receive(key, size, &msgData, ident );\n";
+    fhSource << "    int iBytes = mPublisher.receive(key, size, msgData, ident );\n";
     fhSource << "    if( 0 < iBytes )\n";
     fhSource << "    {\n";
     fhSource << "      iBytesTotal += iBytes;\n";

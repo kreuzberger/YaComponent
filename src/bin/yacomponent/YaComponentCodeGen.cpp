@@ -265,8 +265,13 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     fhHeaderIfc << "#pragma once" << std::endl;
 
     for (const auto *include : includes) {
-        fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
-        fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        auto filename = std::string(include->Attribute("file"));
+        auto suffix = std::string(".h");
+        if (filename.size() >= suffix.size()
+            && filename.compare(filename.size() - suffix.size(), suffix.size(), suffix) == 0) {
+            fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+            fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        }
     }
 
     fhHeader << "#include \"I" << ifcName << "ProxyHandler.h\"" << std::endl;
@@ -552,8 +557,13 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhHeaderIfc << "#pragma once\n";
 
     for (const auto *include : includes) {
-        fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
-        fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        auto filename = std::string(include->Attribute("file"));
+        auto suffix = std::string(".h");
+        if (filename.size() >= suffix.size()
+            && filename.compare(filename.size() - suffix.size(), suffix.size(), suffix) == 0) {
+            fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+            fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        }
     }
 
     fhHeader << "#include \"I" << ifcName << "StubHandler.h\"\n";

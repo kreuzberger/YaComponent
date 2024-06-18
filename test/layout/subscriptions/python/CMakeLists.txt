@@ -11,7 +11,7 @@ protobuf_generate(
 
 pro_add_pytest(
     NAME pypubsubunittestsp WHAT pypubsubunittestsp.py PYTHONPATH
-    "${CMAKE_CURRENT_BINARY_DIR};${pyyacomponent_SOURCE_DIR}"
+    "${CMAKE_CURRENT_BINARY_DIR};${pyyacomponent_SOURCE_DIR};${SubscriptionsTest_BINARY_DIR}/python/PublisherIfc/py"
 )
 
 yacomponent_ifc_generate(

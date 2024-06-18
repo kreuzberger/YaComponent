@@ -1,8 +1,11 @@
 import PublisherIfc_pb2
 
 import yacomponent
-from yacomponent.subscriber import Subscriber
-from yacomponent.publisher import Publisher
+#from yacomponent.subscriber import Subscriber
+#from yacomponent.publisher import Publisher
+from yacomponent import Subscriber
+from yacomponent import Publisher
+import PublisherIfcProxy
 
 from PySide2.QtCore import QThread
 from PySide2.QtTest import QTest

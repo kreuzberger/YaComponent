@@ -190,9 +190,13 @@ YaComponentParser::parseIfcDefinitions(Element *ifc)
 
     auto *include = ifc->FirstChildElement("include");
     while (include) {
-        YaComponentCore::printDbg(std::string("include file: ")
-                                  + std::string(include->Attribute("file")));
-        includes.push_back(include);
+        auto *file = include->FindAttribute("file");
+        if (file) {
+            YaComponentCore::printDbg(std::string("include file: ")
+                                      + std::string(include->Attribute("file")));
+            includes.push_back(include);
+        }
+
         include = include->NextSiblingElement("include");
     }
     return std::make_tuple(properties, requests, responses, includes);

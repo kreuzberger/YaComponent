@@ -111,10 +111,10 @@ macro(YACOMPONENT_IFC_GENERATE outfiles)
                     --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --verbose
                 DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
             )
+            include_directories(${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp)
         endif()
         set(${outfiles} ${${outfiles}} ${outfile})
 
-        include_directories(${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp)
     endforeach(it)
 
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -164,11 +164,11 @@ macro(YACOMPONENT_GENERATE outfiles)
                     --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --verbose
                 DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
             )
+            include_directories(${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp)
         endif()
 
         set(${outfiles} ${${outfiles}} ${outfile})
 
-        include_directories(${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp)
     endforeach(it)
 
     set_property(
