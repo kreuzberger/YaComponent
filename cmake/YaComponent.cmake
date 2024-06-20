@@ -74,24 +74,20 @@ macro(YACOMPONENT_IFC_GENERATE outfiles)
 
     set(outfiles)
 
-    message("args_UNPARSED_ARGUMENTS ${args_UNPARSED_ARGUMENTS}")
-    message("args_LANGUAGE ${args_LANGUAGE}")
+    # message("args_UNPARSED_ARGUMENTS ${args_UNPARSED_ARGUMENTS}") message("args_LANGUAGE ${args_LANGUAGE}")
 
     foreach(it ${args_UNPARSED_ARGUMENTS})
         get_filename_component(it ${it} ABSOLUTE)
         get_filename_component(component ${it} NAME_WE)
 
-        set(outfile
-            ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Proxy.h
-            ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Proxy.cpp
-            ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/I${component}ProxyHandler.h
-            ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Stub.h
-            ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Stub.cpp
-            ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml
-        )
-        # message(" adding outfile in if generation ${outfile}")
-
         if("${args_LANGUAGE}" STREQUAL "python")
+            set(outfile
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Proxy.py
+                # ${CMAKE_CURRENT_BINARY_DIR}/${component}/py/I${component}ProxyHandler.h
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Stub.py
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml
+            )
+            # message(" adding outfile in if generation ${outfile}")
             add_custom_command(
                 OUTPUT ${outfile}
                 COMMAND
@@ -102,6 +98,15 @@ macro(YACOMPONENT_IFC_GENERATE outfiles)
             )
 
         else()
+            set(outfile
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Proxy.h
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Proxy.cpp
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/I${component}ProxyHandler.h
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Stub.h
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Stub.cpp
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml
+            )
+            # message(" adding outfile in if generation ${outfile}")
 
             add_custom_command(
                 OUTPUT ${outfile}
@@ -140,13 +145,10 @@ macro(YACOMPONENT_GENERATE outfiles)
         get_filename_component(it ${it} ABSOLUTE)
         get_filename_component(component ${it} NAME_WE)
 
-        set(outfile
-            "${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Impl.h"
-            "${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Impl.cpp"
-            "${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml"
-        )
-
         if("${args_LANGUAGE}" STREQUAL "python")
+            set(outfile "${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Impl.py"
+                        "${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml"
+            )
             add_custom_command(
                 OUTPUT ${outfile}
                 COMMAND
@@ -156,6 +158,11 @@ macro(YACOMPONENT_GENERATE outfiles)
                 DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
             )
         else()
+            set(outfile
+                "${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Impl.h"
+                "${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Impl.cpp"
+                "${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml"
+            )
             add_custom_command(
                 OUTPUT ${outfile}
                 COMMAND

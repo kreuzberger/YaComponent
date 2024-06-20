@@ -9,4 +9,5 @@ KeySync = -2
 KeyEnd = -3
 KeySetNotification = -4
 KeyClearNotification = -5
-TimeOut = 20
+TimeOut = 0.02
+TimeOutMs = 20

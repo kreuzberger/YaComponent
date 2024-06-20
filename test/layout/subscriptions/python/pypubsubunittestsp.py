@@ -1,14 +1,19 @@
-import PublisherIfc_pb2
+from PublisherIfc_pb2 import *
 
 import yacomponent
 #from yacomponent.subscriber import Subscriber
 #from yacomponent.publisher import Publisher
 from yacomponent import Subscriber
 from yacomponent import Publisher
-import PublisherIfcProxy
+from PublisherIfcProxy import PublisherIfcProxy
+from PublisherIfcStub import PublisherIfcStub
+from SubscriberCompImpl import SubscriberCompImpl
+from PublisherCompImpl import PublisherCompImpl
 
 from PySide2.QtCore import QThread
 from PySide2.QtTest import QTest
+from PySide2.QtCore import QCoreApplication
+
 import pytest
 from time import sleep
 import logging
@@ -33,6 +38,9 @@ import logging
 # mPublisher->moveToThread(mPublisherThread.get());
 # mSubScriber->moveToThread(mSubscriperThread.get());
 
+import logging
+from time import sleep
+
 class PubSubEnv():
     _context = None
     _pub_thread = None
@@ -43,20 +51,33 @@ class PubSubEnv():
 
     def __init__(self):
         self._context = yacomponent.context_new()
-        self._pub_thread = yacomponent.Thread()
-        self._sub_thread = yacomponent.Thread()
-        self._pub = yacomponent.Stub(self._context,1)
-        self._sub = yacomponent.Proxy(self._context,2)
+        self._pub_thread = QThread()
+        self._sub_thread = QThread()
+        self._pub = PublisherCompImpl(self._context, None)
+        self._sub = SubscriberCompImpl(self._context, None)
         self._pub_thread.start()
         self._sub_thread.start()
-        self._sub.setConnectionPara("inproc://pytestingprocsubpub", "pysubscriber_sp");
-        self._pub.setConnectionPara("inproc://pytestingprocsubpub", 3000);
+        self._pub.init()
+        self._sub.init()
+        self._pub.moveToThread(self._pub_thread)
+        self._sub.moveToThread(self._sub_thread)
+        logging.info("setConnectionParaReceiverData")
+        self._pub.setConnectionParaReceiverData("inproc://pytestingprocsubpub", 3000);
+        logging.info("setConnectionParaData")
+        self._sub.setConnectionParaData("inproc://pytestingprocsubpub", "pysubscriber_sp");
+        logging.info("init finished")
+
 
     def __del__(self):
+        logging.info("terminate")
         self._pub.close()
         self._sub.close()
         self._pub_thread.quit()
         self._sub_thread.quit()
+        logging.info("terminate wait for Thread finished")
+        self._pub_thread.wait()
+        self._sub_thread.wait()
+        logging.info("terminate Thread finished")
         sleep(0.1)
         assert( self._pub_thread.isFinished())
         assert( self._sub_thread.isFinished())
@@ -69,7 +90,7 @@ def pubsubtest():
 
 
 def test_protobuf():
-    data = PublisherIfc_pb2.Data()
+    data = Data()
     data.timeSeconds = 12345
     data.counter = 10
     assert True
@@ -89,16 +110,25 @@ def test_base_impls(qapp):
 
     assert True
 
-def test_pubsub_env(pubsubtest):
+def test_pubsub_env(pubsubtest, qapp):
     assert pubsubtest._context is not None
 
 def test_basic_notifications(pubsubtest, qapp):
-    rc = pubsubtest._sub.setNotification(0)
+    logging.info("starting with setNotification")
+    rc = pubsubtest._sub._Data.setNotification(PublisherIfcProxy.KEYS.PROP_DATA.value);
     assert -1 != rc
     sleep(0.05)
-    msg = "this is the data".encode("utf-8")
-    rc = pubsubtest._pub.send(0, len(msg), msg)
-    print(f"this is rc {rc}")
-    assert -1 != rc
 
+    data = Data()
+    #logging.info(f"data {dir(data)}")
+    data.timeSeconds = 0
+    data.timeFraction = 0.0
+    data.counter = 123
+
+    # todo
+    # rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA.value, data)
+    # sleep(1)
+
+    # QCOMPARE(mSubScriber->miPropertiesCnt, 1);
+    # QCOMPARE(mSubScriber->mLastData.counter(), 123);
 

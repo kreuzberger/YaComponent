@@ -5,6 +5,8 @@ from google.protobuf.message import Message
 from time import sleep
 from PySide2.QtCore import QCoreApplication
 
+import logging
+
 class Subscriber():
 
     _reqresp_socket = None
@@ -29,105 +31,116 @@ class Subscriber():
         if self._reqresp_socket is not None and not self._connected:
             self._reqresp_socket.setsockopt_string(zmq.IDENTITY,ident)
             self._reqresp_socket.setsockopt(zmq.RCVTIMEO, 0)
+            logging.info(f"Subscriber::setConnectionPara: connecting to {address}")
             self._reqresp_socket.connect(address)
+            logging.info(f"Subscriber::setConnectionPara: connected to {address}")
             self._connected = True
             key = yc.KeyFmt % yc.KeySync
+
             rc = self._reqresp_socket.send_string("",zmq.Flag.SNDMORE);
-            assert -1 != rc
             self._reqresp_socket.send_string(key,0)
-            assert -1 != rc
             sleep(yc.TimeOut)
             sync = False
             while not sync:
+                #logging.info("Subscriber::setConnectionPara: syncing")
                 QCoreApplication.processEvents()
-                sync = checkSync()
+                sync = self._checkSync()
         else:
             raise RuntimeError("no valid socket or not connected")
 
     def send(self, key: int, msgSize: int, data: bytes)-> int:
         rc = -1;
-        raise RuntimerError("_reqresp_socket_should not be none") if _reqresp_socket is None else None
+        if self._reqresp_socket is None:
+            raise RuntimerError("_reqresp_socket_should not be none")
         if self._reqresp_socket is not None:
-             rc = self._reqresp_socket.send("",zmq.Flag.SNDMORE);
+             rc = self._reqresp_socket.send(b"",zmq.Flag.SNDMORE);
              assert -1 != rc
 
-        send_more = True if 0 != size and data is not None else False
+        send_more = True if 0 != msgSize and data is not None else False
         flags = zmq.SNDMORE if send_more else 0
-        ckey = yc.KeyFmt % key
-        rc = mpReqRespSocket.send(ckey, flags);
+        rc = self._reqresp_socket.send((yc.KeyFmt % key).encode("ascii"), flags);
         assert -1 != rc;
         if send_more:
-            rc = mpReqRespSocket.send(data, 0)
+            rc = self._reqresp_socket.send(data.encode("utf-8"), 0)
 
         return rc;
 
 
-    def receive(self, key: int, size: int, data , ident: str) -> int:
+    #def receive(self, key: int, size: int, data , ident: str) -> int:
+    def receive(self) -> tuple[int, int, bytes]:
         bytes = 0
         more = -1
+        key = None
+        msgSize = None
+        msg = None
         assert self._reqresp_socket is not None
         if self._reqresp_socket is not None:
-            rc = self._reqresp_socket.poll(None, zmq.PollEvent.POLLIN)
+            rc = self._reqresp_socket.poll(0, zmq.PollEvent.POLLIN)
 
             if rc == zmq.PollEvent.POLLIN:
-                msg = self._reqresp_socket.rcv(zmq.NOBLOCK)
-                assert 0 == len(msg);
-                msg = self._reqresp_socket.rcv(zmq.NOBLOCK)
-                assert len(msg) == yc.KeySize
+                logging.info(f"Subscriber::receive pollin")
+                msg = self._reqresp_socket.recv(zmq.NOBLOCK)
+                logging.info(f"Subscriber::receive msg {msg}")
+                msg = self._reqresp_socket.recv(zmq.NOBLOCK)
                 key = int(msg)
+                logging.info(f"Subscriber::receive key {key}")
                 if 0 <= key:
-                    more = self._reqresp_socket.getsockopt(ZMQ_RCVMORE)
+                    more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                     if more:
-                        msg = self._reqresp_socket.recv(ZMQ_NOBLOCK);
-                        more = self._reqresp_socket.getsockopt(ZMQ_RCVMORE)
+                        msg = self._reqresp_socket.recv(zmq.NOBLOCK);
+                        logging.info(f"Subscriber::receive 2 msg {msg}")
+                        more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                         if more and 0 < len(msg):
                             raise RuntimerError("Subscriber::receive: KeyFmt unexpected end of message");
                 elif yc.KeySync == key:
-                    iBytes = 0;
-                    more = self._reqresp_socket.getsockopt(ZMQ_RCVMORE)
+                    logging.info(f"Subscriber::receive keySync")
+                    key = None # returning key should not be handled by caller
+                    more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                     if more:
-                        msg = self._reqresp_socket.recv(ZMQ_NOBLOCK);
+                        msg = self._reqresp_socket.recv(zmq.NOBLOCK);
+                        logging.info(f"Subscriber::receive keySync msg {msg}")
                         if 0 < len(msg):
-                            self._sync = True if yc.SyncAck == msg else False
-                            more = self._reqresp_socket.getsockopt(ZMQ_RCVMORE)
+                            self._sync = True if yc.SynAck == msg.decode("ascii") else False
+                            logging.info(f"Subscriber::receive keySync synced {yc.SynAck} {msg} {self._sync}")
+                            more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                             if  more:
                                 raise RuntimeError("Subscriber::receive: KeySync unexpected end of message");
                 elif yc.KeyEnd == key:
-                    iBytes = 0;
-                    more = self._reqresp_socket.getsockopt(ZMQ_RCVMORE)
+                    key = None # returning key should not be handled by caller
+                    more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                     if more:
                         raise RuntimeError("Subscriber::receive: KeyEnd unexpected end of message");
                 else:
                     raise RuntimeError(f"Subscriber::receive received invalid key {key}")
 
-        return bytes
+        return (key, msgSize, msg)
 
     def request(self, key: int, msg: Message )-> int: #const ::google::protobuf::MessageLite
         rc = -1;
         size = msg.ByteSize();
         msg.SerializeToString(self._msg_outbuffer);
-        rc = send(key, isze, self._msg_outbuffer);
+        rc = self.send(key, size, self._msg_outbuffer);
         return rc;
 
     def request(self, key: int)->int:
-        return send(key, 0, 0);
+        return self.send(key, 0, 0);
 
     def setNotification(self, key: int)->int:
         rc = -1
         msg = yc.KeyFmt % (key)
-        rc  = send(yc.KeySetNotification, yc.KeySize, msg)
+        rc  = self.send(yc.KeySetNotification, yc.KeySize, msg)
         return rc
 
     def clearNotification(self, key: int)->int:
         msg = yc.KeyFmt % (key)
-        send(yc.KeyClearNotification, yc.KeySize, msg)
+        self.send(yc.KeyClearNotification, yc.KeySize, msg)
         return -1
 
 
     def close(self):
-        _reqresp_socket.close()
-        _reqresp_socket = None
+        self._reqresp_socket.close()
+        self._reqresp_socket = None
 
 
-    def checkSync(self) -> bool:
+    def _checkSync(self) -> bool:
         return self._sync

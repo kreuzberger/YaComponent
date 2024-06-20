@@ -4,5 +4,5 @@ from PySide2.QtCore import QThread
 class Thread(QThread):
 
     def run(self):
-        self.exec_()
+        QThread.run(self)
 

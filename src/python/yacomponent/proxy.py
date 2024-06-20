@@ -13,7 +13,7 @@ class Proxy(QObject):
         self._id = id
 
     def setNotification( self, key: int) -> int:
-        return self.Subscriber.setNotification(key)
+        return self._Subscriber.setNotification(key)
 
     def clearNotification( self, key: int) -> int:
         return self._Subscriber.clearNotification(key)
