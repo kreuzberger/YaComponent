@@ -45,6 +45,7 @@ void YaComponentPyCodeGen::writeComponent(const std::filesystem::path &codePath,
     fhSource << "from PySide2.QtCore import QTimer, Signal, Slot" << std::endl;
     fhSource << "from enum import IntEnum" << std::endl;
     fhSource << "import logging" << std::endl;
+    fhSource << "from time import sleep" << std::endl;
     fhSource << std::endl;
 
     fhSource << "class " << compName << "Impl(QObject):";
@@ -136,6 +137,11 @@ void YaComponentPyCodeGen::writeComponent(const std::filesystem::path &codePath,
 
     fhSource << "    def close(self):" << std::endl;
     fhSource << "        self._stopTimer.emit()" << std::endl;
+    fhSource << std::endl;
+    //fhSource << "        while self._Timer.isActive():" << std::endl;
+    //fhSource << "            sleep(yc.TimeOut)" << std::endl;
+    fhSource << "        sleep(yc.TimeOut)" << std::endl;
+    fhSource << std::endl;
 
     for (const auto &ifc : providedIfc) {
         fhSource << "        self._" << ifc.at("id") << ".close()" << std::endl;
@@ -147,8 +153,6 @@ void YaComponentPyCodeGen::writeComponent(const std::filesystem::path &codePath,
 
     fhSource << std::endl << std::endl;
 
-    fhSource << "    # def killTimer(self):" << std::endl;
-    fhSource << "    #     self._Timer = None;" << std::endl;
 
     fhSource << std::endl << std::endl;
 
