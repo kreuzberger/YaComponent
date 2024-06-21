@@ -11,7 +11,6 @@ class Publisher():
 
     _reqresp_socket = None
     _bound = False
-    _subscriber_count = 0
     _peer_map = {}
     _lvc_map = {}
 
@@ -19,6 +18,9 @@ class Publisher():
         if ctx is None:
             raise RuntimeError("invalid context, aquire zmq context and pass")
         self._reqresp_socket = ctx.socket(zmq.ROUTER)
+        self._bound = False
+        self._peer_map = {}
+        self._lvc_map = {}
 
     def setConnectionPara(self, address: str, hwm: int = 0):
         assert self._reqresp_socket is not None
@@ -62,11 +64,12 @@ class Publisher():
             raise RuntimerError("_reqresp_socket_should not be none")
         else:
             # store msg vor last value caching
-            logging.info(f"Publisher::_send store {msgData} with {key} to lvc_map")
+            #logging.info(f"Publisher::_send store {msgData} with {key} to lvc_map")
             self._lvc_map[key] = {"size": msgSize, "msg": msgData}
 
+            #logging.info(f"Publisher::_send current peers {len(self._peer_map)}")
             for peer_name, value in self._peer_map.items():
-                logging.info(f"Publisher::_send looking for notifications for {peer_name} {value}")
+                #logging.info(f"Publisher::_send looking for notifications for {peer_name} {value}")
 
                 if key == value["key"] and value["value"]==1:
                     self._reqresp_socket.send(peer_name, zmq.SNDMORE)
@@ -166,8 +169,8 @@ class Publisher():
                                 if notification_key in self._lvc_map:
                                     lvc = self._lvc_map[notification_key]
                                     if 0 < len(lvc["msg"]):
-                                        logging.info(f"Publisher::receive sending LVC cache values on {notification_key}")
-                                        self.send(notification_key, lvc["msgSize"], lvc["msg"]);
+                                        logging.info(f"Publisher::receive sending LVC cache values on {notification_key} {lvc}")
+                                        self._send(notification_key, lvc["size"], lvc["msg"]);
 
                         elif key == yc.KeyClearNotification:
                             logging.info(f"Publisher::receive peer {ident} KeyClearNotification")

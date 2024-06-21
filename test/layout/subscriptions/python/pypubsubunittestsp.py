@@ -54,6 +54,11 @@ class PublisherProxyCallback(PublisherIfcProxyHandler):
     _last_time = None
     _properties_cnt = 0
 
+    def __init__(self):
+        self._properties_cnt = 0
+        self._last_data = None
+        self._last_time = None
+
     def onPropertyData(self, id: int, property: Data):
         logging.info(f"PublisherProxyCallback::onProperty Data:")
         self._last_data = property
@@ -147,7 +152,7 @@ def test_base_impls(qapp):
 def test_pubsub_env(pubsubtest, qapp):
     assert pubsubtest._context is not None
 
-def test_basic_notifications(pubsubtest, qapp):
+def test_notifications(pubsubtest, qapp):
     rc = pubsubtest._sub._Data.setNotification(PublisherIfcProxy.KEYS.PROP_DATA);
     assert -1 != rc
     sleep(0.05)
@@ -159,10 +164,91 @@ def test_basic_notifications(pubsubtest, qapp):
     data.counter = 123
 
     rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA, data)
-    sleep(1)
+    sleep(0.05)
 
     assert 123 == pubsubtest._sub_cb._last_data.counter
+    assert 1 == pubsubtest._sub_cb._properties_cnt
 
-    # QCOMPARE(mSubScriber->miPropertiesCnt, 1);
-    # QCOMPARE(mSubScriber->mLastData.counter(), 123);
+def test_send_without_subscriptions(pubsubtest, qapp):
+    data = Data()
+    data.timeSeconds = 0
+    data.timeFraction = 0.0
+    data.counter = 123
+    rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA, data)
+    sleep(0.05)
+    assert -1 == rc
+    assert 0 == pubsubtest._sub_cb._properties_cnt
 
+
+def test_send_lvc_connect(pubsubtest, qapp):
+    for i in range(10):
+        data = Data()
+        data.timeSeconds = 0
+        data.timeFraction = 0.0
+        data.counter = i
+        rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA, data)
+        assert -1 == rc
+        sleep(0.05)
+
+    rc = pubsubtest._sub._Data.setNotification(PublisherIfcProxy.KEYS.PROP_DATA);
+    assert -1 != rc
+    sleep(0.05)
+    assert 1 == pubsubtest._sub_cb._properties_cnt
+    assert 9 == pubsubtest._sub_cb._last_data.counter
+
+
+def test_send_lvc_connect_empty(pubsubtest, qapp):
+    rc = pubsubtest._sub._Data.setNotification(PublisherIfcProxy.KEYS.PROP_DATA);
+    assert -1 != rc
+    sleep(0.05)
+    assert 0 == pubsubtest._sub_cb._properties_cnt
+    assert pubsubtest._sub_cb._last_data is None
+
+
+def test_send_on_change_off(pubsubtest, qapp):
+    # send identical value twice, should be received a second time
+    rc = pubsubtest._sub._Data.setNotification(PublisherIfcProxy.KEYS.PROP_DATA);
+    sleep(0.05)
+
+    data = Data()
+    data.timeSeconds = 0
+    data.timeFraction = 0.0
+    data.counter = 123
+
+    rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA, data)
+    sleep(0.05)
+
+    assert 123 == pubsubtest._sub_cb._last_data.counter
+    assert 1 == pubsubtest._sub_cb._properties_cnt
+
+    pubsubtest._sub_cb._last_data = None
+    rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA, data)
+    sleep(0.05)
+
+    assert 123 == pubsubtest._sub_cb._last_data.counter
+    assert 2 == pubsubtest._sub_cb._properties_cnt
+
+
+def test_send_on_change_on(pubsubtest, qapp):
+    # send identical value twice, should be received a second time
+    rc = pubsubtest._sub._Data.setNotification(PublisherIfcProxy.KEYS.PROP_TIME);
+    sleep(0.05)
+
+    time = Time()
+    time.timeSeconds = 0
+    time.timeFraction = 0.0
+    time.counter = 321
+
+    rc = pubsubtest._pub._ReceiverData.sendTime(PublisherIfcStub.KEYS.PROP_TIME, time)
+    sleep(0.05)
+
+    assert 321 == pubsubtest._sub_cb._last_time.counter
+    assert 1 == pubsubtest._sub_cb._properties_cnt
+
+    pubsubtest._sub_cb._last_time = None
+    pubsubtest._sub_cb._properties_cnt = 0
+    rc = pubsubtest._pub._ReceiverData.sendTime(PublisherIfcStub.KEYS.PROP_TIME, time)
+    sleep(0.05)
+
+    assert pubsubtest._sub_cb._last_data is None
+    assert 0 == pubsubtest._sub_cb._properties_cnt

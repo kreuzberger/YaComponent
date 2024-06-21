@@ -52,7 +52,7 @@ void PubSubUnittestSP::cleanupComponents()
     YaComponent::context_term(mContext);
 }
 
-void PubSubUnittestSP::testConnect()
+void PubSubUnittestSP::testNotification()
 {
     int rc = -1;
     rc = mSubScriber->setNotifications();
@@ -77,6 +77,7 @@ void PubSubUnittestSP::testSendWithoutSubscriptions()
     data.set_timefraction(0.0);
     data.set_counter(123);
     auto rc = mPublisher->sendData(data);
+    QTest::qWait(50);
     QVERIFY(-1 == rc);
     QCOMPARE(mSubScriber->miPropertiesCnt, 0);
 }
@@ -113,6 +114,7 @@ void PubSubUnittestSP::testSendLVCConnectEmpty()
 
 void PubSubUnittestSP::testSendOnChangeOff()
 {
+    // send identical value twice, should be received a second time
     int rc = -1;
     rc = mSubScriber->setNotifications();
     QVERIFY(-1 != rc);

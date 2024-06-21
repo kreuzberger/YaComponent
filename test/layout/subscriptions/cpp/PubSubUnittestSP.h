@@ -21,7 +21,7 @@ private slots:
     void cleanupTestCase();
     void cleanup();
     void init();
-    void testConnect();
+    void testNotification();
     void testSendWithoutSubscriptions();
     void testSendLVCConnect();
     void testSendLVCConnectEmpty();

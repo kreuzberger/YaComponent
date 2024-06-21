@@ -622,10 +622,9 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
         if (onChange) {
             fhSource << "        rc = 0\n";
-            fhSource << "        # if not google::protobuf::util::MessageDifferencer::Equals(self._"
-                     << prop->Attribute("id") << " , msg):\n";
-            fhSource << "        rc = self._Publisher.send(key, msg )\n";
-            fhSource << "        self._" << prop->Attribute("id") << " = msg\n";
+            fhSource << "        if not self._" << prop->Attribute("id") << " == msg:\n";
+            fhSource << "            rc = self._Publisher.send(key, msg )\n";
+            fhSource << "            self._" << prop->Attribute("id") << " = msg\n";
             fhSource << "        return rc\n";
         } else {
             fhSource << "        return self._Publisher.send(key, msg )\n";
