@@ -24,3 +24,10 @@ add_custom_target(
     DEPENDS "${PYTHON_UPDATE_DEPENDENCY}"
     COMMENT "install python site-packages"
 )
+install(
+    DIRECTORY "${pyyacomponent_SOURCE_DIR}/yacomponent"
+    # DESTINATION "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}"
+    DESTINATION "lib/python"
+    COMPONENT "yacomponent"
+    PATTERN "__pycache__" EXCLUDE
+)
