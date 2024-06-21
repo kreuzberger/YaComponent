@@ -25,6 +25,7 @@ int main(int argc, char** argv)
     auto codePath = std::filesystem::path();
     auto docPath = std::filesystem::path();
     auto verbose = false;
+    auto language = std::string("cpp");
 
     for (int idx = 1; idx < argc; idx++) {
         if (std::string(argv[idx]) == std::string("--component")) {
@@ -47,6 +48,8 @@ int main(int argc, char** argv)
             idx++;
         } else if (std::string(argv[idx]).rfind("--outdoc=", 0) == 0) {
             docPath = std::string(argv[idx]).erase(0, std::string("--outdoc=").length());
+        } else if (std::string(argv[idx]).rfind("--language=", 0) == 0) {
+            language = std::string(argv[idx]).erase(0, std::string("--language=").length());
         } else if (std::string(argv[idx]) == std::string("--verbose")) {
             YaComponentCore::VERBOSE = true;
         } else if (std::string(argv[idx]) == std::string("--help")) {
@@ -72,7 +75,7 @@ int main(int argc, char** argv)
     }
 
     YaComponentParser parser;
-    parser.init(codePath, docPath, verbose);
+    parser.init(codePath, docPath, language, verbose);
 
     if (!componentPath.empty()) {
         parser.parseComponent(componentPath);

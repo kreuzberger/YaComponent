@@ -50,6 +50,9 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
     fhHeader << "#include <QtCore/QObject>" << std::endl;
     fhHeader << "#include <QtCore/QTimer>" << std::endl;
     //fhHeader << "#include <stdio.h>" << std::endl;
+    fhHeader << "#include <thread>" << std::endl;
+    fhHeader << "#include <chrono>" << std::endl;
+
     fhHeader << std::endl;
 
     fhHeader << "namespace YaComponent {" << std::endl;
@@ -93,7 +96,7 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
 
     fhHeader << "  public slots:" << std::endl;
     fhHeader << "    void onTimer();" << std::endl;
-    fhHeader << "    void killTimer();" << std::endl;
+    //fhHeader << "    void killTimer();" << std::endl;
 
     fhHeader << "  signals:" << std::endl;
     fhHeader << "    void startTimer( int iTimeOutMs );" << std::endl;
@@ -149,13 +152,17 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
     fhSource << "{" << std::endl;
     fhSource << "  connect( mpoTimer, SIGNAL(timeout()), this, SLOT(onTimer()));" << std::endl;
     fhSource << "  connect( this, SIGNAL(startTimer(int)), mpoTimer, SLOT(start(int)));" << std::endl;
-    fhSource << "  connect( this, SIGNAL(stopTimer()), this, SLOT(killTimer()));" << std::endl;
+    fhSource << "  connect( this, SIGNAL(stopTimer()), mpoTimer, SLOT(stop()));" << std::endl;
     fhSource << "  emit startTimer( YaComponent::TimeOut );" << std::endl;
     fhSource << "}" << std::endl;
 
     fhSource << "void " << compName << "Impl::close()" << std::endl;
     fhSource << "{" << std::endl;
     fhSource << "  emit stopTimer( );" << std::endl;
+    fhSource << "  while(mpoTimer->isActive())" << std::endl;
+    fhSource << "  {" << std::endl;
+    fhSource << "    std::this_thread::sleep_for(std::chrono::milliseconds(50));" << std::endl;
+    fhSource << "  }" << std::endl;
 
     for (const auto &ifc : providedIfc) {
         fhSource << "  m" << ifc.at("id") << ".close();" << std::endl;
@@ -167,11 +174,11 @@ void YaComponentCodeGen::writeComponent(const std::filesystem::path &codePath,
 
     fhSource << "}" << std::endl;
 
-    fhSource << "void " << compName << "Impl::killTimer()" << std::endl;
-    fhSource << "{" << std::endl;
-    fhSource << "  delete mpoTimer;" << std::endl;
-    fhSource << "  mpoTimer = nullptr;" << std::endl;
-    fhSource << "}" << std::endl;
+    // fhSource << "void " << compName << "Impl::killTimer()" << std::endl;
+    // fhSource << "{" << std::endl;
+    // fhSource << "  delete mpoTimer;" << std::endl;
+    // fhSource << "  mpoTimer = nullptr;" << std::endl;
+    // fhSource << "}" << std::endl;
 
     for (const auto &ifc : providedIfc) {
         fhSource << "void " << compName << "Impl::setConnectionPara" << ifc.at("id")
@@ -265,8 +272,13 @@ void YaComponentCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     fhHeaderIfc << "#pragma once" << std::endl;
 
     for (const auto *include : includes) {
-        fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
-        fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        auto filename = std::string(include->Attribute("file"));
+        auto suffix = std::string(".h");
+        if (filename.size() >= suffix.size()
+            && filename.compare(filename.size() - suffix.size(), suffix.size(), suffix) == 0) {
+            fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+            fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        }
     }
 
     fhHeader << "#include \"I" << ifcName << "ProxyHandler.h\"" << std::endl;
@@ -552,8 +564,13 @@ void YaComponentCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhHeaderIfc << "#pragma once\n";
 
     for (const auto *include : includes) {
-        fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
-        fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        auto filename = std::string(include->Attribute("file"));
+        auto suffix = std::string(".h");
+        if (filename.size() >= suffix.size()
+            && filename.compare(filename.size() - suffix.size(), suffix.size(), suffix) == 0) {
+            fhHeader << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+            fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
+        }
     }
 
     fhHeader << "#include \"I" << ifcName << "StubHandler.h\"\n";

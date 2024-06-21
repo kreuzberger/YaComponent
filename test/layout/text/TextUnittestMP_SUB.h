@@ -2,9 +2,9 @@
 
 #include <QObject>
 
-#include <yacomponent/YaComponent.h>
-#include <yacomponent/YaComponentThread.h>
 #include "textoutcompunittest.h"
+#include <yacomponent/YaComponent.h>
+#include <QtCore/QThread>
 
 class TextUnittestMPSub : public QObject
 {
@@ -27,6 +27,6 @@ private:
     void testRoutine();
 
     void *mpContext;
-    YaComponentThread *mpTextOutThread;
+    QThread *mpTextOutThread;
     TextOutComp *mpTextOut;
 };

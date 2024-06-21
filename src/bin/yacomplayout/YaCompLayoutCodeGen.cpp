@@ -25,7 +25,7 @@ void YaCompLayoutCodeGen::write(const std::filesystem::path &codePath,
         while (thread) {
             YaComponentCore::printDbg(std::string("write code for thread ")
                                       + thread->Attribute("name"));
-            fhSource << "    YaComponentThread " << thread->Attribute("name") << ";" << std::endl;
+            fhSource << "    QThread " << thread->Attribute("name") << ";" << std::endl;
             fhSource << "    " << thread->Attribute("name") << ".start();" << std::endl;
 
             auto *component = thread->FirstChildElement("component");

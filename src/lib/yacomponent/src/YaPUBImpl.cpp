@@ -230,6 +230,7 @@ int YaPUBImpl::send(int key, int msgSize, const char *msgData)
         mLVC[key] = {msgSize, msgData};
 
         for (auto it = mPeerMap.begin(); it != mPeerMap.end(); ++it) {
+            // 1 means notification is set / enabled.
             if (1 == mPeerMap[it->first][key]) {
                 rc = zmq_send(mpReqRespSocket, it->first.c_str(), it->first.length(), ZMQ_SNDMORE);
                 if (-1 == rc) {

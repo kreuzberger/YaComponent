@@ -1,7 +1,6 @@
-add_library( YaComponent STATIC )
+add_library(YaComponent STATIC)
 
-set( YaComponentLib_PUBLIC_HEADERS
-    ${YaComponentLib_SOURCE_DIR}/include/yacomponent/YaComponentThread.h
+set(YaComponentLib_PUBLIC_HEADERS
     ${YaComponentLib_SOURCE_DIR}/include/yacomponent/YaProxyBase.h
     ${YaComponentLib_SOURCE_DIR}/include/yacomponent/YaPUBImpl.h
     ${YaComponentLib_SOURCE_DIR}/include/yacomponent/YaStubBase.h
@@ -10,26 +9,28 @@ set( YaComponentLib_PUBLIC_HEADERS
     ${YaComponentLib_SOURCE_DIR}/include/yacomponent/YaComponent.h
 )
 
-target_sources( YaComponent PRIVATE
-    YaBuffer.cpp
-    YaComponent.cpp
-    YaComponentThread.cpp
-    YaProxyBase.cpp
-    YaPUBImpl.cpp
-    YaStubBase.cpp
-    YaSUBImpl.cpp
-    ${YaComponentLib_PUBLIC_HEADERS}
+target_sources(
+    YaComponent
+    PRIVATE YaBuffer.cpp
+            YaComponent.cpp
+            YaProxyBase.cpp
+            YaPUBImpl.cpp
+            YaStubBase.cpp
+            YaSUBImpl.cpp
+            ${YaComponentLib_PUBLIC_HEADERS}
 )
 
-#target_link_libraries( YaComponentLib PUBLIC Qt5::Core libzmq-static protobuf::libprotobuf absl::log absl::log_internal_check_op absl::node_hash_set absl::status absl::statusor absl::cord absl::strings)
-target_link_libraries( YaComponent PUBLIC Qt5::Core libzmq-static protobuf::libprotobuf)
-target_include_directories( YaComponent
+# target_link_libraries( YaComponentLib PUBLIC Qt5::Core libzmq-static protobuf::libprotobuf absl::log
+# absl::log_internal_check_op absl::node_hash_set absl::status absl::statusor absl::cord absl::strings)
+target_link_libraries(YaComponent PUBLIC Qt5::Core libzmq-static protobuf::libprotobuf)
+target_include_directories(
+    YaComponent
     PUBLIC # where top-level project will look for the library's public headers
-           $<BUILD_INTERFACE:${YaComponentLib_SOURCE_DIR}/include> $<BUILD_INTERFACE:${YaComponentLib_SOURCE_DIR}/include>
+           $<BUILD_INTERFACE:${YaComponentLib_SOURCE_DIR}/include>
+           $<BUILD_INTERFACE:${YaComponentLib_SOURCE_DIR}/include>
            # where external projects will look for the library's public headers
            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
-
 
 install(
     TARGETS YaComponent

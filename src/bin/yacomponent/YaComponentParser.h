@@ -12,7 +12,10 @@ class YaComponentParser
 public:
     YaComponentParser();
 
-    void init(const std::filesystem::path &code, const std::filesystem::path &doc, bool verbose);
+    void init(const std::filesystem::path &code,
+              const std::filesystem::path &doc,
+              const std::string &language,
+              bool verbose);
     void parseComponent(const std::filesystem::path &component);
     void parseIfc(const std::filesystem::path &ifc);
 
@@ -21,6 +24,8 @@ private:
     using ElementList = std::list<const tinyxml2::XMLElement *>;
     using Entry = std::map<std::string, std::string>;
     using EntryList = std::list<Entry>;
+
+    enum class LANGUAGE : int { INVALID = -1, CPP = 0, PY = 1 };
 
     void parseDefinitions(Element *layout);
     std::tuple<EntryList, EntryList> parseComponentDefinitions(Element *component);
@@ -31,6 +36,6 @@ private:
     std::filesystem::path mIfcPath = {};
     std::filesystem::path mCodePath = {};
     std::filesystem::path mDocPath = {};
-    std::string mBaseName = {};
     bool mVerbose = false;
+    LANGUAGE mLanguage = LANGUAGE::INVALID;
 };

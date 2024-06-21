@@ -1,3 +1,15 @@
 CMakeLists.txt.user
-build/
+CMakeSettings.json
+CMakeUserPresets.json
+__pycache__/
+/.vs
+.idea/
+.cache/
+.vscode/
+/build*/
+/defaults.cmake
+/_build/
+/.run/
+.ropeproject/
+.pytest_cache/
 

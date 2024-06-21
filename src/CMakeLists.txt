@@ -43,4 +43,4 @@ install(
 add_subdirectory(tinyxml2)
 add_subdirectory(lib)
 add_subdirectory(bin)
-
+add_subdirectory(python)

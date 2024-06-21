@@ -1,6 +1,7 @@
 <interface>
   <version maj="1" min="1" rev="0"/>
   <include file="PublisherIfc.pb.h"/>
+  <include file="PublisherIfc_pb2.py"/>
   <properties>
       <prop id="Data" package=""/>
       <prop id="Time" onChange="1" package=""/>

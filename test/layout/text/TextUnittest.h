@@ -4,7 +4,7 @@
 #include "textgencompunittest.h"
 #include "textoutcompunittest.h"
 #include <yacomponent/YaComponent.h>
-#include <yacomponent/YaComponentThread.h>
+#include <QtCore/QThread>
 
 class TextUnittest : public QObject
 {
@@ -33,9 +33,9 @@ private:
     void testRoutine();
 
     void *mpContext;
-    YaComponentThread *mpTextGenThread;
+    QThread *mpTextGenThread;
     TextGenComp *mpTextGen1;
-    YaComponentThread *mpTextOutThread;
+    QThread *mpTextOutThread;
     void *mpContext2;
     TextOutComp *mpTextOut;
 };

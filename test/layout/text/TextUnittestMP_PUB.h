@@ -3,7 +3,7 @@
 
 #include "textgencompunittest.h"
 #include <yacomponent/YaComponent.h>
-#include <yacomponent/YaComponentThread.h>
+#include <QtCore/QThread>
 
 class TextUnittestMPPub : public QObject
 {
@@ -26,6 +26,6 @@ private:
     void testRoutine();
 
     void *mpContext;
-    YaComponentThread *mpTextGenThread;
+    QThread *mpTextGenThread;
     TextGenComp *mpTextGen1;
 };

@@ -22,99 +22,167 @@ Script to generate example source code for layouts
 
 #]=======================================================================]
 
-
 include(CMakeParseArguments)
 
-macro (YACOMPONENT_LAYOUT_GENERATE)
-  foreach( it ${ARGN})
-    get_filename_component( it ${it} ABSOLUTE )
-    get_filename_component( layout ${it} NAME_WE )
+macro(YACOMPONENT_LAYOUT_GENERATE)
+    foreach(it ${ARGN})
+        get_filename_component(it ${it} ABSOLUTE)
+        get_filename_component(layout ${it} NAME_WE)
 
-    set(_outfile ${CMAKE_CURRENT_BINARY_DIR}/${layout}/code/${layout}.cpp
+        set(_outfile ${CMAKE_CURRENT_BINARY_DIR}/${layout}/cpp/${layout}.cpp)
+
+        get_property(
+            inc_dirs
+            DIRECTORY ${YaComponent_GENERATOR_SOURCE_DIR}
+            PROPERTY INCLUDE_DIRECTORIES
+        )
+        # message("include dirs ${inc_dirs}")
+
+        add_custom_command(
+            OUTPUT ${_outfile}
+            COMMAND $<TARGET_FILE:YaComponent::yacomplayout> --layout=${it}
+                    --outcode=${CMAKE_CURRENT_BINARY_DIR}/${layout}/cpp
+            COMMAND $<TARGET_FILE:YaComponent::yacomplayout> --layout=${it} --language=python
+                    --outcode=${CMAKE_CURRENT_BINARY_DIR}/${layout}/py
+            DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomplayout>
+        )
+
+        list(APPEND _outfiles ${_outfile})
+        include_directories(${CMAKE_CURRENT_BINARY_DIR}/${layout}/cpp)
+    endforeach(it)
+
+    add_custom_target(
+        layouts_${PROJECT_NAME} ALL
+        DEPENDS ${_outfiles}
+        COMMENT "Generating layout for ${PROJECT_NAME}"
     )
 
-    get_property(inc_dirs DIRECTORY ${YaComponent_GENERATOR_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-#    message("include dirs ${inc_dirs}")
-
-    add_custom_command( OUTPUT ${_outfile}
-      COMMAND $<TARGET_FILE:YaComponent::yacomplayout> --layout=${it} --outcode=${CMAKE_CURRENT_BINARY_DIR}/${layout}/code
-      DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomplayout>
+    set_property(
+        DIRECTORY
+        APPEND
+        PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${_outfiles}"
     )
 
-    list( APPEND _outfiles ${_outfile})
-    INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${layout}/code )
-  endforeach( it )
+endmacro(YACOMPONENT_LAYOUT_GENERATE)
 
-  add_custom_target(layouts_${PROJECT_NAME} ALL DEPENDS ${_outfiles}
-                    COMMENT "Generating layout for ${PROJECT_NAME}")
+macro(YACOMPONENT_IFC_GENERATE outfiles)
 
-  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${_outfiles}" )
+    set(options NO_DOC)
+    set(oneValueArgs LANGUAGE)
+    set(multiValueArgs)
+    cmake_parse_arguments(args "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-endmacro( YACOMPONENT_LAYOUT_GENERATE )
+    set(outfiles)
 
+    # message("args_UNPARSED_ARGUMENTS ${args_UNPARSED_ARGUMENTS}") message("args_LANGUAGE ${args_LANGUAGE}")
 
-macro (YACOMPONENT_IFC_GENERATE outfiles)
+    foreach(it ${args_UNPARSED_ARGUMENTS})
+        get_filename_component(it ${it} ABSOLUTE)
+        get_filename_component(component ${it} NAME_WE)
 
-   set( outfiles )
+        set(doc_args)
+        set(doc_outfile)
+        if(NOT ${args_NO_DOC})
+            set(doc_args "--outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc")
+            set(doc_outfile ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml)
+        endif()
 
-  foreach( it ${ARGN})
-    get_filename_component( it ${it} ABSOLUTE )
-    get_filename_component( component ${it} NAME_WE )
+        if("${args_LANGUAGE}" STREQUAL "python")
+            set(outfile
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Proxy.py
+                # ${CMAKE_CURRENT_BINARY_DIR}/${component}/py/I${component}ProxyHandler.h
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Stub.py ${doc_outfile}
+            )
+            # message(" adding outfile in if generation ${outfile}")
 
-    set(outfile ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Proxy.h
-                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Proxy.cpp
-                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/I${component}ProxyHandler.h
-                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.h
-                ${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Stub.cpp
-                ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml
+            add_custom_command(
+                OUTPUT ${outfile}
+                COMMAND $<TARGET_FILE:YaComponent::yacomponent> --ifc=${it} --language=python --verbose
+                        --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/py ${doc_args}
+                DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
+            )
+
+        else()
+            set(outfile
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Proxy.h
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Proxy.cpp
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/I${component}ProxyHandler.h
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Stub.h
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Stub.cpp
+                ${doc_outfile}
+            )
+            # message(" adding outfile in if generation ${outfile}")
+
+            add_custom_command(
+                OUTPUT ${outfile}
+                COMMAND $<TARGET_FILE:YaComponent::yacomponent> --ifc=${it}
+                        --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp ${doc_args} --verbose
+                DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
+            )
+            include_directories(${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp)
+        endif()
+        set(${outfiles} ${${outfiles}} ${outfile})
+
+    endforeach(it)
+
+    include_directories(${CMAKE_CURRENT_BINARY_DIR})
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/cpp)
+
+    set(${outfiles} ${${outfiles}})
+
+    set_property(
+        DIRECTORY
+        APPEND
+        PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}"
     )
-   # message(" adding outfile in if generation ${outfile}")
 
+endmacro(YACOMPONENT_IFC_GENERATE)
 
-    add_custom_command( OUTPUT ${outfile}
-      COMMAND $<TARGET_FILE:YaComponent::yacomponent> --ifc=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --verbose
+macro(YACOMPONENT_GENERATE outfiles)
+    set(options NO_DOC)
+    set(oneValueArgs LANGUAGE)
+    set(multiValueArgs)
+    cmake_parse_arguments(args "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-      DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
+    foreach(it ${args_UNPARSED_ARGUMENTS})
+        get_filename_component(it ${it} ABSOLUTE)
+        get_filename_component(component ${it} NAME_WE)
+
+        set(doc_args)
+        set(doc_outfile)
+        if(NOT ${args_NO_DOC})
+            set(doc_args "--outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc")
+            set(doc_outfile ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml)
+        endif()
+
+        if("${args_LANGUAGE}" STREQUAL "python")
+            set(outfile "${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Impl.py" "${doc_outfile}")
+            add_custom_command(
+                OUTPUT ${outfile}
+                COMMAND $<TARGET_FILE:YaComponent::yacomponent> --component=${it} --verbose
+                        --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/py --language=python ${doc_args}
+                DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
+            )
+        else()
+            set(outfile "${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Impl.h"
+                        "${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Impl.cpp" "${doc_outfile}"
+            )
+            add_custom_command(
+                OUTPUT ${outfile}
+                COMMAND $<TARGET_FILE:YaComponent::yacomponent> --component=${it} --verbose
+                        --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp ${doc_args}
+                DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
+            )
+            include_directories(${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp)
+        endif()
+
+        set(${outfiles} ${${outfiles}} ${outfile})
+
+    endforeach(it)
+
+    set_property(
+        DIRECTORY
+        APPEND
+        PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}"
     )
-
-    set( ${outfiles} ${${outfiles}} ${outfile} )
-
-    INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
-  endforeach( it )
-
-  INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR} )
-  INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/code )
-
-  set( ${outfiles} ${${outfiles}}  )
-
-  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
-
-endmacro( YACOMPONENT_IFC_GENERATE )
-
-
-
-macro (YACOMPONENT_GENERATE outfiles)
-  foreach( it ${ARGN})
-    get_filename_component( it ${it} ABSOLUTE )
-    get_filename_component( component ${it} NAME_WE )
-
-    set(outfile "${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Impl.h"
-               "${CMAKE_CURRENT_BINARY_DIR}/${component}/code/${component}Impl.cpp"
-               "${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml"
-    )
-
-    add_custom_command( OUTPUT ${outfile}
-      COMMAND $<TARGET_FILE:YaComponent::yacomponent> --component=${it}  --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/code --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --verbose
-      DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
-    )
-
-    set( ${outfiles} ${${outfiles}} ${outfile})
-
-    INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR}/${component}/code )
-  endforeach( it )
-
-  set_property( DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${${outfiles}}" )
-endmacro( YACOMPONENT_GENERATE )
-
-
-
+endmacro(YACOMPONENT_GENERATE)

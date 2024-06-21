@@ -60,5 +60,5 @@ target_link_libraries(textoutMPMT PRIVATE YaComponent Qt5::Test)
 target_link_libraries(textunittest PRIVATE YaComponent Qt5::Test)
 target_link_libraries(textunittestmp PRIVATE YaComponent Qt5::Test)
 
-add_test( NAME textunittest COMMAND textunittest )
-add_test( NAME textunittestmp COMMAND textunittestmp )
+yc_add_test( NAME textunittest COMMAND textunittest )
+yc_add_test( NAME textunittestmp COMMAND textunittestmp )

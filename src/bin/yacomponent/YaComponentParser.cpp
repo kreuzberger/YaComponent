@@ -2,33 +2,34 @@
 #include "YaComponentParser.h"
 #include "YaComponentCodeGen.h"
 #include "YaComponentDocGen.h"
+#include "YaComponentPyCodeGen.h"
 
+#include <cassert>
 #include <core/YaComponentCore.h>
+
 YaComponentParser::YaComponentParser() {}
 
-void YaComponentParser::init(
-
-    const std::filesystem::path &code, const std::filesystem::path &doc, bool verbose)
+void YaComponentParser::init(const std::filesystem::path &code,
+                             const std::filesystem::path &doc,
+                             const std::string &language,
+                             bool verbose)
 {
     if (!code.empty()) {
         mCodePath = std::filesystem::absolute(code);
-    } else {
-        mCodePath = std::filesystem::current_path() / mBaseName / std::filesystem::path("code");
+        std::filesystem::create_directories(mCodePath);
     }
     if (!doc.empty()) {
         mDocPath = std::filesystem::absolute(doc);
-    } else {
-        mDocPath = std::filesystem::current_path() / mBaseName / std::filesystem::path("doc");
+        std::filesystem::create_directories(mDocPath);
     }
-    std::filesystem::create_directories(mCodePath);
-    std::filesystem::create_directories(mDocPath);
+    mLanguage = (language == "cpp") ? LANGUAGE::CPP : LANGUAGE::PY;
     mVerbose = verbose;
 }
 
 void YaComponentParser::parseComponent(const std::filesystem::path &componentPath)
 {
     mComponentPath = std::filesystem::absolute(componentPath);
-    mBaseName = std::filesystem::absolute(mComponentPath).stem().string();
+    auto baseName = std::filesystem::absolute(mComponentPath).stem().string();
 
     tinyxml2::XMLDocument doc;
     tinyxml2::XMLError load_state = doc.LoadFile(mComponentPath.string().c_str());
@@ -42,10 +43,22 @@ void YaComponentParser::parseComponent(const std::filesystem::path &componentPat
     auto *component = doc.RootElement();
     auto [providedIfc, usedIfc] = parseComponentDefinitions(component);
 
-    YaComponentCodeGen code_writer;
-    code_writer.writeComponent(mCodePath, mBaseName, providedIfc, usedIfc);
+    switch (mLanguage) {
+    case LANGUAGE::CPP: {
+        YaComponentCodeGen code_writer;
+        code_writer.writeComponent(mCodePath, baseName, providedIfc, usedIfc);
+    } break;
+
+    case LANGUAGE::PY: {
+        YaComponentPyCodeGen code_writer;
+        code_writer.writeComponent(mCodePath, baseName, providedIfc, usedIfc);
+    } break;
+    default:
+        assert(0);
+    }
+
     YaComponentDocGen doc_writer;
-    doc_writer.writeComponent(mDocPath, mBaseName, providedIfc, usedIfc);
+    doc_writer.writeComponent(mDocPath, baseName, providedIfc, usedIfc);
 }
 
 void YaComponentParser::parseIfc(const std::filesystem::path &ifcPath)
@@ -65,8 +78,19 @@ void YaComponentParser::parseIfc(const std::filesystem::path &ifcPath)
     auto *ifc = doc.RootElement();
     auto [properties, requests, responses, includes] = parseIfcDefinitions(ifc);
 
-    YaComponentCodeGen code_writer;
-    code_writer.writeIfc(mCodePath, ifcBaseName, properties, requests, responses, includes);
+    switch (mLanguage) {
+    case LANGUAGE::CPP: {
+        YaComponentCodeGen code_writer;
+        code_writer.writeIfc(mCodePath, ifcBaseName, properties, requests, responses, includes);
+    } break;
+    case LANGUAGE::PY: {
+        YaComponentPyCodeGen code_writer;
+        code_writer.writeIfc(mCodePath, ifcBaseName, properties, requests, responses, includes);
+    } break;
+
+    default:
+        assert(0);
+    }
     YaComponentDocGen doc_writer;
     doc_writer.writeIfc(mDocPath, ifcBaseName, properties, requests, responses, includes);
 }
@@ -166,9 +190,13 @@ YaComponentParser::parseIfcDefinitions(Element *ifc)
 
     auto *include = ifc->FirstChildElement("include");
     while (include) {
-        YaComponentCore::printDbg(std::string("include file: ")
-                                  + std::string(include->Attribute("file")));
-        includes.push_back(include);
+        auto *file = include->FindAttribute("file");
+        if (file) {
+            YaComponentCore::printDbg(std::string("include file: ")
+                                      + std::string(include->Attribute("file")));
+            includes.push_back(include);
+        }
+
         include = include->NextSiblingElement("include");
     }
     return std::make_tuple(properties, requests, responses, includes);
