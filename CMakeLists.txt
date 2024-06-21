@@ -80,18 +80,15 @@ else()
 endif()
 
 find_package(PlantUML REQUIRED)
-find_package(
-    Python 3.11
-    COMPONENTS Interpreter Development
-    REQUIRED
-)
-find_package(PySide2 REQUIRED)
 find_package(SphinxBuild REQUIRED)
+
+find_package(Python 3.11 COMPONENTS Interpreter Development)
 
 enable_testing()
 include(CTest)
 
 if(Python_FOUND)
+    find_package(PySide2 REQUIRED)
     include(cmake/PyTestTools.cmake)
     execute_process(COMMAND $<TARGET_FILE:Python::Interpreter> --version)
 endif()

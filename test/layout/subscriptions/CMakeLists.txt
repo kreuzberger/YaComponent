@@ -1,4 +1,6 @@
 project(SubscriptionsTest)
 
 add_subdirectory(cpp)
-add_subdirectory(python)
+if(Python_FOUND)
+    add_subdirectory(python)
+endif()
