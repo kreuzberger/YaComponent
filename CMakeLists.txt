@@ -70,7 +70,11 @@ if(WITH_BUNDLED_EXTERNALS)
 
     FetchContent_MakeAvailable(abseil protobuf)
 
-    include(${protobuf_BINARY_DIR}/cmake/protobuf/protobuf-generate.cmake)
+    if(UNIX)
+        include(${protobuf_BINARY_DIR}/cmake/protobuf/protobuf-generate.cmake)
+    else()
+        include(${protobuf_BINARY_DIR}/cmake/protobuf-generate.cmake)
+    endif()
 
 else()
     find_package(ZeroMQ REQUIRED PATHS ${ZeroMQ_DIR} NO_DEFAULT_PATH)

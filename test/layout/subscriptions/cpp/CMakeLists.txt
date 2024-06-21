@@ -67,8 +67,8 @@ target_link_libraries(subscriber_slow_MPMT PRIVATE YaComponent Qt5::Test)
 target_link_libraries(pubsubunittestmp PRIVATE YaComponent Qt5::Test)
 target_link_libraries(pubsubunittestsp PRIVATE YaComponent Qt5::Test)
 
-add_test(NAME pubsubunittestmp COMMAND pubsubunittestmp)
-add_test(NAME pubsubunittestsp COMMAND pubsubunittestsp)
+yc_add_test(NAME pubsubunittestmp COMMAND pubsubunittestmp)
+yc_add_test(NAME pubsubunittestsp COMMAND pubsubunittestsp)
 
 set_tests_properties(pubsubunittestmp PROPERTIES TIMEOUT 30)
 set_tests_properties(pubsubunittestsp PROPERTIES TIMEOUT 30)

@@ -5,7 +5,7 @@ set(PRO_RUNPATH
     "$<$<TARGET_EXISTS:Python::Python>:$<TARGET_FILE_DIR:Python::Python>>"
 )
 
-function(_pro_create_runenv_python dll_directories)
+function(_yc_create_runenv_python dll_directories)
     list(FILTER dll_directories EXCLUDE REGEX "Marble|Python::|PythonQt::")
     list(TRANSFORM dll_directories REPLACE "^(.+)$" "$<$<BOOL:\\1>:os.add_dll_directory('\\1')  # type: ignore>")
     file(
@@ -28,7 +28,7 @@ if hasattr(os, 'add_dll_directory'):
     )
 endfunction()
 
-function(_pro_create_runenv_shell runpath binpath pythonpath)
+function(_yc_create_runenv_shell runpath binpath pythonpath)
     if(WIN32)
         string(REPLACE ";" "\;" runpath "${runpath}")
         string(REPLACE ";" "\;" binpath "${binpath}")
@@ -58,8 +58,8 @@ set(PRO_PYPACKAGES_DIR
     CACHE PATH "Where Python modules and packages are build"
 )
 
-_pro_create_runenv_python("${PRO_RUNPATH}")
-_pro_create_runenv_shell(
+_yc_create_runenv_python("${PRO_RUNPATH}")
+_yc_create_runenv_shell(
     "${PRO_RUNPATH}" "$<$<TARGET_EXISTS:Python::Interpreter>:$<TARGET_FILE_DIR:Python::Interpreter>>"
     "${PRO_PYPACKAGES_DIR};$<$<TARGET_EXISTS:PySide2::libshiboken>:$<TARGET_FILE_DIR:PySide2::libshiboken>/..>"
 )

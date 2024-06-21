@@ -7,7 +7,7 @@ else()
     set(PYTHON_VENV_BIN_DIR ${PYTHON_VENV_DIR}/bin)
 endif()
 
-function(pro_add_pytest)
+function(yc_add_pytest)
     set(options NO_ASAN NO_CAPTURE)
     set(oneValueArgs NAME WORKING_DIRECTORY)
     set(multiValueArgs WHAT PYTHONPATH DEPEND_PATHS)
@@ -17,7 +17,7 @@ function(pro_add_pytest)
         list(APPEND pytest_args "--capture=no") # don't hide UBSAN output in tests or if wanted.
     endif()
 
-    pro_add_test(
+    yc_add_test(
         NAME
         ${args_NAME}
         COMMAND
@@ -39,11 +39,11 @@ function(pro_add_pytest)
     endif()
 
     if(NOT args_NO_ASAN)
-        pro_preload_asan_in_test(${args_NAME})
+        yc_preload_asan_in_test(${args_NAME})
     endif()
 endfunction()
 
-function(pro_preload_asan_in_test)
+function(yc_preload_asan_in_test)
     # pass any number of tests as argument to get libasan preload if enabled example: running a test with Python
     # libpython is not compiled with asan and it gets loaded before our pymodules -> preload asan
     if(LIBASAN)
@@ -55,7 +55,7 @@ function(pro_preload_asan_in_test)
     endif()
 endfunction()
 
-function(pro_add_test)
+function(yc_add_test)
     set(options)
     set(oneValueArgs NAME WORKING_DIRECTORY)
     set(multiValueArgs COMMAND DEPEND_PATHS CONFIGURATIONS PYTHONPATH)
@@ -63,7 +63,7 @@ function(pro_add_test)
     cmake_parse_arguments(test_arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT test_arg_NAME)
-        message(FATAL_ERROR "use pro_add_test( NAME .. COMMAND ..) syntax.\nSee add_test() cmake documentation")
+        message(FATAL_ERROR "use yc_add_test( NAME .. COMMAND ..) syntax.\nSee add_test() cmake documentation")
     endif()
 
     set(extra_args)

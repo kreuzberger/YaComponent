@@ -50,7 +50,7 @@ add_executable(
 )
 target_link_libraries(publisher PRIVATE YaComponent Qt5::Test)
 
-pro_add_pytest(
+yc_add_pytest(
     NAME
     pypubsubunittestsp
     WHAT
@@ -60,7 +60,7 @@ pro_add_pytest(
     "${CMAKE_CURRENT_BINARY_DIR};${pyyacomponent_SOURCE_DIR};${SubscriptionsTest_BINARY_DIR}/python/PublisherIfc/py;${SubscriptionsTest_BINARY_DIR}/python/PublisherComp/py;${SubscriptionsTest_BINARY_DIR}/python/SubscriberComp/py"
 )
 
-pro_add_pytest(
+yc_add_pytest(
     NAME
     pypubsubunittestmp
     WHAT
