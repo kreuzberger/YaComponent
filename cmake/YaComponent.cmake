@@ -67,7 +67,7 @@ endmacro(YACOMPONENT_LAYOUT_GENERATE)
 
 macro(YACOMPONENT_IFC_GENERATE outfiles)
 
-    set(options)
+    set(options NO_DOC)
     set(oneValueArgs LANGUAGE)
     set(multiValueArgs)
     cmake_parse_arguments(args "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -80,20 +80,25 @@ macro(YACOMPONENT_IFC_GENERATE outfiles)
         get_filename_component(it ${it} ABSOLUTE)
         get_filename_component(component ${it} NAME_WE)
 
+        set(doc_args)
+        set(doc_outfile)
+        if(NOT ${args_NO_DOC})
+            set(doc_args "--outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc")
+            set(doc_outfile ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml)
+        endif()
+
         if("${args_LANGUAGE}" STREQUAL "python")
             set(outfile
                 ${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Proxy.py
                 # ${CMAKE_CURRENT_BINARY_DIR}/${component}/py/I${component}ProxyHandler.h
-                ${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Stub.py
-                ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml
+                ${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Stub.py ${doc_outfile}
             )
             # message(" adding outfile in if generation ${outfile}")
+
             add_custom_command(
                 OUTPUT ${outfile}
-                COMMAND
-                    $<TARGET_FILE:YaComponent::yacomponent> --ifc=${it} --language=python
-                    --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --verbose
-                    --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/py
+                COMMAND $<TARGET_FILE:YaComponent::yacomponent> --ifc=${it} --language=python --verbose
+                        --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/py ${doc_args}
                 DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
             )
 
@@ -104,16 +109,14 @@ macro(YACOMPONENT_IFC_GENERATE outfiles)
                 ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/I${component}ProxyHandler.h
                 ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Stub.h
                 ${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Stub.cpp
-                ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml
+                ${doc_outfile}
             )
             # message(" adding outfile in if generation ${outfile}")
 
             add_custom_command(
                 OUTPUT ${outfile}
-                COMMAND
-                    $<TARGET_FILE:YaComponent::yacomponent> --ifc=${it}
-                    --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp
-                    --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --verbose
+                COMMAND $<TARGET_FILE:YaComponent::yacomponent> --ifc=${it}
+                        --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp ${doc_args} --verbose
                 DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
             )
             include_directories(${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp)
@@ -136,7 +139,7 @@ macro(YACOMPONENT_IFC_GENERATE outfiles)
 endmacro(YACOMPONENT_IFC_GENERATE)
 
 macro(YACOMPONENT_GENERATE outfiles)
-    set(options)
+    set(options NO_DOC)
     set(oneValueArgs LANGUAGE)
     set(multiValueArgs)
     cmake_parse_arguments(args "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -145,30 +148,29 @@ macro(YACOMPONENT_GENERATE outfiles)
         get_filename_component(it ${it} ABSOLUTE)
         get_filename_component(component ${it} NAME_WE)
 
+        set(doc_args)
+        set(doc_outfile)
+        if(NOT ${args_NO_DOC})
+            set(doc_args "--outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc")
+            set(doc_outfile ${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml)
+        endif()
+
         if("${args_LANGUAGE}" STREQUAL "python")
-            set(outfile "${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Impl.py"
-                        "${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml"
-            )
+            set(outfile "${CMAKE_CURRENT_BINARY_DIR}/${component}/py/${component}Impl.py" "${doc_outfile}")
             add_custom_command(
                 OUTPUT ${outfile}
-                COMMAND
-                    $<TARGET_FILE:YaComponent::yacomponent> --component=${it}
-                    --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/py --language=python
-                    --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --verbose
+                COMMAND $<TARGET_FILE:YaComponent::yacomponent> --component=${it} --verbose
+                        --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/py --language=python ${doc_args}
                 DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
             )
         else()
-            set(outfile
-                "${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Impl.h"
-                "${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Impl.cpp"
-                "${CMAKE_CURRENT_BINARY_DIR}/${component}/doc/${component}.uml"
+            set(outfile "${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Impl.h"
+                        "${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp/${component}Impl.cpp" "${doc_outfile}"
             )
             add_custom_command(
                 OUTPUT ${outfile}
-                COMMAND
-                    $<TARGET_FILE:YaComponent::yacomponent> --component=${it}
-                    --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp
-                    --outdoc=${CMAKE_CURRENT_BINARY_DIR}/${component}/doc --verbose
+                COMMAND $<TARGET_FILE:YaComponent::yacomponent> --component=${it} --verbose
+                        --outcode=${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp ${doc_args}
                 DEPENDS ${it} ${YaComponent_GENERATOR_SOURCE_DIR} $<TARGET_FILE:YaComponent::yacomponent>
             )
             include_directories(${CMAKE_CURRENT_BINARY_DIR}/${component}/cpp)

@@ -31,7 +31,7 @@ class Subscriber():
         if self._reqresp_socket is not None and not self._connected:
             self._reqresp_socket.setsockopt_string(zmq.IDENTITY,ident)
             self._reqresp_socket.setsockopt(zmq.RCVTIMEO, 0)
-            logging.info(f"Subscriber::setConnectionPara: connecting to {address}")
+            logging.debug(f"Subscriber::setConnectionPara: connecting to {address}")
             self._reqresp_socket.connect(address)
             logging.info(f"Subscriber::setConnectionPara: connected to {address}")
             self._connected = True
@@ -88,19 +88,19 @@ class Subscriber():
                     more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                     if more:
                         msg = self._reqresp_socket.recv(zmq.NOBLOCK);
-                        logging.info(f"Subscriber::receive key {key} msg {msg}")
+                        logging.debug(f"Subscriber::receive key {key} msg {msg}")
                         more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                         if more:
                             raise RuntimerError("Subscriber::receive: KeyFmt unexpected end of message");
                         # logging.info(f"Subscriber::receive 3")
 
                 elif yc.KeySync == key:
-                    logging.info(f"Subscriber::receive keySync")
+                    logging.debug(f"Subscriber::receive keySync")
                     key = None # returning key should not be handled by caller
                     more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                     if more:
                         msg = self._reqresp_socket.recv(zmq.NOBLOCK);
-                        logging.info(f"Subscriber::receive keySync msg {msg}")
+                        logging.debug(f"Subscriber::receive keySync msg {msg}")
                         if 0 < len(msg):
                             self._sync = True if yc.SynAck == msg.decode("ascii") else False
                             logging.info(f"Subscriber::receive keySync synced {yc.SynAck} {msg} {self._sync}")

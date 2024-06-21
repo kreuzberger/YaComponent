@@ -347,7 +347,7 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
         }
         fhSource << "    def request" << req->Attribute("id") << "(self" << strPara << std::endl;
 
-        fhSource << "        return self._Subscriber.request( REQ_";
+        fhSource << "        return self._Subscriber.request( self.KEYS.REQ_";
         if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
             fhSource << YaComponentCore::to_upper(req->Attribute("package")) + "_";
         }
