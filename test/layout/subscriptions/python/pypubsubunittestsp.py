@@ -10,6 +10,10 @@ from PublisherIfcStub import PublisherIfcStub
 from SubscriberCompImpl import SubscriberCompImpl
 from PublisherCompImpl import PublisherCompImpl
 
+
+from PublisherIfcProxyHandler import PublisherIfcProxyHandler
+from PublisherIfcStubHandler import PublisherIfcStubHandler
+
 from PySide2.QtCore import QThread
 from PySide2.QtTest import QTest
 from PySide2.QtCore import QCoreApplication
@@ -17,6 +21,7 @@ from PySide2.QtCore import QCoreApplication
 import pytest
 from time import sleep
 import logging
+from enum import IntEnum
 #from pytestqt.qtbot import QtBot
 
 # todo
@@ -41,6 +46,34 @@ import logging
 import logging
 from time import sleep
 
+
+
+class PublisherProxyCallback(PublisherIfcProxyHandler):
+
+    _last_data = None
+    _last_time = None
+    _properties_cnt = 0
+
+    def onPropertyData(self, id: int, property: Data):
+        logging.info(f"PublisherProxyCallback::onProperty Data:")
+        self._last_data = property
+        self._properties_cnt += 1
+
+    def onPropertyTime(self, id: int, property: Time ):
+        self._last_time = property
+        self._properties_cnt += 1
+        logging.info(f"PublisherProxyCallback::onProperty Time:")
+
+class PublisherStubCallback(PublisherIfcStubHandler):
+
+    def onRequestStartData(self, id: int  ):
+        logging.info(f"PublisherStubCallback::onRequestStartData {id}")
+
+
+    def onRequestStopData(self, id: int  ):
+        logging.info(f"PublisherStubCallback::onRequestStopData {id}")
+        pass
+
 class PubSubEnv():
     _context = None
     _pub_thread = None
@@ -48,13 +81,14 @@ class PubSubEnv():
     _pub = None
     _sub = None
 
-
     def __init__(self):
         self._context = yacomponent.context_new()
         self._pub_thread = QThread()
         self._sub_thread = QThread()
-        self._pub = PublisherCompImpl(self._context, None)
-        self._sub = SubscriberCompImpl(self._context, None)
+        self._pub_cb = PublisherStubCallback()
+        self._sub_cb = PublisherProxyCallback()
+        self._pub = PublisherCompImpl(self._context, self._pub_cb)
+        self._sub = SubscriberCompImpl(self._context, self._sub_cb)
         self._pub_thread.start()
         self._sub_thread.start()
         self._pub.init()
@@ -114,8 +148,7 @@ def test_pubsub_env(pubsubtest, qapp):
     assert pubsubtest._context is not None
 
 def test_basic_notifications(pubsubtest, qapp):
-    logging.info("starting with setNotification")
-    rc = pubsubtest._sub._Data.setNotification(PublisherIfcProxy.KEYS.PROP_DATA.value);
+    rc = pubsubtest._sub._Data.setNotification(PublisherIfcProxy.KEYS.PROP_DATA);
     assert -1 != rc
     sleep(0.05)
 
@@ -125,9 +158,10 @@ def test_basic_notifications(pubsubtest, qapp):
     data.timeFraction = 0.0
     data.counter = 123
 
-    # todo
-    # rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA.value, data)
-    # sleep(1)
+    rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA, data)
+    sleep(1)
+
+    assert 123 == pubsubtest._sub_cb._last_data.counter
 
     # QCOMPARE(mSubScriber->miPropertiesCnt, 1);
     # QCOMPARE(mSubScriber->mLastData.counter(), 123);

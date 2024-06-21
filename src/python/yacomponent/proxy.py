@@ -21,8 +21,5 @@ class Proxy(QObject):
     def setConnectionPara(self, address: str, ident: str):
         self._Subscriber.setConnectionPara(address, ident)
 
-    def receive(self):
-        assert True
-
     def close(self):
         self._Subscriber.close()

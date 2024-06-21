@@ -3,7 +3,7 @@ from . import variables as yc
 
 from google.protobuf.message import Message
 from time import sleep
-from PySide2.QtCore import QCoreApplication
+#from PySide2.QtCore import QCoreApplication
 
 import logging
 
@@ -43,7 +43,8 @@ class Subscriber():
             sync = False
             while not sync:
                 #logging.info("Subscriber::setConnectionPara: syncing")
-                QCoreApplication.processEvents()
+                #QCoreApplication.processEvents()
+                sleep(yc.TimeOut)
                 sync = self._checkSync()
         else:
             raise RuntimeError("no valid socket or not connected")
@@ -67,31 +68,32 @@ class Subscriber():
 
 
     #def receive(self, key: int, size: int, data , ident: str) -> int:
-    def receive(self) -> tuple[int, int, bytes]:
+    def receive(self) -> tuple[int,  bytes]:
         bytes = 0
         more = -1
         key = None
-        msgSize = None
         msg = None
         assert self._reqresp_socket is not None
         if self._reqresp_socket is not None:
             rc = self._reqresp_socket.poll(0, zmq.PollEvent.POLLIN)
 
             if rc == zmq.PollEvent.POLLIN:
-                logging.info(f"Subscriber::receive pollin")
+                #logging.info(f"Subscriber::receive pollin")
                 msg = self._reqresp_socket.recv(zmq.NOBLOCK)
-                logging.info(f"Subscriber::receive msg {msg}")
+                #logging.info(f"Subscriber::receive msg {msg}")
                 msg = self._reqresp_socket.recv(zmq.NOBLOCK)
                 key = int(msg)
-                logging.info(f"Subscriber::receive key {key}")
+                #logging.info(f"Subscriber::receive key {key}")
                 if 0 <= key:
                     more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                     if more:
                         msg = self._reqresp_socket.recv(zmq.NOBLOCK);
-                        logging.info(f"Subscriber::receive 2 msg {msg}")
+                        logging.info(f"Subscriber::receive key {key} msg {msg}")
                         more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
-                        if more and 0 < len(msg):
+                        if more:
                             raise RuntimerError("Subscriber::receive: KeyFmt unexpected end of message");
+                        # logging.info(f"Subscriber::receive 3")
+
                 elif yc.KeySync == key:
                     logging.info(f"Subscriber::receive keySync")
                     key = None # returning key should not be handled by caller
@@ -113,7 +115,8 @@ class Subscriber():
                 else:
                     raise RuntimeError(f"Subscriber::receive received invalid key {key}")
 
-        return (key, msgSize, msg)
+        #logging.info(f"Subscriber::receive returns with {key}, {msg}")
+        return (key, msg)
 
     def request(self, key: int, msg: Message )-> int: #const ::google::protobuf::MessageLite
         rc = -1;
