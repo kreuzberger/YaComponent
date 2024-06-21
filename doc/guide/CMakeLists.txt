@@ -1,7 +1,7 @@
-project (UserGuide)
+project(UserGuide)
 
-add_subdirectory( examples )
+add_subdirectory(examples)
 
-if(USE_DOC_SPHINX)
-  SPHINX_DOC_GENERATE(UserGuide BUILDERS HTML)
+if(USE_DOC)
+    sphinx_doc_generate(UserGuide BUILDERS HTML)
 endif()

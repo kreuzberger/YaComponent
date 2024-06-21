@@ -1,5 +1,5 @@
-project (CommunicationSlides)
+project(CommunicationSlides)
 
-if(USE_DOC_SPHINX)
-    SPHINX_DOC_GENERATE(CommunicationSlides BUILDERS REVEALJS)
+if(USE_DOC)
+    sphinx_doc_generate(CommunicationSlides BUILDERS REVEALJS)
 endif()

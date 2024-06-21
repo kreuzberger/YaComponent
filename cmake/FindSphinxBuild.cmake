@@ -1,14 +1,21 @@
 # - Find sphinx-build program
 #
-#  USE_DOC_SPHINX               - have the sphinx-build command found
+#  USE_DOC               - have the sphinx-build command found
 
-
-set(USE_DOC_SPHINX true)
-find_program(SPHINX_BUILD_EXECUTABLE sphinx-build PATH_SUFFIXES bin)
-if (NOT SPHINX_BUILD_EXECUTABLE)
-  message(STATUS "sphinx-build was not found, the documentation will not be generated.")
-  set(USE_DOC_SPHINX false)
+set(USE_DOC false)
+if(Python_FOUND)
+    message(STATUS "python was not found, the documentation will not be generated.")
+    set(USE_DOC true)
 endif()
+
+set(SPHINX_VENV_DIR "${YaComponent_BINARY_DIR}/pypackages/venv")
+
+if(WIN32)
+    set(SPHINX_VENV_PYTHON_EXECUTABLE ${SPHINX_VENV_DIR}/Scripts/python.exe)
+else()
+    set(SPHINX_VENV_PYTHON_EXECUTABLE ${SPHINX_VENV_DIR}/bin/python)
+endif()
+
 function(sphinx_environment SPHINX_ENV)
     # environment settings for the targets above - TODO: use generator-expressions for path handling (shell)
     set(options)
@@ -129,7 +136,7 @@ macro(sphinx_doc_generate outtarget)
         add_custom_command(
             OUTPUT ${SPHINX_DOC_OUTPUT_DIRECTORY}/html/${_project_name}.html
             COMMAND
-                ${CMAKE_COMMAND} -E env ${SPHINX_ENV} ${SPHINX_BUILD_EXECUTABLE}  -c
+                ${CMAKE_COMMAND} -E env ${SPHINX_ENV}${SPHINX_VENV_PYTHON_EXECUTABLE} -s -m sphinx -c
                 "${SPHINX_DOC_CONFIGDIR}" ${_sphinx_options} -b html ${SPHINX_DOC_WORKING_DIRECTORY}
                 ${SPHINX_DOC_OUTPUT_DIRECTORY}/html
             DEPENDS ${SPHINX_DOC_DEPENDS} ${SPHINX_DOC_RST_FILES}
@@ -150,7 +157,7 @@ macro(sphinx_doc_generate outtarget)
         add_custom_command(
             OUTPUT ${SPHINX_DOC_OUTPUT_DIRECTORY}/singlehtml/${_project_name}.html
             COMMAND
-                ${CMAKE_COMMAND} -E env ${SPHINX_ENV} ${SPHINX_BUILD_EXECUTABLE}  -c
+                ${CMAKE_COMMAND} -E env ${SPHINX_ENV} ${SPHINX_VENV_PYTHON_EXECUTABLE} -s -m sphinx -c
                 "${SPHINX_DOC_CONFIGDIR}" ${_sphinx_options} -b singlehtml ${SPHINX_DOC_WORKING_DIRECTORY}
                 ${SPHINX_DOC_OUTPUT_DIRECTORY}/singlehtml
             DEPENDS ${SPHINX_DOC_DEPENDS} ${SPHINX_DOC_RST_FILES}
@@ -171,7 +178,7 @@ macro(sphinx_doc_generate outtarget)
         add_custom_command(
             OUTPUT ${SPHINX_DOC_OUTPUT_DIRECTORY}/revealjs/${_project_name}.html
             COMMAND
-                ${CMAKE_COMMAND} -E env ${SPHINX_ENV} ${SPHINX_BUILD_EXECUTABLE}  -c
+                ${CMAKE_COMMAND} -E env ${SPHINX_ENV} ${SPHINX_VENV_PYTHON_EXECUTABLE} -s -m sphinx -c
                 "${SPHINX_DOC_CONFIGDIR}" ${_sphinx_options} -b revealjs ${SPHINX_DOC_WORKING_DIRECTORY}
                 ${SPHINX_DOC_OUTPUT_DIRECTORY}/revealjs
             DEPENDS ${SPHINX_DOC_DEPENDS} ${SPHINX_DOC_RST_FILES}
@@ -195,7 +202,7 @@ macro(sphinx_doc_generate outtarget)
         set_target_properties(doc_${_outtarget_name} PROPERTIES EXCLUDE_FROM_ALL TRUE)
     endif()
 
-    set_target_properties( doc_${_outtarget_name} PROPERTIES OUTPUT_DIRECTORY ${SPHINX_DOC_OUTPUT_DIRECTORY})
+    set_target_properties(doc_${_outtarget_name} PROPERTIES OUTPUT_DIRECTORY ${SPHINX_DOC_OUTPUT_DIRECTORY})
 
     foreach(_builder ${SPHINX_DOC_BUILDERS})
         if(SPHINX_INSTALL_DIR_${_builder})
