@@ -13,7 +13,7 @@ TextUnittestMPSub::TextUnittestMPSub(QObject *parent)
 void TextUnittestMPSub::initTestCase()
 {
     mpContext = YaComponent::context_new();
-    mpSubscriberThread = new YaComponentThread();
+    mpSubscriberThread = new QThread();
     mpSubscriberComp = new SubscriberComp(mpContext);
 
     mpSubscriberThread->start();

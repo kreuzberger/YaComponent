@@ -1,11 +1,10 @@
 #pragma once
 #include <QObject>
 
-#include <yacomponent/YaComponent.h>
-#include <yacomponent/YaComponentThread.h>
-
 #include "IPublisherIfcProxyHandler.h"
 #include "SubscriberCompImpl.h"
+#include <yacomponent/YaComponent.h>
+#include <QtCore/QThread>
 
 class SubscriberComp : public YaComponent::SubscriberCompImpl,
                        public YaComponent::IPublisherIfcProxyHandler
@@ -48,6 +47,6 @@ private:
     void testRoutine();
 
     void *mpContext;
-    YaComponentThread *mpSubscriberThread;
+    QThread *mpSubscriberThread;
     SubscriberComp *mpSubscriberComp;
 };

@@ -2,7 +2,6 @@
 #include <QObject>
 
 #include <yacomponent/YaComponent.h>
-#include <yacomponent/YaComponentThread.h>
 
 #include "IPublisherIfcStubHandler.h"
 #include "PublisherCompImpl.h"

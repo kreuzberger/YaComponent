@@ -4,7 +4,7 @@
 #include "IPublisherIfcStubHandler.h"
 #include "PublisherCompImpl.h"
 #include <yacomponent/YaComponent.h>
-#include <yacomponent/YaComponentThread.h>
+#include <QtCore/QThread>
 
 class PublisherComp : public YaComponent::PublisherCompImpl, public YaComponent::IPublisherIfcStubHandler
 {
@@ -49,6 +49,6 @@ private:
     void testRoutine();
 
     void *mpContext;
-    YaComponentThread *mpPublisherThread;
+    QThread *mpPublisherThread;
     PublisherComp *mpPublisher;
 };

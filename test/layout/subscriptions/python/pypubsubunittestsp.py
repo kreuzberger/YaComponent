@@ -139,8 +139,8 @@ def test_base_impls(qapp):
     proxy = yacomponent.Proxy(ctx, 1)
     stub = yacomponent.Stub(ctx, 2)
     yacomponent.context_term(ctx)
-    pub_thread = yacomponent.Thread
-    sub_thread = yacomponent.Thread
+    pub_thread = QThread
+    sub_thread = QThread
 
     assert True
 

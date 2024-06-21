@@ -27,9 +27,9 @@ void TextUnittest::initComponentsSPST()
 void TextUnittest::initComponentsSPMT()
 {
     mpContext = YaComponent::context_new();
-    mpTextGenThread = new YaComponentThread();
+    mpTextGenThread = new QThread();
     mpTextGen1 = new TextGenComp(mpContext);
-    mpTextOutThread = new YaComponentThread();
+    mpTextOutThread = new QThread();
     mpTextOut = new TextOutComp(mpContext);
 
     mpTextGenThread->start();
@@ -46,9 +46,9 @@ void TextUnittest::initComponentsSPMT()
 void TextUnittest::initComponentsSPMTGui()
 {
     mpContext = YaComponent::context_new();
-    mpTextGenThread = new YaComponentThread();
+    mpTextGenThread = new QThread();
     mpTextGen1 = new TextGenComp(mpContext);
-    mpTextOutThread = new YaComponentThread();
+    mpTextOutThread = new QThread();
     mpTextOut = new TextOutComp(mpContext);
 
     mpTextGenThread->start();

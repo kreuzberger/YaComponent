@@ -14,7 +14,7 @@ void PubSubUnittestMPPub::initComponentsMPMT()
 {
     mpContext = YaComponent::context_new();
     mpPublisher = new PublisherComp(mpContext);
-    mpPublisherThread = new YaComponentThread();
+    mpPublisherThread = new QThread();
 
     mpPublisherThread->start();
 

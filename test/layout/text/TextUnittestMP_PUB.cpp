@@ -14,7 +14,7 @@ void TextUnittestMPPub::initComponentsMPMT()
 {
     mpContext = YaComponent::context_new();
     mpTextGen1 = new TextGenComp(mpContext);
-    mpTextGenThread = new YaComponentThread();
+    mpTextGenThread = new QThread();
 
     mpTextGenThread->start();
 

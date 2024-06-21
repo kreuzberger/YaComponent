@@ -23,8 +23,8 @@ void PubSubUnittestSP::cleanup()
 void PubSubUnittestSP::initComponents()
 {
     mContext = YaComponent::context_new();
-    mPublisherThread = std::make_unique<YaComponentThread>();
-    mSubscriperThread = std::make_unique<YaComponentThread>();
+    mPublisherThread = std::make_unique<QThread>();
+    mSubscriperThread = std::make_unique<QThread>();
     mSubScriber.reset(new SubscriberComp(mContext));
     mPublisher.reset(new PublisherComp(mContext));
 

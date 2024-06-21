@@ -34,7 +34,7 @@ private:
 
     std::unique_ptr<PublisherComp> mPublisher = nullptr;
     std::unique_ptr<SubscriberComp> mSubScriber = nullptr;
-    std::unique_ptr<YaComponentThread> mPublisherThread = nullptr;
-    std::unique_ptr<YaComponentThread> mSubscriperThread = nullptr;
+    std::unique_ptr<QThread> mPublisherThread = nullptr;
+    std::unique_ptr<QThread> mSubscriperThread = nullptr;
     void *mContext = nullptr;
 };

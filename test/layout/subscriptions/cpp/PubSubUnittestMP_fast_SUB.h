@@ -3,7 +3,7 @@
 #include <QObject>
 
 #include <yacomponent/YaComponent.h>
-#include <yacomponent/YaComponentThread.h>
+#include <QtCore/QThread>
 
 #include "IPublisherIfcProxyHandler.h"
 #include "SubscriberCompImpl.h"
@@ -50,6 +50,6 @@ private:
     void testRoutine();
 
     void *mpContext;
-    YaComponentThread *mpSubscriberThread;
+    QThread *mpSubscriberThread;
     SubscriberComp *mpSubscriberComp;
 };

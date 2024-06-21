@@ -13,7 +13,7 @@ TextUnittestMPSub::TextUnittestMPSub(QObject *parent)
 void TextUnittestMPSub::initComponentsMPMT()
 {
     mpContext = YaComponent::context_new();
-    mpTextOutThread = new YaComponentThread();
+    mpTextOutThread = new QThread();
     mpTextOut = new TextOutComp(mpContext);
 
     mpTextOutThread->start();
