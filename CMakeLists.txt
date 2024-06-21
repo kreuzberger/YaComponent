@@ -63,9 +63,9 @@ if(WITH_BUNDLED_EXTERNALS)
 
     FetchContent_Declare(
         protobuf
-        URL "${CMAKE_SOURCE_DIR}/bin/protobuf-25.3.tar.gz"
+        URL "${CMAKE_SOURCE_DIR}/bin/protobuf-26.1.tar.gz"
         URL_HASH
-            SHA512=1f73e237c919082e5423ae9e2ea8813dccf672c059051d1531fe89ffaa45872d3cf3052b8c3af26f674296ec17d7dc861c67b8f0834ed80261ce4a6a14ed7115
+            SHA512=0363ac09f92d8e040491425d444c8dca0b9b430e02d2dff6e2b28a0c2b2bea0d33a47f50bc9e2e2d4e8e22b65a02009a20c0066fb89c75df93a7b703dda42ed4
     )
 
     FetchContent_MakeAvailable(abseil protobuf)
