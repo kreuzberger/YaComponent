@@ -27,7 +27,7 @@ add_custom_target(
 install(
     DIRECTORY "${pyyacomponent_SOURCE_DIR}/yacomponent"
     # DESTINATION "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}"
-    DESTINATION "lib/python"
+    DESTINATION "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages"
     COMPONENT "yacomponent"
     PATTERN "__pycache__" EXCLUDE
 )
