@@ -264,6 +264,7 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     }
     for (const auto *resp : responses) {
         // fhHeader << "    ";
+        fhSource << "    ";
         // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
         //     fhHeader << resp->Attribute("package") << "::";
         // }
