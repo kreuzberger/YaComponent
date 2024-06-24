@@ -1,7 +1,6 @@
 from PublisherIfc_pb2 import *
 
 import yacomponent
-from yacomponent import Subscriber
 from PublisherIfcProxy import PublisherIfcProxy
 from SubscriberCompImpl import SubscriberCompImpl
 

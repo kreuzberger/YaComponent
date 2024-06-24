@@ -216,7 +216,8 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     //fhSource << "import " << ifcName << "Proxy" << std::endl;
     fhSource << "# import " << ifcName << "ProxyHandler" << std::endl;
     fhSource << "import zmq" << std::endl;
-    fhSource << "from yacomponent import Proxy, Stub" << std::endl;
+    fhSource << "from yacomponent.proxy import *" << std::endl;
+    fhSource << "from yacomponent.stub import *" << std::endl;
 
     //fhSource << "#include <yacomponent/YaProxyBase.h>" << std::endl;
     //fhSource << "#include <yacomponent/YaSUBImpl.h>" << std::endl;
@@ -489,7 +490,7 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhSource << "# import" << ifcName << "StubHandler\n";
 
     fhSource << "import zmq" << std::endl;
-    fhSource << "from yacomponent import Stub" << std::endl;
+    fhSource << "from yacomponent.stub import *" << std::endl;
 
     fhSource << "# todo python equivalent to <google/protobuf/util/message_differencer.h>\n";
 

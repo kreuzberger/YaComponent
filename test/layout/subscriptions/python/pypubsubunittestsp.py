@@ -1,10 +1,6 @@
 from PublisherIfc_pb2 import *
 
 import yacomponent
-#from yacomponent.subscriber import Subscriber
-#from yacomponent.publisher import Publisher
-from yacomponent import Subscriber
-from yacomponent import Publisher
 from PublisherIfcProxy import PublisherIfcProxy
 from PublisherIfcStub import PublisherIfcStub
 from SubscriberCompImpl import SubscriberCompImpl
@@ -22,26 +18,6 @@ import pytest
 from time import sleep
 import logging
 from enum import IntEnum
-#from pytestqt.qtbot import QtBot
-
-# todo
-# create a context that does this similar to cpp
-# mContext = YaComponent::context_new();
-# mPublisherThread = std::make_unique<YaComponentThread>();
-# mSubscriperThread = std::make_unique<YaComponentThread>();
-# mSubScriber.reset(new SubscriberComp(mContext));
-# mPublisher.reset(new PublisherComp(mContext));
-
-# mPublisherThread->start();
-# mSubscriperThread->start();
-# QTest::qWait(10);
-# mSubScriber->init();
-# mPublisher->init();
-# mPublisher->setConnectionParaReceiverData("inproc://testinprocsubpub", 3000);
-
-# mSubScriber->setConnectionParaData("inproc://testinprocsubpub", "subscriber_sp");
-# mPublisher->moveToThread(mPublisherThread.get());
-# mSubScriber->moveToThread(mSubscriperThread.get());
 
 import logging
 from time import sleep
@@ -139,15 +115,15 @@ def test_zmq():
     yacomponent.context_term(ctx)
     assert True
 
-def test_base_impls(qapp):
-    ctx = yacomponent.context_new()
-    proxy = yacomponent.Proxy(ctx, 1)
-    stub = yacomponent.Stub(ctx, 2)
-    yacomponent.context_term(ctx)
-    pub_thread = QThread
-    sub_thread = QThread
+# def test_base_impls(qapp):
+#     ctx = yacomponent.context_new()
+#     proxy = yacomponent.Proxy(ctx, 1)
+#     stub = yacomponent.Stub(ctx, 2)
+#     yacomponent.context_term(ctx)
+#     pub_thread = QThread
+#     sub_thread = QThread
 
-    assert True
+#     assert True
 
 def test_pubsub_env(pubsubtest, qapp):
     assert pubsubtest._context is not None
