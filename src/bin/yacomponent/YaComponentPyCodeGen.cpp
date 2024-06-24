@@ -255,61 +255,62 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
 
     for (const auto *prop : properties) {
         fhSource << "    ";
+        auto package = std::string();
         // if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
-        //     fhHeader << prop->Attribute("package") << "::";
+        //     package += prop->Attribute("package") + std::string(".");
         // }
-        // //fhSource << prop->Attribute("id");
-        fhSource << "_" << prop->Attribute("id") << " = " << prop->Attribute("id") << "()"
-                 << std::endl;
+        fhSource << "_" << prop->Attribute("id") << " = " << package << prop->Attribute("id")
+                 << "()" << std::endl;
     }
     for (const auto *resp : responses) {
         // fhHeader << "    ";
         fhSource << "    ";
+        auto package = std::string();
         // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-        //     fhHeader << resp->Attribute("package") << "::";
+        //     package += resp->Attribute("package") + std::string(".");
         // }
         //fhSource << resp->Attribute("id");
-        fhSource << "_" << resp->Attribute("id") << " = " << resp->Attribute("id") << "()"
-                 << std::endl;
+        fhSource << "_" << resp->Attribute("id") << " = " << package << resp->Attribute("id")
+                 << "()" << std::endl;
     }
 
     fhSource << std::endl;
 
     auto keyIdx = 0;
+    if (!(properties.empty() && requests.empty() && responses.empty())) {
+        fhSource << "    class KEYS(IntEnum):" << std::endl;
 
-    fhSource << "    class KEYS(IntEnum):" << std::endl;
-
-    for (const auto *prop : properties) {
-        std::string strProp;
-        strProp += "PROP_";
-        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
-            strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
+        for (const auto *prop : properties) {
+            std::string strProp;
+            strProp += "PROP_";
+            // if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
+            //     strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
+            // }
+            strProp += YaComponentCore::to_upper(prop->Attribute("id"));
+            fhSource << "        " << strProp << " = " << keyIdx++ << std::endl;
         }
-        strProp += YaComponentCore::to_upper(prop->Attribute("id"));
-        fhSource << "        " << strProp << " = " << keyIdx++ << std::endl;
-    }
-    for (const auto *req : requests) {
-        std::string strReq;
-        strReq += "REQ_";
-        if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
-            strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
+        for (const auto *req : requests) {
+            std::string strReq;
+            strReq += "REQ_";
+            // if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
+            //     strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
+            // }
+
+            strReq += YaComponentCore::to_upper(req->Attribute("id"));
+            fhSource << "        " << strReq << " = " << keyIdx++ << std::endl;
+        }
+        for (const auto *resp : responses) {
+            std::string strResp;
+            strResp += "RESP_";
+            // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+            //     strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
+            // }
+            strResp += YaComponentCore::to_upper(resp->Attribute("id"));
+            fhSource << "        " << strResp << " = " << keyIdx++ << std::endl;
         }
 
-        strReq += YaComponentCore::to_upper(req->Attribute("id"));
-        fhSource << "        " << strReq << " = " << keyIdx++ << std::endl;
+        fhSource << std::endl << std::endl;
     }
-    for (const auto *resp : responses) {
-        std::string strResp;
-        strResp += "RESP_";
-        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-            strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
-        }
-        strResp += YaComponentCore::to_upper(resp->Attribute("id"));
-        fhSource << "        " << strResp << " = " << keyIdx++ << std::endl;
-    }
-
-    fhSource << std::endl << std::endl;
-
     fhSource << "    def __init__(self, context: zmq.Context, id: int, callback ): # todo callback "
                 "handler"
              << std::endl;
@@ -319,17 +320,20 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
 
     fhSource << std::endl << std::endl;
 
-    fhHeaderIfc << "class " << ifcName << "ProxyHandler:" << std::endl;
-    fhHeaderIfc << std::endl;
+    if (!(properties.empty() && responses.empty())) {
+        fhHeaderIfc << "class " << ifcName << "ProxyHandler:" << std::endl;
+        fhHeaderIfc << std::endl;
 
-    for (const auto *prop : properties) {
-        fhHeaderIfc << "    def onProperty" << prop->Attribute("id") << "(self, id: int, property: ";
-        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
-            fhHeaderIfc << prop->Attribute("package") << ".";
+        for (const auto *prop : properties) {
+            fhHeaderIfc << "    def onProperty" << prop->Attribute("id")
+                        << "(self, id: int, property: ";
+            // if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
+            //     fhHeaderIfc << prop->Attribute("package") << ".";
+            // }
+            fhHeaderIfc << prop->Attribute("id") << " ):" << std::endl;
+            fhHeaderIfc << "        pass" << std::endl;
+            fhHeaderIfc << std::endl << std::endl;
         }
-        fhHeaderIfc << prop->Attribute("id") << " ):" << std::endl;
-        fhHeaderIfc << "        pass" << std::endl;
-        fhHeaderIfc << std::endl << std::endl;
     }
 
     for (const auto *req : requests) {
@@ -337,26 +341,23 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
         std::string strPara;
         auto *para = req->FirstChildElement("para");
         auto has_para = para != nullptr;
+        int paraIdx = 1;
         while (para) {
-            strPara += ", ";
-            if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
-                strPara += std::string(para->Attribute("package")) + ".";
-            }
+            strPara += std::string(", msg") /*+ std::to_string(paraIdx)*/ + std::string(": ");
+            // if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
+            //     strPara += std::string(para->Attribute("package")) + ".";
+            // }
             strPara += std::string(para->Attribute("id"));
             para = para->NextSiblingElement("para");
+            paraIdx++;
         }
-        if (!strPara.empty()) {
-            strPara.pop_back();
-            strPara += ", msg) -> int:";
-        } else {
-            strPara = ") -> int:";
-        }
+        strPara += " ) -> int:";
         fhSource << "    def request" << req->Attribute("id") << "(self" << strPara << std::endl;
 
         fhSource << "        return self._Subscriber.request( self.KEYS.REQ_";
-        if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
-            fhSource << YaComponentCore::to_upper(req->Attribute("package")) + "_";
-        }
+        // if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
+        //     fhSource << YaComponentCore::to_upper(req->Attribute("package")) + "_";
+        // }
         fhSource << YaComponentCore::to_upper(req->Attribute("id"));
         if (has_para) {
             fhSource << ", msg";
@@ -381,9 +382,9 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     for (const auto *resp : responses) {
         std::string strResp;
         strResp += "RESP_";
-        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-            strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
-        }
+        // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+        //     strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
+        // }
         strResp += YaComponentCore::to_upper(resp->Attribute("id"));
         fhSource << "                    case self.KEYS." << strResp << ":" << std::endl;
         fhSource << "                        self._" << resp->Attribute("id")
@@ -398,16 +399,16 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
             para = para->NextSiblingElement("para");
         }
 
-        fhSource << "                        self._callback.onResponse << " << resp->Attribute("id")
-                 << "( mId, " << strResp << strPara << ")" << std::endl;
+        fhSource << "                        self._callback.onResponse" << resp->Attribute("id")
+                 << "( self._id" << strPara << ")" << std::endl;
     }
 
     for (const auto *prop : properties) {
         std::string strProp;
         strProp += "PROP_";
-        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
-            strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
-        }
+        // if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
+        //     strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
+        // }
         strProp += YaComponentCore::to_upper(prop->Attribute("id"));
         fhSource << "                    case self.KEYS." << strProp << ":" << std::endl;
         fhSource << "                        if msgData is not None:" << std::endl;
@@ -433,11 +434,11 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
         std::string strPara;
         auto *para = resp->FirstChildElement("para");
         while (para) {
-            strPara += ", const ";
-            if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
-                strPara += std::string(para->Attribute("package")) + "::";
-            }
-            strPara += std::string(para->Attribute("id")) + "&";
+            strPara += ", msg: ";
+            // if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
+            //     strPara += std::string(para->Attribute("package")) + "::";
+            // }
+            strPara += std::string(para->Attribute("id"));
             para = para->NextSiblingElement("para");
         }
         fhHeaderIfc << "    def onResponse" << resp->Attribute("id")
@@ -506,9 +507,9 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     for (const auto *prop : properties) {
         fhSource << "    ";
-        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
-            fhSource << prop->Attribute("package") << ".";
-        }
+        // if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
+        //     fhSource << prop->Attribute("package") << ".";
+        // }
         fhSource << "_" << prop->Attribute("id") << " = None" << std::endl;
     }
 
@@ -516,37 +517,40 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     auto keyIdx = 0;
 
-    fhSource << "    class KEYS(IntEnum):" << std::endl;
+    if (!(properties.empty() && requests.empty() && responses.empty())) {
+        fhSource << "    class KEYS(IntEnum):" << std::endl;
 
-    for (const auto *prop : properties) {
-        std::string strProp;
-        strProp += "PROP_";
-        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
-            strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
+        for (const auto *prop : properties) {
+            std::string strProp;
+            strProp += "PROP_";
+            // if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
+            //     strProp += YaComponentCore::to_upper(prop->Attribute("package")) + "_";
+            // }
+            strProp += YaComponentCore::to_upper(prop->Attribute("id"));
+            fhSource << "        " << strProp << " = " << keyIdx++ << std::endl;
         }
-        strProp += YaComponentCore::to_upper(prop->Attribute("id"));
-        fhSource << "        " << strProp << " = " << keyIdx++ << std::endl;
-    }
-    for (const auto *req : requests) {
-        std::string strReq;
-        strReq += "REQ_";
-        if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
-            strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
+        for (const auto *req : requests) {
+            std::string strReq;
+            strReq += "REQ_";
+            // if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
+            //     strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
+            // }
+
+            strReq += YaComponentCore::to_upper(req->Attribute("id"));
+            fhSource << "        " << strReq << " = " << keyIdx++ << std::endl;
+        }
+        for (const auto *resp : responses) {
+            std::string strResp;
+            strResp += "RESP_";
+            // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+            //     strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
+            // }
+            strResp += YaComponentCore::to_upper(resp->Attribute("id"));
+            fhSource << "        " << strResp << " = " << keyIdx++ << std::endl;
         }
 
-        strReq += YaComponentCore::to_upper(req->Attribute("id"));
-        fhSource << "        " << strReq << " = " << keyIdx++ << std::endl;
+        fhSource << std::endl << std::endl;
     }
-    for (const auto *resp : responses) {
-        std::string strResp;
-        strResp += "RESP_";
-        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-            strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
-        }
-        strResp += YaComponentCore::to_upper(resp->Attribute("id"));
-        fhSource << "        " << strResp << " = " << keyIdx++ << std::endl;
-    }
-
     // for (const auto *prop : properties) {
     //     std::string strMethod;
     //     if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
@@ -556,43 +560,43 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     //     fhHeader << "    int send(int key, const " << strMethod << "&);\n";
     // }
 
-    fhHeaderIfc << "class " << ifcName << "StubHandler:" << std::endl;
-    fhHeaderIfc << std::endl;
+    if (!(properties.empty() && requests.empty() && responses.empty())) {
+        fhHeaderIfc << "class " << ifcName << "StubHandler:" << std::endl;
+        fhHeaderIfc << std::endl;
 
-    for (const auto *req : requests) {
-        fhHeaderIfc << "    def onRequest" << req->Attribute("id");
-        fhHeaderIfc << "(self, id: int ";
-        std::string strPara;
+        for (const auto *req : requests) {
+            fhHeaderIfc << "    def onRequest" << req->Attribute("id");
+            fhHeaderIfc << "(self, id: int ";
+            std::string strPara;
 
-        auto *para = req->FirstChildElement("para");
-        while (para) {
-            strPara += ", ";
-            if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
-                strPara += std::string(para->Attribute("package")) + ".";
+            auto *para = req->FirstChildElement("para");
+            while (para) {
+                strPara += ", ";
+                // if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
+                //     strPara += std::string(para->Attribute("package")) + ".";
+                // }
+                strPara += std::string(para->Attribute("id"));
+                para = para->NextSiblingElement("para");
             }
-            strPara += std::string(para->Attribute("id"));
-            para = para->NextSiblingElement("para");
-        }
 
-        auto *resp = req->FirstChildElement("resp");
-        while (resp) {
-            strPara += ", ";
-            if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-                strPara += std::string(resp->Attribute("package")) + ".";
+            auto *resp = req->FirstChildElement("resp");
+            while (resp) {
+                strPara += ", ";
+                // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+                //     strPara += std::string(resp->Attribute("package")) + ".";
+                // }
+                strPara += std::string(resp->Attribute("id"));
+                resp = resp->NextSiblingElement("resp");
             }
-            strPara += std::string(resp->Attribute("id"));
-            resp = resp->NextSiblingElement("resp");
+            if (!strPara.empty()) {
+                fhHeaderIfc << strPara << " ):\n";
+            } else {
+                fhHeaderIfc << " ):\n";
+            }
+            fhHeaderIfc << "        pass" << std::endl;
+            fhHeaderIfc << std::endl << std::endl;
         }
-        if (!strPara.empty()) {
-            fhHeaderIfc << strPara << " ):\n";
-        } else {
-            fhHeaderIfc << " ):\n";
-        }
-        fhHeaderIfc << "        pass" << std::endl;
-        fhHeaderIfc << std::endl << std::endl;
     }
-
-    fhSource << std::endl << std::endl;
 
     fhSource << "    def __init__(self, context: zmq.Context, id: int, callback ): # todo callback "
                 "handler"
@@ -605,11 +609,11 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhSource << std::endl;
 
     for (const auto *resp : responses) {
-        fhSource << "    def  response( key: int, ";
-        if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-            fhSource << resp->Attribute("package") << ".";
-        }
-        fhSource << resp->Attribute("id") << " msg, ident: str ) -> int:\n";
+        fhSource << "    def response" << resp->Attribute("id") << "( key: int, ";
+        // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+        //     fhSource << resp->Attribute("package") << ".";
+        // }
+        fhSource << " msg: " << resp->Attribute("id") << ", ident: str ) -> int:\n";
         fhSource << "        return self._Publisher.response(key, msg, ident)\n";
         fhSource << std::endl;
         fhSource << std::endl;
@@ -617,9 +621,9 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     for (const auto *prop : properties) {
         std::string strMethod;
-        if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
-            strMethod += std::string(prop->Attribute("package")) + "::";
-        }
+        // if (prop->Attribute("package") && prop->Attribute("package")[0] != '\0') {
+        //     strMethod += std::string(prop->Attribute("package")) + "::";
+        // }
         strMethod += prop->Attribute("id");
         fhSource << "    def send" << prop->Attribute("id") << "(self, key: int, msg: " << strMethod
                  << ") -> int:\n";
@@ -661,9 +665,9 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     for (const auto *req : requests) {
         std::string strReq;
         strReq += "REQ_";
-        if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
-            strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
-        }
+        // if (req->Attribute("package") && req->Attribute("package")[0] != '\0') {
+        //     strReq += YaComponentCore::to_upper(req->Attribute("package")) + "_";
+        // }
         strReq += YaComponentCore::to_upper(req->Attribute("id"));
         fhSource << "                    case KEYS." << strReq << ":\n";
         std::string strMember;
@@ -713,12 +717,13 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
         while (resp) {
             std::string strResp;
             strResp += "RESP_";
-            if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-                strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
-            }
+            // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+            //     strResp += YaComponentCore::to_upper(resp->Attribute("package")) + "_";
+            // }
             strResp += YaComponentCore::to_upper(resp->Attribute("id"));
-            fhSource << "                    response( " << strResp << ", self."
-                     << req->Attribute("id") << "_" << resp->Attribute("id") << ", ident )\n";
+            fhSource << "                        response" << req->Attribute("id") << "( "
+                     << strResp << ", self." << req->Attribute("id") << "_" << resp->Attribute("id")
+                     << ", ident )\n";
             resp = resp->NextSiblingElement("resp");
         }
 
@@ -743,9 +748,9 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
         auto *para = req->FirstChildElement("para");
         while (para) {
             strPara += "    ";
-            if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
-                strPara += std::string(para->Attribute("package")) + "::";
-            }
+            // if (para->Attribute("package") && para->Attribute("package")[0] != '\0') {
+            //     strPara += std::string(para->Attribute("package")) + "::";
+            // }
             strPara += std::string(para->Attribute("id")) + " self._" + req->Attribute("id") + "_"
                        + para->Attribute("id") + "\n";
             para = para->NextSiblingElement("para");
@@ -754,9 +759,9 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
         auto *resp = req->FirstChildElement("resp");
         while (resp) {
             strPara += "    ";
-            if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-                strPara += std::string(resp->Attribute("package")) + "::";
-            }
+            // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
+            //     strPara += std::string(resp->Attribute("package")) + "::";
+            // }
             strPara += std::string(resp->Attribute("id")) + " m" + req->Attribute("id") + "_"
                        + resp->Attribute("id") + ";\n";
             resp = resp->NextSiblingElement("resp");

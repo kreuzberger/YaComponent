@@ -1,6 +1,7 @@
 <interface>
   <version maj="1" min="1" rev="0"/>
   <include file="TextGenIfc.pb.h"/>
+  <include file="TextGenIfc_pb2.py"/>
   <properties>
     <prop id="Text" package="TextGen"/>
   </properties>
