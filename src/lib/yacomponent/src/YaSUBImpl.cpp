@@ -21,8 +21,10 @@ YaSUBImpl::YaSUBImpl(void *context)
 
 void YaSUBImpl::close()
 {
-    zmq_close(mpReqRespSocket);
-    mpReqRespSocket = nullptr;
+    if (mpReqRespSocket) {
+        zmq_close(mpReqRespSocket);
+        mpReqRespSocket = nullptr;
+    }
 }
 
 YaSUBImpl::~YaSUBImpl()
@@ -167,7 +169,6 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
     int more = -1;
     size_t moreSize = sizeof(more);
 
-    assert(0 != mpReqRespSocket);
     if (0 != mpReqRespSocket) {
         zmq_pollitem_t items[1];
         items[0].socket = mpReqRespSocket;
@@ -223,10 +224,11 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
                 }
             } else if (YaComponent::KeyEnd == key) {
                 iBytes = 0;
-                rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
-                if (-1 < rc && more) {
-                    qFatal("YaSUBImpl::receive: KeyEnd unexpected end of message");
-                }
+                // rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
+                // if (-1 < rc && more) {
+                //     qFatal("YaSUBImpl::receive: KeyEnd unexpected end of message");
+                // }
+                close();
             } else {
                 qFatal("%s", qPrintable(QString("YaSUBImpl::receive %1").arg(key)));
             }

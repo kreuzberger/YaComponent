@@ -109,9 +109,10 @@ class Subscriber():
                                 raise RuntimeError("Subscriber::receive: KeySync unexpected end of message");
                 elif yc.KeyEnd == key:
                     key = None # returning key should not be handled by caller
-                    more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
-                    if more:
-                        raise RuntimeError("Subscriber::receive: KeyEnd unexpected end of message");
+                    #more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
+                    #if more:
+                    #    raise RuntimeError("Subscriber::receive: KeyEnd unexpected end of message");
+                    self.close()
                 else:
                     raise RuntimeError(f"Subscriber::receive received invalid key {key}")
 
@@ -141,8 +142,9 @@ class Subscriber():
 
 
     def close(self):
-        self._reqresp_socket.close()
-        self._reqresp_socket = None
+        if self._reqresp_socket is not None:
+            self._reqresp_socket.close()
+            self._reqresp_socket = None
 
 
     def _checkSync(self) -> bool:

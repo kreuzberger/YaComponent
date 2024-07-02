@@ -22,9 +22,11 @@ YaPUBImpl::~YaPUBImpl()
 
 void YaPUBImpl::close()
 {
-    send(YaComponent::KeyEnd, 0, 0, "");
-    zmq_close(mpReqRespSocket);
-    mpReqRespSocket = 0;
+    if (mpReqRespSocket) {
+        send(YaComponent::KeyEnd, 0, 0, "");
+        zmq_close(mpReqRespSocket);
+        mpReqRespSocket = 0;
+    }
 }
 
 int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
@@ -138,10 +140,11 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                         } else if (YaComponent::KeyEnd == key) {
                             qDebug() << "peer " << ident.c_str() << " closes";
                             mPeerMap.erase(ident);
-                            rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
-                            if (-1 < rc && more) {
-                                qFatal("YaPUBImpl::receive KeyEnd unexpected end");
-                            }
+                            // rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
+                            // if (-1 < rc && more) {
+                            //     qFatal("YaPUBImpl::receive KeyEnd unexpected end");
+                            // }
+                            close();
 
                         } else {
                             qFatal("%s",

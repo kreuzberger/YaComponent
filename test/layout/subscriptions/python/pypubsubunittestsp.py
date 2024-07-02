@@ -100,7 +100,7 @@ class PubSubEnv():
 
 
 @pytest.fixture
-def pubsubtest():
+def pubsubtest(qapp):
     return PubSubEnv()
 
 

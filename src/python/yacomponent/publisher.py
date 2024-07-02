@@ -186,9 +186,10 @@ class Publisher():
                             logging.info(f"Publisher::receive peer {ident} KeyEnd -> closes")
                             if ident in self._peer_map:
                                 del self._peer_map[ident]
-                                more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
-                                if more:
-                                    raise RuntimeError("Publisher:receive KeyEnd unexpected end")
+                                # more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
+                                # if more:
+                                #     raise RuntimeError("Publisher:receive KeyEnd unexpected end")
+                                close()
                         else:
                             raise RuntimeError(f"Publisher:receive unknown key {key}")
 
@@ -196,6 +197,7 @@ class Publisher():
 
 
     def close(self):
-        self._send_ident(yc.KeyEnd,0,0,"")
-        self._reqresp_socket.close()
-        self._reqresp_socket = None
+        if self._reqresp_socket is not None:
+            self._send_ident(yc.KeyEnd,0,0,"")
+            self._reqresp_socket.close()
+            self._reqresp_socket = None
