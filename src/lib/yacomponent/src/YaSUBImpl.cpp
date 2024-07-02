@@ -178,11 +178,11 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
         auto rc = zmq_poll(items, 1, 0);
 
         if (-1 < rc && 0 < items[0].revents) {
-            iBytes = zmq_recv(mpReqRespSocket, 0, 0, ZMQ_NOBLOCK);
-            assert(0 == iBytes);
+            auto keyBytes = zmq_recv(mpReqRespSocket, 0, 0, ZMQ_NOBLOCK);
+            assert(0 == keyBytes);
             char ckey[YaComponent::KeySize + 1];
-            iBytes = zmq_recv(mpReqRespSocket, ckey, YaComponent::KeySize, ZMQ_NOBLOCK);
-            assert(iBytes == YaComponent::KeySize);
+            keyBytes = zmq_recv(mpReqRespSocket, ckey, YaComponent::KeySize, ZMQ_NOBLOCK);
+            assert(keyBytes == YaComponent::KeySize);
             sscanf(ckey, YaComponent::KeyFmt, &key);
 
             if (0 <= key) {
@@ -202,14 +202,13 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
                     }
                 }
             } else if (YaComponent::KeySync == key) {
-                iBytes = 0;
                 rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                 if (-1 < rc && more) {
-                    iBytes = zmq_recv(mpReqRespSocket,
-                                      mMsgRespBuffer.data(),
-                                      YaComponent::MaxMessageSize,
-                                      ZMQ_NOBLOCK);
-                    if (0 < iBytes) {
+                    auto keyBytes = zmq_recv(mpReqRespSocket,
+                                             mMsgRespBuffer.data(),
+                                             YaComponent::MaxMessageSize,
+                                             ZMQ_NOBLOCK);
+                    if (0 < keyBytes) {
                         mbSync = (0
                                   == strncmp(YaComponent::SynAck,
                                              mMsgRespBuffer.data(),
@@ -223,7 +222,6 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
                     }
                 }
             } else if (YaComponent::KeyEnd == key) {
-                iBytes = 0;
                 // rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                 // if (-1 < rc && more) {
                 //     qFatal("YaSUBImpl::receive: KeyEnd unexpected end of message");
