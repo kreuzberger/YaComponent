@@ -110,7 +110,6 @@ class Publisher():
         return 1
 
     def receive(self) -> tuple[int,int,bytes,str]:
-        bytes = 0
         more = -1
         key = None
         msgSize = 0

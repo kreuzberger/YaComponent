@@ -387,8 +387,9 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
         // }
         strResp += YaComponentCore::to_upper(resp->Attribute("id"));
         fhSource << "                    case self.KEYS." << strResp << ":" << std::endl;
-        fhSource << "                        self._" << resp->Attribute("id")
-                 << ".ParseFromString(msgData, size)" << std::endl;
+        fhSource << "                        if msgData is not None:" << std::endl;
+        fhSource << "                            self._" << resp->Attribute("id")
+                 << ".ParseFromString(msgData)" << std::endl;
 
         std::string strPara;
 
@@ -399,7 +400,7 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
             para = para->NextSiblingElement("para");
         }
 
-        fhSource << "                        self._callback.onResponse" << resp->Attribute("id")
+        fhSource << "                            self._callback.onResponse" << resp->Attribute("id")
                  << "( self._id" << strPara << ")" << std::endl;
     }
 
@@ -441,8 +442,7 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
             strPara += std::string(para->Attribute("id"));
             para = para->NextSiblingElement("para");
         }
-        fhHeaderIfc << "    def onResponse" << resp->Attribute("id")
-                    << "( self, proxyId: int, key: int";
+        fhHeaderIfc << "    def onResponse" << resp->Attribute("id") << "( self, proxyId: int";
         //if (!strPara.empty()) {
         fhHeaderIfc << strPara << "):" << std::endl;
         // } else if (!empty_response_handled) {

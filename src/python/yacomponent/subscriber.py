@@ -69,7 +69,6 @@ class Subscriber():
 
     #def receive(self, key: int, size: int, data , ident: str) -> int:
     def receive(self) -> tuple[int,  bytes]:
-        bytes = 0
         more = -1
         key = None
         msg = None
@@ -84,6 +83,7 @@ class Subscriber():
                 msg = self._reqresp_socket.recv(zmq.NOBLOCK)
                 key = int(msg)
                 #logging.info(f"Subscriber::receive key {key}")
+                msg = None # reset msg for real payload msg
                 if 0 <= key:
                     more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                     if more:
@@ -104,6 +104,7 @@ class Subscriber():
                         if 0 < len(msg):
                             self._sync = True if yc.SynAck == msg.decode("ascii") else False
                             logging.info(f"Subscriber::receive keySync synced {yc.SynAck} {msg} {self._sync}")
+                            msg = None # reset msg for real payload msg
                             more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                             if  more:
                                 raise RuntimeError("Subscriber::receive: KeySync unexpected end of message");
