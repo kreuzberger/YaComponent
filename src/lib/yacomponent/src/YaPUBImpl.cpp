@@ -61,7 +61,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                 iBytes = zmq_recv(mpReqRespSocket, cKey, YaComponent::KeySize, 0);
                 if (0 < iBytes) {
                     assert(iBytes == YaComponent::KeySize);
-                    auto ok = sscanf_s(cKey, YaComponent::KeyFmt, &key);
+                    auto ok = sscanf(cKey, YaComponent::KeyFmt, &key);
                     if (0 < ok) {
                         if (0 <= key) {
                             qDebug() << "peer" << ident.c_str() << "with key" << key;
@@ -104,7 +104,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                             assert((0 < iBytes) && (iBytes == YaComponent::KeySize));
                             if (0 < iBytes) {
                                 int notKey = -1;
-                                sscanf_s(cNotKey, YaComponent::KeyFmt, &notKey);
+                                sscanf(cNotKey, YaComponent::KeyFmt, &notKey);
                                 qDebug() << "peer" << ident.c_str() << "setNotification property "
                                          << notKey;
                                 mPeerMap[ident][notKey] = 1;
@@ -130,7 +130,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                             assert((0 < iBytes) && (iBytes == YaComponent::KeySize));
                             if (0 < iBytes) {
                                 int notKey = -1;
-                                sscanf_s(cNotKey, YaComponent::KeyFmt, &notKey);
+                                sscanf(cNotKey, YaComponent::KeyFmt, &notKey);
                                 mPeerMap[ident][notKey] = 0;
                                 rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                                 if (-1 < rc && more) {

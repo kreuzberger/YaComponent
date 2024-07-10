@@ -106,7 +106,7 @@ void YaSUBImpl::setConnectionPara(const char *address, const char *ident)
     assert(0 != mpReqRespSocket && 0 != address);
 
     assert(strlen(ident) < YaComponent::MaxIdentSize);
-    strncpy_s(mcIdent, ident, strlen(ident));
+    strncpy(mcIdent, ident, strlen(ident));
 
     if (mpReqRespSocket && !mbConnected) {
         zmq_setsockopt(mpReqRespSocket, ZMQ_IDENTITY, mcIdent, strlen(mcIdent));
@@ -195,7 +195,7 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
             }
             else
             {
-            sscanf_s(cKey, YaComponent::KeyFmt, &rcvKey);
+                sscanf(cKey, YaComponent::KeyFmt, &rcvKey);
             }
 
             if (0 <= rcvKey) {
