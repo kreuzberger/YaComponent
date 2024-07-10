@@ -178,20 +178,22 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
         auto rc = zmq_poll(items, 1, 0);
 
         if (-1 < rc && 0 < items[0].revents) {
-            auto keyBytes = zmq_recv(mpReqRespSocket, 0, 0, ZMQ_NOBLOCK);
+            int rcvKey = -1;
+            auto keyBytes = zmq_recv(mpReqRespSocket, 0, 0, 0);
             assert(0 == keyBytes);
             char ckey[YaComponent::KeySize + 1];
-            keyBytes = zmq_recv(mpReqRespSocket, ckey, YaComponent::KeySize, ZMQ_NOBLOCK);
+            keyBytes = zmq_recv(mpReqRespSocket, ckey, YaComponent::KeySize, 0);
             assert(keyBytes == YaComponent::KeySize);
-            sscanf(ckey, YaComponent::KeyFmt, &key);
+            sscanf(ckey, YaComponent::KeyFmt, &rcvKey);
 
-            if (0 <= key) {
+            if (0 <= rcvKey) {
+                key = rcvKey;
                 zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                 if (more) {
                     iBytes = zmq_recv(mpReqRespSocket,
                                       mMsgRespBuffer.data(),
                                       YaComponent::MaxMessageSize,
-                                      ZMQ_NOBLOCK);
+                                      0);
                     if (0 < iBytes) {
                         size = iBytes;
                         *pcData = mMsgRespBuffer.data();
@@ -200,14 +202,16 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
                     if (more && -1 < rc) {
                         qFatal("YaSUBImpl::receive: KeyFmt unexpected end of message");
                     }
+                } else {
+                    // qFatal("YaSUBImpl::receive: valid key, but not message content!");
                 }
-            } else if (YaComponent::KeySync == key) {
+            } else if (YaComponent::KeySync == rcvKey) {
                 rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                 if (-1 < rc && more) {
                     auto keyBytes = zmq_recv(mpReqRespSocket,
                                              mMsgRespBuffer.data(),
                                              YaComponent::MaxMessageSize,
-                                             ZMQ_NOBLOCK);
+                                             0);
                     if (0 < keyBytes) {
                         mbSync = (0
                                   == strncmp(YaComponent::SynAck,
@@ -221,14 +225,11 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
                         }
                     }
                 }
-            } else if (YaComponent::KeyEnd == key) {
-                // rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
-                // if (-1 < rc && more) {
-                //     qFatal("YaSUBImpl::receive: KeyEnd unexpected end of message");
-                // }
+            } else if (YaComponent::KeyEnd == rcvKey) {
+                qInfo("YaSUBImpl::receive: KeyEnd, closing connection");
                 close();
             } else {
-                qFatal("%s", qPrintable(QString("YaSUBImpl::receive %1").arg(key)));
+                qFatal("%s", qPrintable(QString("YaSUBImpl::receive %1").arg(rcvKey)));
             }
             //miMessageCnt++;
         }
