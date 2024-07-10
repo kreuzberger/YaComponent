@@ -67,6 +67,10 @@ int YaSUBImpl::send(int key, int size, const char *data)
     if (0 != mpReqRespSocket) {
         rc = zmq_send(mpReqRespSocket, 0, 0, ZMQ_SNDMORE);
         assert(-1 != rc);
+        if( -1 == rc)
+        {
+            fprintf(stderr, "YaSUBImpl::send:error: %s\n", zmq_strerror(zmq_errno()));
+        }
 
         auto send_more = (0 != size && data);
         int flags = send_more ? ZMQ_SNDMORE : 0;
@@ -102,7 +106,7 @@ void YaSUBImpl::setConnectionPara(const char *address, const char *ident)
     assert(0 != mpReqRespSocket && 0 != address);
 
     assert(strlen(ident) < YaComponent::MaxIdentSize);
-    strncpy(mcIdent, ident, strlen(ident));
+    strncpy_s(mcIdent, ident, strlen(ident));
 
     if (mpReqRespSocket && !mbConnected) {
         zmq_setsockopt(mpReqRespSocket, ZMQ_IDENTITY, mcIdent, strlen(mcIdent));
@@ -179,12 +183,20 @@ int YaSUBImpl::receive(int &key, int &size, char **pcData)
 
         if (-1 < rc && 0 < items[0].revents) {
             int rcvKey = -1;
-            auto keyBytes = zmq_recv(mpReqRespSocket, 0, 0, 0);
+            auto keyBytes = zmq_recv(mpReqRespSocket, 0, 0,0);
             assert(0 == keyBytes);
-            char ckey[YaComponent::KeySize + 1];
-            keyBytes = zmq_recv(mpReqRespSocket, ckey, YaComponent::KeySize, 0);
+            char cKey[YaComponent::KeySize + 1];
+            memset(cKey,0,YaComponent::KeySize+1);
+            keyBytes = zmq_recv(mpReqRespSocket, cKey, YaComponent::KeySize, 0);
             assert(keyBytes == YaComponent::KeySize);
-            sscanf(ckey, YaComponent::KeyFmt, &rcvKey);
+            if(keyBytes != YaComponent::KeySize)
+            {
+                fprintf(stderr, "YaSUBImpl::receive:error: %s\n", zmq_strerror(zmq_errno()));
+            }
+            else
+            {
+            sscanf_s(cKey, YaComponent::KeyFmt, &rcvKey);
+            }
 
             if (0 <= rcvKey) {
                 key = rcvKey;

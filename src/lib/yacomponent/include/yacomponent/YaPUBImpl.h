@@ -39,8 +39,6 @@ private:
     int miSubscribersCnt = 0;
     YaBuffer mMsgBuffer = YaBuffer(YaComponent::MaxMessageSize);
     YaBuffer mMsgBufferReq = YaBuffer(YaComponent::MaxMessageSize);
-    char mcKey[YaComponent::KeySize + 1] = {};
-    char mcKeyReq[YaComponent::KeySize + 1] = {};
     std::map<std::string, std::map<int, int>> mPeerMap = {};
     //  char mcSize[YaComponent::MessageSize];
 

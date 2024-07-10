@@ -36,7 +36,6 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
     memset(address, 0, YaComponent::MaxIdentSize + 1);
     int more = -1;
     size_t moreSize = sizeof(more);
-    memset(mcKeyReq, 0, YaComponent::KeySize + 1);
 
     if (0 != mpReqRespSocket) {
         zmq_pollitem_t items[1];
@@ -57,10 +56,12 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                 assert(0 == rc);
 
                 // receive key
-                iBytes = zmq_recv(mpReqRespSocket, mcKeyReq, YaComponent::KeySize, 0);
+                char cKey[YaComponent::KeySize+1];
+                memset(cKey, 0, YaComponent::KeySize + 1);
+                iBytes = zmq_recv(mpReqRespSocket, cKey, YaComponent::KeySize, 0);
                 if (0 < iBytes) {
                     assert(iBytes == YaComponent::KeySize);
-                    auto ok = sscanf(mcKeyReq, YaComponent::KeyFmt, &key);
+                    auto ok = sscanf_s(cKey, YaComponent::KeyFmt, &key);
                     if (0 < ok) {
                         if (0 <= key) {
                             qDebug() << "peer" << ident.c_str() << "with key" << key;
@@ -85,7 +86,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                             // internal used sync key!
                             zmq_send(mpReqRespSocket, address, addressSize, ZMQ_SNDMORE);
                             zmq_send(mpReqRespSocket, 0, 0, ZMQ_SNDMORE);
-                            zmq_send(mpReqRespSocket, mcKeyReq, YaComponent::KeySize, ZMQ_SNDMORE);
+                            zmq_send(mpReqRespSocket, cKey, YaComponent::KeySize, ZMQ_SNDMORE);
                             zmq_send(mpReqRespSocket,
                                      YaComponent::SynAck,
                                      strlen(YaComponent::SynAck),
@@ -103,7 +104,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                             assert((0 < iBytes) && (iBytes == YaComponent::KeySize));
                             if (0 < iBytes) {
                                 int notKey = -1;
-                                sscanf(cNotKey, YaComponent::KeyFmt, &notKey);
+                                sscanf_s(cNotKey, YaComponent::KeyFmt, &notKey);
                                 qDebug() << "peer" << ident.c_str() << "setNotification property "
                                          << notKey;
                                 mPeerMap[ident][notKey] = 1;
@@ -129,7 +130,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                             assert((0 < iBytes) && (iBytes == YaComponent::KeySize));
                             if (0 < iBytes) {
                                 int notKey = -1;
-                                sscanf(cNotKey, YaComponent::KeyFmt, &notKey);
+                                sscanf_s(cNotKey, YaComponent::KeyFmt, &notKey);
                                 mPeerMap[ident][notKey] = 0;
                                 rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
                                 if (-1 < rc && more) {
@@ -151,7 +152,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                                    qPrintable(QString("unknown key %1 from iBytes %2 to '%3'")
                                                   .arg(key)
                                                   .arg(iBytes)
-                                                  .arg(mcKeyReq)));
+                                                  .arg(cKey)));
                         }
                     } else {
                         qFatal("%s",
@@ -160,7 +161,7 @@ int YaPUBImpl::receive(int &key, int &size, char **pcData, std::string &ident)
                                            "message key %1 from iBytes %2 to '%3' from ident %4")
                                        .arg(key)
                                        .arg(iBytes)
-                                       .arg(mcKeyReq, address)));
+                                       .arg(cKey, address)));
 
                         iBytes = 0;
                         key = -1;
@@ -226,10 +227,13 @@ int YaPUBImpl::response(int key, const ::google::protobuf::MessageLite &msg, con
 
 int YaPUBImpl::send(int key, int msgSize, const char *msgData)
 {
-    sprintf(mcKey, YaComponent::KeyFmt, key);
     int rc = -1;
 
     if (0 != mpReqRespSocket) {
+        char cKey[YaComponent::KeySize + 1];
+        memset(cKey,0,YaComponent::KeySize+1);
+        sprintf(cKey, YaComponent::KeyFmt, key);
+
         mLVC[key] = {msgSize, msgData};
 
         for (auto it = mPeerMap.begin(); it != mPeerMap.end(); ++it) {
@@ -252,7 +256,7 @@ int YaPUBImpl::send(int key, int msgSize, const char *msgData)
 
                 int flags = send_more ? ZMQ_SNDMORE : 0;
 
-                rc = zmq_send(mpReqRespSocket, mcKey, YaComponent::KeySize, flags);
+                rc = zmq_send(mpReqRespSocket, cKey, YaComponent::KeySize, flags);
                 assert(YaComponent::KeySize == rc);
 
                 if (send_more) {
