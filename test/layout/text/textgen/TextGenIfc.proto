@@ -16,15 +16,15 @@ message Response {
 }
 
 
-message startedText {
+message StartedText {
   optional Response id = 1;
 }
 
-message stoppedText {
+message StoppedText {
   optional Response id = 1;
 }
 
 service Requests {
-  rpc StartText(Request) returns (startedText);
-  rpc StopText(Request) returns (stoppedText);
+  rpc StartText(Request) returns (StartedText);
+  rpc StopText(Request) returns (StoppedText);
 }

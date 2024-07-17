@@ -10,22 +10,25 @@ public:
     TextOutComp(void *context);
     virtual ~TextOutComp() {}
 
-    void onProperty(int, const TextGen::Text &);
+    void onPropertyText(int, const TextGen::Text &) override;
 
-    virtual void onResponse(int, int key, const TextGen::startedText &);
-    virtual void onResponse(int, int key, const TextGen::stoppedText &);
+    void onResponseStartedText(int, const TextGen::StartedText &) override;
+    void onResponseStoppedText(int, const TextGen::StoppedText &) override;
+    void onResponseTerminated(int) override;
 
-    virtual void init();
+    void init() override;
 
     void setNotifications();
     void clearNotifications();
 
     void requestStart();
     void requestStop();
+    void requestTerminate();
 
     int miPropertiesCnt;
     int miResponseStartCnt;
     int miResponseStopCnt;
+    int miResponseTerminatedCnt;
 
 private:
 };

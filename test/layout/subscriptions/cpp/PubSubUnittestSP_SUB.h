@@ -10,8 +10,8 @@ public:
     SubscriberComp(void *context);
     virtual ~SubscriberComp() {}
 
-    void onProperty(int, const Data &);
-    void onProperty(int, const Time &);
+    void onPropertyData(int, const Data &);
+    void onPropertyTime(int, const Time &);
 
     virtual void init();
 

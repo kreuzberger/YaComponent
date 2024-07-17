@@ -37,4 +37,6 @@ private:
                       const ElementList &requests,
                       const ElementList &responses,
                       const ElementList &includes);
+
+    const tinyxml2::XMLElement *findResponse(const ElementList &responses, const std::string &id);
 };

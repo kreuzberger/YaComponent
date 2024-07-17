@@ -38,14 +38,14 @@ int SubscriberComp::requestStop()
     return mData.requestStartData();
 }
 
-void SubscriberComp::onProperty(int proxyId, const Data &data)
+void SubscriberComp::onPropertyData(int proxyId, const Data &data)
 {
     assert(PROXY_DATA == proxyId);
     qDebug() << "received onProperty" << data.counter();
     miPropertiesCnt++;
     mLastData = data;
 }
-void SubscriberComp::onProperty(int proxyId, const Time &time)
+void SubscriberComp::onPropertyTime(int proxyId, const Time &time)
 {
     assert(PROXY_DATA == proxyId);
     qDebug() << "received onProperty Time" << time.counter();

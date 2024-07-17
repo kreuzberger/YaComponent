@@ -142,7 +142,8 @@ def test_notifications(pubsubtest, qapp):
 
     logging.info(f"test_notifications: stopping data")
     rc = pubsubtest._sub._Data.requestStopData()
-
+    # wait a while for the stop to be processed
+    sleep(0.05)
     pubsubtest._sub_cb._last_time = None
     pubsubtest._sub_cb._properties_cnt = 0
 

@@ -15,7 +15,8 @@ public:
     //  setConnectionPara(address,syncaddress,5000); }
     void setConnectionPara(const char *address, int hwm = 0);
     int send(int key, const ::google::protobuf::MessageLite &msg);
-    int response(int key, const ::google::protobuf::MessageLite &msg, const std::string &ident);
+    int response(int key, const std::string &ident, const ::google::protobuf::MessageLite &msg);
+    int response(int key, const std::string &ident);
     int send(int key, int msgSize, const char *msgData);
     int send(int key, int msgSize, const char *msgData, const std::string &ident);
     int receive(int &key, int &size, char **pcData, std::string &ident);

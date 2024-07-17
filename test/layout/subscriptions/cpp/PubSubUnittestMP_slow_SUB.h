@@ -13,10 +13,10 @@ public:
     explicit SubscriberComp(void *context);
     virtual ~SubscriberComp() {}
 
-    void onProperty(int, const Data &);
-    void onProperty(int, const Time &);
+    void onPropertyData(int, const Data &) override;
+    void onPropertyTime(int, const Time &) override;
 
-    virtual void init();
+    virtual void init() override;
 
     int setNotifications();
     int clearNotifications();

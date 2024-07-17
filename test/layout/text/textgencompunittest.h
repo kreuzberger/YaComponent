@@ -8,9 +8,10 @@ public:
     TextGenComp(void *context);
     virtual ~TextGenComp() {}
 
-    virtual void onRequestStartText(int id, const TextGen::Request &, TextGen::startedText &);
-    virtual void onRequestStopText(int id, const TextGen::Request &, TextGen::stoppedText &);
-    virtual void init();
+    void onRequestStartText(int id, const TextGen::Request &, TextGen::StartedText &) override;
+    void onRequestStopText(int id, const TextGen::Request &, TextGen::StoppedText &) override;
+    void onRequestTerminate(int id) override;
+    void init() override;
     int miRequestStop;
     int miTimerID;
     int miMessageCnt;
@@ -20,7 +21,7 @@ public:
     void sendResponseStop();
 
 protected:
-    virtual void timerEvent(QTimerEvent *);
+    void timerEvent(QTimerEvent *) override;
 
 private:
     TextGen::Text moText;

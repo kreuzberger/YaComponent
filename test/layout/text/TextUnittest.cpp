@@ -170,3 +170,11 @@ void TextUnittest::testSPMTAllMessages()
 
     cleanupComponents();
 }
+
+void TextUnittest::testSPMTReqRespWithoutParameters()
+{
+    initComponentsSPMT();
+    mpTextOut->requestTerminate();
+    QVERIFY(QTest::qWaitFor([=]() { return mpTextOut->miResponseTerminatedCnt == 1; },
+                            YaComponent::TimeOut * 3));
+}

@@ -18,7 +18,7 @@ void TextGenComp::init()
 
 void TextGenComp::onRequestStartText(int /*id*/,
                                      const TextGen::Request &oRequest,
-                                     TextGen::startedText &oResponse)
+                                     TextGen::StartedText &oResponse)
 {
     fprintf(stderr, "received onRequestStartText, start sending text\n");
     oResponse.mutable_id()->set_id(oRequest.id());
@@ -29,7 +29,7 @@ void TextGenComp::onRequestStartText(int /*id*/,
 
 void TextGenComp::onRequestStopText(int /*id*/,
                                     const TextGen::Request &oRequest,
-                                    TextGen::stoppedText &oResponse)
+                                    TextGen::StoppedText &oResponse)
 {
     fprintf(stderr, "received onRequestStopText\n");
     oResponse.mutable_id()->set_id(oRequest.id());
@@ -40,11 +40,18 @@ void TextGenComp::onRequestStopText(int /*id*/,
     fprintf(stderr, "send %d messages\n", miMessageCnt);
 }
 
+void TextGenComp::onRequestTerminate(int /*id*/)
+{
+    fprintf(stderr, "received onRequestTerminate\n");
+}
+
 void TextGenComp::sendResponseStop()
 {
-    TextGen::stoppedText oResponse;
+    TextGen::StoppedText oResponse;
     oResponse.mutable_id()->set_id(4242);
-    mTextGenXml.response(YaComponent::TextGenIfcStub::RESP_TEXTGEN_STOPPEDTEXT, oResponse, "");
+    mTextGenXml.responseStoppedText(YaComponent::TextGenIfcStub::RESP_TEXTGEN_STOPPEDTEXT,
+                                    "",
+                                    oResponse);
     if (0 < miTimerID) {
         QObject::killTimer(miTimerID);
     }

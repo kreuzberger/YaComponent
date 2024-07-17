@@ -215,12 +215,20 @@ int YaPUBImpl::send(int key, const ::google::protobuf::MessageLite &msg)
     return rc;
 }
 
-int YaPUBImpl::response(int key, const ::google::protobuf::MessageLite &msg, const std::string &ident)
+int YaPUBImpl::response(int key, const std::string &ident, const ::google::protobuf::MessageLite &msg)
 {
     int rc = -1;
     int iSize = msg.ByteSizeLong();
     msg.SerializeToArray(mMsgBuffer.data(), iSize);
     rc = send(key, iSize, mMsgBuffer.data(), ident);
+
+    return rc;
+}
+
+int YaPUBImpl::response(int key, const std::string &ident)
+{
+    int rc = -1;
+    rc = send(key, 0, nullptr, ident);
 
     return rc;
 }

@@ -24,6 +24,7 @@ private slots:
     void testSPMTGui();
     void testSPMTResponse();
     void testSPMTAllMessages();
+    void testSPMTReqRespWithoutParameters();
 
 private:
     void initComponentsSPST();

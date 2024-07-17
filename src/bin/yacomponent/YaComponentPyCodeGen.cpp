@@ -270,8 +270,12 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
         //     package += resp->Attribute("package") + std::string(".");
         // }
         //fhSource << resp->Attribute("id");
-        fhSource << "_" << resp->Attribute("id") << " = " << package << resp->Attribute("id")
-                 << "()" << std::endl;
+        auto *para = resp->FirstChildElement("para");
+        while (para) {
+            fhSource << "_" << para->Attribute("id") << " = " << package << para->Attribute("id")
+                     << "()" << std::endl;
+            para = para->NextSiblingElement("para");
+        }
     }
 
     fhSource << std::endl;
@@ -367,7 +371,6 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     }
 
     fhSource << "    def receive(self) -> None:" << std::endl;
-    fhSource << "        msgCnt = 0" << std::endl;
     fhSource << "        msgAvailable = True" << std::endl;
 
     fhSource << "        while msgAvailable:" << std::endl;
@@ -376,8 +379,6 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
 
     fhSource << "            (key, msgData) = self._Subscriber.receive( )" << std::endl;
     fhSource << "            if key is not None:" << std::endl;
-    fhSource << "                msgCnt += 1" << std::endl;
-
     fhSource << "                match (key):" << std::endl;
     for (const auto *resp : responses) {
         std::string strResp;
@@ -387,21 +388,27 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
         // }
         strResp += YaComponentCore::to_upper(resp->Attribute("id"));
         fhSource << "                    case self.KEYS." << strResp << ":" << std::endl;
-        fhSource << "                        if msgData is not None:" << std::endl;
-        fhSource << "                            self._" << resp->Attribute("id")
-                 << ".ParseFromString(msgData)" << std::endl;
 
         std::string strPara;
 
         auto *para = resp->FirstChildElement("para");
         while (para) {
+            fhSource << "                        if msgData is not None:" << std::endl;
+            fhSource << "                            self._" << para->Attribute("id")
+                     << ".ParseFromString(msgData)" << std::endl;
+
             strPara += ", ";
             strPara += "self._" + std::string(para->Attribute("id"));
             para = para->NextSiblingElement("para");
         }
 
-        fhSource << "                            self._callback.onResponse" << resp->Attribute("id")
-                 << "( self._id" << strPara << ")" << std::endl;
+        if (!strPara.empty()) {
+            fhSource << "                            self._callback.onResponse"
+                     << resp->Attribute("id") << "(self._id" << strPara << ")" << std::endl;
+        } else {
+            fhSource << "                        self._callback.onResponse" << resp->Attribute("id")
+                     << "(self._id )" << std::endl;
+        }
     }
 
     for (const auto *prop : properties) {
@@ -424,7 +431,7 @@ void YaComponentPyCodeGen::writeIfcProxy(const std::filesystem::path &codePath,
     fhSource << "                            raise RuntimeError(f\"" << ifcName
              << "Proxy::receive(): unknown key '{key}'\")" << std::endl;
 
-    fhSource << "            if 0 == msgCnt:" << std::endl;
+    fhSource << "            else:" << std::endl;
     fhSource << "                msgAvailable = False" << std::endl;
 
     fhSource << std::endl << std::endl;
@@ -609,12 +616,15 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     fhSource << std::endl;
 
     for (const auto *resp : responses) {
-        fhSource << "    def response" << resp->Attribute("id") << "( key: int, ";
-        // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-        //     fhSource << resp->Attribute("package") << ".";
-        // }
-        fhSource << " msg: " << resp->Attribute("id") << ", ident: str ) -> int:\n";
-        fhSource << "        return self._Publisher.response(key, msg, ident)\n";
+        fhSource << "    def response" << resp->Attribute("id") << "( key: int, ident: str";
+        auto *para = resp->FirstChildElement("para");
+        while (para) {
+            fhSource << ", msg: " << para->Attribute("id");
+            para = para->NextSiblingElement("para");
+        }
+        fhSource << ") -> int:\n";
+
+        fhSource << "        return self._Publisher.response(key, ident, msg)\n";
         fhSource << std::endl;
         fhSource << std::endl;
     }
@@ -645,11 +655,9 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
     }
 
     fhSource << "    def receive(self) -> None:" << std::endl;
-    fhSource << "        msgCnt = 0" << std::endl;
     fhSource << "        msgAvailable = True" << std::endl;
 
     fhSource << "        while msgAvailable:" << std::endl;
-    fhSource << "            bytesTotal = 0" << std::endl;
     fhSource << "            key = -1" << std::endl;
     fhSource << "            size = -1" << std::endl;
     fhSource << "            msgData = None" << std::endl;
@@ -658,7 +666,6 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     fhSource << "            (key, msgSize, msgData, ident) = self._Publisher.receive()" << std::endl;
     fhSource << "            if key is not None:" << std::endl;
-    fhSource << "                msgCnt += 1" << std::endl;
     fhSource << std::endl;
     fhSource << "                match key:" << std::endl;
 
@@ -685,8 +692,13 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
         auto *resp = req->FirstChildElement("resp");
         while (resp) {
-            fhSource << "                        self._" << req->Attribute("id") << "_"
-                     << resp->Attribute("id") << ".Clear();\n";
+            auto resp_definition = findResponse(responses, resp->Attribute("id"));
+            para = resp_definition->FirstChildElement("para");
+            while (para) {
+                fhSource << "                        self._" << req->Attribute("id") << "_"
+                         << para->Attribute("id") << ".Clear();\n";
+                para = para->NextSiblingElement("para");
+            }
             resp = resp->NextSiblingElement("resp");
         }
 
@@ -704,7 +716,13 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
         resp = req->FirstChildElement("resp");
         while (resp) {
-            strPara += std::string(", self._") + req->Attribute("id") + "_" + resp->Attribute("id");
+            auto resp_definition = findResponse(responses, resp->Attribute("id"));
+            para = resp_definition->FirstChildElement("para");
+            while (para) {
+                strPara += std::string(", self._") + req->Attribute("id") + "_"
+                           + para->Attribute("id");
+                para = para->NextSiblingElement("para");
+            }
             resp = resp->NextSiblingElement("resp");
         }
         if (!strPara.empty()) {
@@ -722,8 +740,16 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
             // }
             strResp += YaComponentCore::to_upper(resp->Attribute("id"));
             fhSource << "                        response" << req->Attribute("id") << "( "
-                     << strResp << ", self." << req->Attribute("id") << "_" << resp->Attribute("id")
-                     << ", ident )\n";
+                     << strResp << ", ident";
+
+            auto resp_definition = findResponse(responses, resp->Attribute("id"));
+            para = resp_definition->FirstChildElement("para");
+            while (para) {
+                fhSource << ", self." << req->Attribute("id") << "_" << resp->Attribute("id");
+                para = para->NextSiblingElement("para");
+            }
+            fhSource << ")\n";
+
             resp = resp->NextSiblingElement("resp");
         }
 
@@ -736,8 +762,7 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
              << "Stub::receive() unknown key '{key}'\")" << std::endl;
 
     fhSource << std::endl;
-
-    fhSource << "            if 0 == msgCnt:" << std::endl;
+    fhSource << "            else:" << std::endl;
     fhSource << "                msgAvailable = False" << std::endl;
 
     fhSource << std::endl << std::endl;
@@ -774,4 +799,16 @@ void YaComponentPyCodeGen::writeIfcStub(const std::filesystem::path &codePath,
 
     fhSource.close();
     fhHeaderIfc.close();
+}
+
+const tinyxml2::XMLElement *YaComponentPyCodeGen::findResponse(const ElementList &responses,
+                                                               const std::string &id)
+{
+    const tinyxml2::XMLElement *ret = nullptr;
+    for (const auto *resp : responses) {
+        if (resp->Attribute("id") == id) {
+            ret = resp;
+        }
+    }
+    return ret;
 }

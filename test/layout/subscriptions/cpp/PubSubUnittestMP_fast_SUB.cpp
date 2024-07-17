@@ -106,7 +106,7 @@ int SubscriberComp::requestStop()
     return mData.requestStopData();
 }
 
-void SubscriberComp::onProperty(int proxyId, const Data &data)
+void SubscriberComp::onPropertyData(int proxyId, const Data &data)
 {
     assert(PROXY_DATA == proxyId);
     miPropertiesCnt++;
@@ -114,7 +114,7 @@ void SubscriberComp::onProperty(int proxyId, const Data &data)
         qDebug() << "fast received " << miPropertiesCnt << "last counter" << data.counter();
     }
 }
-void SubscriberComp::onProperty(int proxyId, const Time &data)
+void SubscriberComp::onPropertyTime(int proxyId, const Time &data)
 {
     assert(PROXY_DATA == proxyId);
     // miPropertiesCnt++;

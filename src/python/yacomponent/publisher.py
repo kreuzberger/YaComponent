@@ -45,7 +45,7 @@ class Publisher():
                 raise RuntimeError("no socket!!")
 
 
-    def response(self, key: int, msg, ident: str)-> int: # const ::google::protobuf::MessageLite
+    def response(self, key: int, ident: str, msg )-> int: # const ::google::protobuf::MessageLite
         size = msg.ByteSize()
         rc = self._send_ident(key, size, msg.SerializeToString(), ident)
         return rc

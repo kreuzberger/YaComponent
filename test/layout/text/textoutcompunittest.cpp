@@ -7,6 +7,7 @@ TextOutComp::TextOutComp(void *context)
     , miPropertiesCnt(0)
     , miResponseStartCnt(0)
     , miResponseStopCnt(0)
+    , miResponseTerminatedCnt(0)
 {
     //  setNotification(YaComponent::TextGenIfcProxy::PROP_TEXTGEN_TEXT);
 }
@@ -37,7 +38,12 @@ void TextOutComp::requestStop()
     mXml.requestStopText(oRequest);
 }
 
-void TextOutComp::onProperty(int proxyId, const TextGen::Text & /*text*/)
+void TextOutComp::requestTerminate()
+{
+    mXml.requestTerminate();
+}
+
+void TextOutComp::onPropertyText(int proxyId, const TextGen::Text & /*text*/)
 {
     //  fprintf(stderr, "received property text %s\n",
     //  text.DebugString().c_str());
@@ -45,7 +51,7 @@ void TextOutComp::onProperty(int proxyId, const TextGen::Text & /*text*/)
     miPropertiesCnt++;
 }
 
-void TextOutComp::onResponse(int proxyId, int key, const TextGen::startedText &resp)
+void TextOutComp::onResponseStartedText(int proxyId, const TextGen::StartedText &resp)
 {
     assert(PROXY_XML == proxyId);
     fprintf(stderr, "received onResponse startedText\n");
@@ -53,10 +59,17 @@ void TextOutComp::onResponse(int proxyId, int key, const TextGen::startedText &r
     miResponseStartCnt++;
 }
 
-void TextOutComp::onResponse(int proxyId, int key, const TextGen::stoppedText &resp)
+void TextOutComp::onResponseStoppedText(int proxyId, const TextGen::StoppedText &resp)
 {
     fprintf(stderr, "received onResponse stoppedText\n");
     assert(PROXY_XML == proxyId);
     assert(2 == resp.id().id() || 4242 == resp.id().id());
     miResponseStopCnt++;
+}
+
+void TextOutComp::onResponseTerminated(int proxyId)
+{
+    fprintf(stderr, "received onResponseTerminated\n");
+    assert(PROXY_XML == proxyId);
+    miResponseTerminatedCnt++;
 }
