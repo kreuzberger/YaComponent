@@ -164,115 +164,18 @@ jobs:
         # message("\"qt_base_url::${qt_base_url}\" >> $GITHUB_OUTPUT")
         file(APPEND "$ENV{GITHUB_OUTPUT}" "qt_base_url=${qt_base_url}\n")
 
-    - name: Configure
-      shell: cmake -P {0}
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: |
-        set(ENV{CC} ${{ matrix.config.cc }})
-        set(ENV{CXX} ${{ matrix.config.cxx }})
-
-        if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
-            execute_process(
-              COMMAND "${{ matrix.config.environment_script }}" && set
-              OUTPUT_FILE environment_script_output.txt
-            )
-            file(STRINGS environment_script_output.txt output_lines)
-            foreach(line IN LISTS output_lines)
-              if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
-                set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
-              endif()
-            endforeach()
-        endif()
-
-        set(ENV{Qt5_DIR} "${{ steps.qt.outputs.qt_dir }}" )
-
-        set(path_separator ":")
-        if ("${{ runner.os }}" STREQUAL "Windows")
-            set(path_separator ";")
-        endif()
-        set(ENV{PATH} "${{ steps.cmake_and_ninja.outputs.cmake_dir }}${path_separator}$ENV{GITHUB_WORKSPACE}${path_separator}$ENV{PATH}")
-
-        set( qt_version ${{ steps.qt.outputs.qt_version }} )
-        set( qt_url ${{ steps.qt.outputs.qt_base_url }} )
-
-        execute_process( COMMAND cmake -E make_directory "build" )
-
-        execute_process(
-          COMMAND cmake
-            -G "Ninja"
-            -DCMAKE_BUILD_TYPE=Release
-            ..
-
-          RESULT_VARIABLE result
-          WORKING_DIRECTORY build
-        )
-
-        if (NOT result EQUAL 0)
-          message(FATAL_ERROR "Bad exit status")
-        endif()
+        cmake --version
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      env:
+        Qt5_DIR: ${{ steps.qt.outputs.qt_dir}}
 
     - name: Build
-      shell: cmake -P {0}
-      run: |
-        set(ENV{CC} ${{ matrix.config.cc }})
-        set(ENV{CXX} ${{ matrix.config.cxx }})
-        set(ENV{MACOSX_DEPLOYMENT_TARGET} "10.13")
-
-        if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
-          execute_process(
-            COMMAND "${{ matrix.config.environment_script }}" && set
-            OUTPUT_FILE environment_script_output.txt
-          )
-          file(STRINGS environment_script_output.txt output_lines)
-          foreach(line IN LISTS output_lines)
-            if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
-              set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
-            endif()
-          endforeach()
-        endif()
-
-        set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
-        set(ENV{Qt5_DIR} "${{ steps.qt.outputs.qt_dir }}" )
-
-        set(path_separator ":")
-        if ("${{ runner.os }}" STREQUAL "Windows")
-            set(path_separator ";")
-        endif()
-
-        set(ENV{PATH} "${{ steps.cmake_and_ninja.outputs.cmake_dir }}${path_separator}$ENV{GITHUB_WORKSPACE}${path_separator}${{ steps.qt.outputs.qt_dir }}/bin/${path_separator}$ENV{PATH}")
-
-        if ("${{ runner.os }}" STREQUAL "Windows")
-        else()
-          set(ENV{LD_LIBRARY_PATH} "qtcreator/lib/Qt/lib:$ENV{LD_LIBRARY_PATH}")
-          set(ENV{QT_QPA_PLATFORM} "minimal" )
-        endif()
-
-        set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
-
-         execute_process(
-           COMMAND ninja
-           RESULT_VARIABLE result
-           WORKING_DIRECTORY build
-         )
-
-         if (NOT result EQUAL 0)
-           message(FATAL_ERROR "Bad exit status of ninja")
-           string(REGEX MATCH "FAILED:.*$" error_message "${output}")
-           string(REPLACE "\n" "%0A" error_message "${error_message}")
-           message("::error::${error_message}")
-           message(FATAL_ERROR "Build failed")
-         endif()
-
-         # install plugin dependencies for deployment
-        execute_process(
-          COMMAND ${CMAKE_COMMAND} -E env "DESTDIR=$ENV{GITHUB_WORKSPACE}/build/install" ninja install
-          RESULT_VARIABLE result
-          WORKING_DIRECTORY build
-        )
-
-        if (NOT result EQUAL 0)
-          message(FATAL_ERROR "Bad exit status of ninja install")
-        endif()
-
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - uses: actions/upload-artifact@v4
       id: upload_artifact
