@@ -12,8 +12,8 @@ on:
 env:
   PLUGIN_NAME: yacomponent
   QT_VERSION: 5.15.2
-  CMAKE_VERSION: 3.18.3
-  NINJA_VERSION: 1.10.1
+  CMAKE_VERSION: 3.22.1
+  NINJA_VERSION: 1.10.2
 
 jobs:
   build:
@@ -35,14 +35,9 @@ jobs:
             os: ubuntu-latest,
             cc: "gcc", cxx: "g++"
           }
-        - {
-            name: "macOS Latest Clang", artifact: "macOS-x64",
-            os: macos-latest,
-            cc: "clang", cxx: "clang++"
-          }
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Download Ninja and CMake
       shell: cmake -P {0}
@@ -104,65 +99,70 @@ jobs:
         endif()
 
     - name: Download Qt
-      id: qt
-      shell: cmake -P {0}
-      run: |
-        set(qt_version "$ENV{QT_VERSION}")
+        id: qt
+        shell: cmake -P {0}
+        run: |
+            set(qt_version "$ENV{QT_VERSION}")
 
-        string(REPLACE "." "" qt_version_dotless "${qt_version}")
-        if ("${{ runner.os }}" STREQUAL "Windows")
-          set(url_os "windows_x86")
-          set(qt_package_arch_suffix "win64_msvc2019_64")
-            set(qt_dir_prefix "${qt_version}/msvc2019_64")
-          set(qt_package_suffix "-Windows-Windows_10-MSVC2019-Windows-Windows_10-X86_64")
-        elseif ("${{ runner.os }}" STREQUAL "Linux")
-          set(url_os "linux_x64")
-          set(qt_package_arch_suffix "gcc_64")
-          set(qt_dir_prefix "${qt_version}/gcc_64")
-          set(qt_package_suffix "-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64")
-        elseif ("${{ runner.os }}" STREQUAL "macOS")
-          set(url_os "mac_x64")
-          set(qt_package_arch_suffix "clang_64")
-          set(qt_dir_prefix "${qt_version}/clang_64")
-          set(qt_package_suffix "-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64")
-        endif()
+            string(REPLACE "." "" qt_version_dotless "${qt_version}")
+            if ("${{ runner.os }}" STREQUAL "Windows")
+                set(url_os "windows_x86")
+                set(qt_package_arch_suffix "win64_msvc2019_64")
+                set(qt_dir_prefix "${qt_version}/msvc2019_64")
+                set(qt_package_suffix "-Windows-Windows_10-MSVC2019-Windows-Windows_10-X86_64")
+            elseif ("${{ runner.os }}" STREQUAL "Linux")
+                set(url_os "linux_x64")
+                set(qt_package_arch_suffix "gcc_64")
+                set(qt_dir_prefix "${qt_version}/gcc_64")
+                set(qt_package_suffix "-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64")
+            elseif ("${{ runner.os }}" STREQUAL "macOS")
+                set(url_os "mac_x64")
+                set(qt_package_arch_suffix "clang_64")
+                set(qt_dir_prefix "${qt_version}/clang_64")
+                set(qt_package_suffix "-MacOS-MacOS_10_13-Clang-MacOS-MacOS_10_13-X86_64")
+            endif()
 
-        set(qt_base_url "https://download.qt.io/online/qtsdkrepository/${url_os}/desktop/qt5_${qt_version_dotless}")
-        file(DOWNLOAD "${qt_base_url}/Updates.xml" ./Updates.xml SHOW_PROGRESS)
+            file(MAKE_DIRECTORY build-qt5)
 
-        file(READ ./Updates.xml updates_xml)
-        string(REGEX MATCH "<Name>qt.qt5.*<Version>([0-9+-.]+)</Version>" updates_xml_output "${updates_xml}")
-        set(qt_package_version ${CMAKE_MATCH_1})
+            set(qt_base_url "https://download.qt.io/online/qtsdkrepository/${url_os}/desktop/qt5_${qt_version_dotless}")
+            file(DOWNLOAD "${qt_base_url}/Updates.xml" ./build-qt5/Updates.xml SHOW_PROGRESS)
 
-        file(MAKE_DIRECTORY qt5)
+            file(READ ./build-qt5/Updates.xml updates_xml)
+            string(REGEX MATCH "<Name>qt.qt5.*<Version>([0-9+-.]+)</Version>" updates_xml_output "${updates_xml}")
+            set(qt_package_version ${CMAKE_MATCH_1})
 
-        # Save the path for other steps
-        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qt5/${qt_dir_prefix}" qt_dir)
-        message("::set-output name=qt_dir::${qt_dir}")
 
-        message("Downloading Qt to ${qt_dir}")
-        function(downloadAndExtract url archive)
-          message("Downloading ${url}")
-          file(DOWNLOAD "${url}" ./${archive} SHOW_PROGRESS)
-          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ../${archive} WORKING_DIRECTORY qt5)
-        endfunction()
+            # Save the path for other steps
+            file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/build-qt5/${qt_dir_prefix}" qt_dir)
+            #message("\"qt_dir=${qt_dir}\" >> $GITHUB_OUTPUT")
+            file(APPEND "$ENV{GITHUB_OUTPUT}" "qt_dir=${qt_dir}\n")
 
-        foreach(package qtbase qtdeclarative qttools qtsvg qtxmlpatterns )
-          downloadAndExtract(
-            "${qt_base_url}/qt.qt5.${qt_version_dotless}.${qt_package_arch_suffix}/${qt_package_version}${package}${qt_package_suffix}.7z"
-            ${package}.7z
-          )
-        endforeach()
+            message("Downloading Qt to ${qt_dir}")
+            function(downloadAndExtract url archive)
+                message("Downloading ${url}")
+                file(DOWNLOAD "${url}" ./build-qt5/${archive} SHOW_PROGRESS)
+                execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ${archive} WORKING_DIRECTORY build-qt5)
+            endfunction()
 
-        # uic depends on libicu56.so
-        if ("${{ runner.os }}" STREQUAL "Linux")
-          downloadAndExtract(
-            "${qt_base_url}/qt.qt5.${qt_version_dotless}.${qt_package_arch_suffix}/${qt_package_version}icu-linux-Rhel7.2-x64.7z"
-            icu.7z
-          )
-        endif()
+            # qtdeclarative qttools qtsvg qtxmlpatterns
+            foreach(package qtbase qttools )
+                downloadAndExtract(
+                "${qt_base_url}/qt.qt5.${qt_version_dotless}.${qt_package_arch_suffix}/${qt_package_version}${package}${qt_package_suffix}.7z"
+                ${package}.7z
+                )
+            endforeach()
 
-        message("::set-output name=qt_base_url::${qt_base_url}")
+            # uic depends on libicu56.so
+            if ("${{ runner.os }}" STREQUAL "Linux")
+                downloadAndExtract(
+                "${qt_base_url}/qt.qt5.${qt_version_dotless}.${qt_package_arch_suffix}/${qt_package_version}icu-linux-Rhel7.2-x64.7z"
+                icu.7z
+                )
+            endif()
+
+            # message("::set-output name=qt_base_url::${qt_base_url}")
+            # message("\"qt_base_url::${qt_base_url}\" >> $GITHUB_OUTPUT")
+            file(APPEND "$ENV{GITHUB_OUTPUT}" "qt_base_url=${qt_base_url}\n")
 
     - name: Configure
       shell: cmake -P {0}
@@ -274,7 +274,7 @@ jobs:
         endif()
 
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       id: upload_artifact
       with:
         name: ${{ env.PLUGIN_NAME}}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}.7z
@@ -286,7 +286,7 @@ jobs:
       needs: build
 
       steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: ReleaseInfo
         id: release_info
@@ -297,7 +297,7 @@ jobs:
             set( readme_url "$ENV{GITHUB_SERVER_URL}/$ENV{GITHUB_REPOSITORY}/blob/${tag_name}/RELEASENOTES.md" )
             configure_file( $ENV{GITHUB_WORKSPACE}/RELEASEINFO.md.in $ENV{GITHUB_WORKSPACE}/RELEASEINFO.md @ONLY )
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
             name: RELEASEINFO.md
             path: |
@@ -310,7 +310,7 @@ jobs:
 
     steps:
     - name: Download artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       id: download
       with:
         path: download
