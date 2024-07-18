@@ -72,3 +72,24 @@ yc_add_test(NAME pubsubunittestsp COMMAND pubsubunittestsp)
 
 set_tests_properties(pubsubunittestmp PROPERTIES TIMEOUT 30)
 set_tests_properties(pubsubunittestsp PROPERTIES TIMEOUT 30)
+
+find_program(clang_format NAMES clang-format)
+
+if(clang_format)
+    message("Found clang-format ${clang_format}")
+    set(clang_files)
+    foreach(_file IN LISTS GENERATED_IFC_SRC_SUB GENERATED_IFC_SRC_PUB GENERATED_COMP_PUB_SRC GENERATED_COMP_SUB_SRC)
+        get_filename_component(_ext ${_file} LAST_EXT)
+        if("${_ext}" STREQUAL ".h" OR "${_ext}" STREQUAL ".cpp")
+            # message("clang for ${_file} ${_ext}")
+            list(APPEND clang_files ${_file})
+        endif()
+    endforeach()
+
+    add_custom_target(
+        clang-format-test
+        COMMAND ${clang_format} -n -Werror --style=file ${clang_files}
+        DEPENDS pubsubunittestsp
+    )
+
+endif()
