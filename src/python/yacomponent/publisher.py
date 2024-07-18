@@ -46,8 +46,11 @@ class Publisher():
 
 
     def response(self, key: int, ident: str, msg )-> int: # const ::google::protobuf::MessageLite
-        size = msg.ByteSize()
-        rc = self._send_ident(key, size, msg.SerializeToString(), ident)
+        if msg is not None:
+            size = msg.ByteSize()
+            rc = self._send_ident(key, size, msg.SerializeToString(), ident)
+        else:
+            rc = self._send_ident(key, 0, None, ident)
         return rc
 
 
@@ -105,7 +108,7 @@ class Publisher():
                 self._reqresp_socket.send_string(yc.KeyFmt % key, send_flags)
 
                 if send_more:
-                    self._reqresp_socket.send_string(msgData,0)
+                    self._reqresp_socket.send(msgData,0)
 
         return 1
 
@@ -155,7 +158,7 @@ class Publisher():
                         elif key == yc.KeySetNotification:
                             logging.info(f"Publisher::receive peer {ident} KeySetNotification")
                             notification_key_str = self._reqresp_socket.recv(zmq.NOBLOCK)
-                            if 0 < len(key_str):
+                            if 0 < len(notification_key_str):
                                 notification_key = int(notification_key_str)
                                 logging.info(f"Publisher::receive peer {ident} KeySetNotification {notification_key}")
                                 self._peer_map[ident] = {"key": notification_key, "value": 1}
@@ -174,7 +177,7 @@ class Publisher():
                         elif key == yc.KeyClearNotification:
                             logging.info(f"Publisher::receive peer {ident} KeyClearNotification")
                             notification_key_str = self._reqresp_socket.recv(zmq.NOBLOCK)
-                            if 0 < len(key_str):
+                            if 0 < len(notification_key_str):
                                 notification_key = int(notification_key_str)
                                 logging.info(f"Publisher::receive peer {ident} KeyClearNotification {notification_key}")
                                 self._peer_map[ident] = {"key": notification_key, "value": 0}

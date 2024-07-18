@@ -17,11 +17,11 @@ message Response {
 
 
 message StartedText {
-  optional Response id = 1;
+  optional int32 id = 1;
 }
 
 message StoppedText {
-  optional Response id = 1;
+  optional int32 id = 1;
 }
 
 service Requests {

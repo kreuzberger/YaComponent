@@ -55,7 +55,7 @@ void TextOutComp::onResponseStartedText(int proxyId, const TextGen::StartedText 
 {
     assert(PROXY_XML == proxyId);
     fprintf(stderr, "received onResponse startedText\n");
-    assert(1 == resp.id().id());
+    assert(1 == resp.id());
     miResponseStartCnt++;
 }
 
@@ -63,7 +63,7 @@ void TextOutComp::onResponseStoppedText(int proxyId, const TextGen::StoppedText 
 {
     fprintf(stderr, "received onResponse stoppedText\n");
     assert(PROXY_XML == proxyId);
-    assert(2 == resp.id().id() || 4242 == resp.id().id());
+    assert(2 == resp.id() || 4242 == resp.id());
     miResponseStopCnt++;
 }
 

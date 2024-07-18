@@ -122,13 +122,15 @@ class Subscriber():
 
     def request(self, key: int, msg: Message )-> int: #const ::google::protobuf::MessageLite
         rc = -1;
-        size = msg.ByteSize();
-        msg.SerializeToString(self._msg_outbuffer);
-        rc = self.send(key, size, self._msg_outbuffer);
+        if msg is not None:
+            size = msg.ByteSize();
+            msg.SerializeToString(self._msg_outbuffer);
+            rc = self.send(key, size, self._msg_outbuffer);
+        else:
+            rc = self.send(key, 0, 0);
+
         return rc;
 
-    def request(self, key: int)->int:
-        return self.send(key, 0, 0);
 
     def setNotification(self, key: int)->int:
         rc = -1
