@@ -7,9 +7,9 @@
 YaCompLayoutCodeGen::YaCompLayoutCodeGen() {}
 
 void YaCompLayoutCodeGen::write( const std::filesystem::path& codePath,
-                                 const std::string&           componentName,
-                                 const ElementList&           processes,
-                                 const AddressMap&            adresses )
+                                 const std::string& componentName,
+                                 const ElementList& processes,
+                                 const AddressMap& adresses )
 {
   for ( auto* process : processes )
   {
@@ -86,7 +86,7 @@ void YaCompLayoutCodeGen::writeComponentParts( std::ofstream& fhSource, Element*
   while ( uses )
   {
     auto* ifc = uses->FirstChildElement( "interface" );
-    auto  key = std::string( ifc->Attribute( "sub" ) );
+    auto key = std::string( ifc->Attribute( "sub" ) );
     if ( addresses.find( key ) != addresses.end() )
     {
       fhSource << "    " << component->Attribute( "name" ) << ".setConnectionPara" << ifc->Attribute( "id" ) << "( \"";

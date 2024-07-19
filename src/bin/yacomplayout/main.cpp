@@ -17,8 +17,8 @@ void printHelp()
 int main( int argc, char** argv )
 {
   auto layoutPath = std::filesystem::path();
-  auto codePath   = std::filesystem::path();
-  auto verbose    = false;
+  auto codePath = std::filesystem::path();
+  auto verbose = false;
 
   for ( int idx = 1; idx < argc; idx++ )
   {

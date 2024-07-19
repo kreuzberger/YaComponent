@@ -10,14 +10,14 @@ YaProxyBase::YaProxyBase( void* context, int id, QObject* parent )
 int YaProxyBase::setNotification( int key )
 {
   int rc = -1;
-  rc     = mSubscriber.setNotification( key );
+  rc = mSubscriber.setNotification( key );
   return rc;
 }
 
 int YaProxyBase::clearNotification( int key )
 {
   int rc = -1;
-  rc     = mSubscriber.clearNotification( key );
+  rc = mSubscriber.clearNotification( key );
   return rc;
 }
 

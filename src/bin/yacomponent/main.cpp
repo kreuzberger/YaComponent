@@ -21,11 +21,11 @@ void printHelp()
 int main( int argc, char** argv )
 {
   auto componentPath = std::filesystem::path();
-  auto ifcPath       = std::filesystem::path();
-  auto codePath      = std::filesystem::path();
-  auto docPath       = std::filesystem::path();
-  auto verbose       = false;
-  auto language      = std::string( "cpp" );
+  auto ifcPath = std::filesystem::path();
+  auto codePath = std::filesystem::path();
+  auto docPath = std::filesystem::path();
+  auto verbose = false;
+  auto language = std::string( "cpp" );
 
   for ( int idx = 1; idx < argc; idx++ )
   {

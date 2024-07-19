@@ -8,9 +8,9 @@
 YaComponentPyCodeGen::YaComponentPyCodeGen() {}
 
 void YaComponentPyCodeGen::writeComponent( const std::filesystem::path& codePath,
-                                           const std::string&           compName,
-                                           const EntryList&             providedIfc,
-                                           const EntryList&             usedIfc )
+                                           const std::string& compName,
+                                           const EntryList& providedIfc,
+                                           const EntryList& usedIfc )
 {
   std::ofstream fhSource;
 
@@ -185,27 +185,27 @@ void YaComponentPyCodeGen::writeComponent( const std::filesystem::path& codePath
 }
 
 void YaComponentPyCodeGen::writeIfc( const std::filesystem::path& codePath,
-                                     const std::string&           ifcName,
-                                     const ElementList&           properties,
-                                     const ElementList&           requests,
-                                     const ElementList&           responses,
-                                     const ElementList&           includes )
+                                     const std::string& ifcName,
+                                     const ElementList& properties,
+                                     const ElementList& requests,
+                                     const ElementList& responses,
+                                     const ElementList& includes )
 {
   writeIfcProxy( codePath, ifcName, properties, requests, responses, includes );
   writeIfcStub( codePath, ifcName, properties, requests, responses, includes );
 }
 void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
-                                          const std::string&           ifcName,
-                                          const ElementList&           properties,
-                                          const ElementList&           requests,
-                                          const ElementList&           responses,
-                                          const ElementList&           includes )
+                                          const std::string& ifcName,
+                                          const ElementList& properties,
+                                          const ElementList& requests,
+                                          const ElementList& responses,
+                                          const ElementList& includes )
 {
   std::ofstream fhSource;
   std::ofstream fhHeaderIfc;
 
   auto sourceFilename = ( codePath / ( ifcName + "Proxy.py" ) ).string();
-  auto ifcFilename    = ( codePath / ( ifcName + "ProxyHandler.py" ) ).string();
+  auto ifcFilename = ( codePath / ( ifcName + "ProxyHandler.py" ) ).string();
 
   YaComponentCore::printDbg( std::string( "YaComponentPyCodeGen:: write interface proxy source code file " ) + sourceFilename );
   fhSource.open( sourceFilename, std::ios::out | std::ios::trunc );
@@ -223,7 +223,7 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   for ( const auto* include : includes )
   {
     auto filename = std::string( include->Attribute( "file" ) );
-    auto suffix   = std::string( ".py" );
+    auto suffix = std::string( ".py" );
     if ( filename.size() >= suffix.size() && filename.compare( filename.size() - suffix.size(), suffix.size(), suffix ) == 0 )
     {
       fhSource << "from " << filename.erase( filename.find( suffix ) ) << " import *" << std::endl;
@@ -311,9 +311,9 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   {
     //     fhHeader << "    int request" << req->Attribute("id");
     std::string strPara;
-    auto*       para     = req->FirstChildElement( "para" );
-    auto        has_para = para != nullptr;
-    int         paraIdx  = 1;
+    auto* para = req->FirstChildElement( "para" );
+    auto has_para = para != nullptr;
+    int paraIdx = 1;
     while ( para )
     {
       strPara += std::string( ", msg" ) /*+ std::to_string(paraIdx)*/ + std::string( ": " );
@@ -402,7 +402,7 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   for ( const auto* resp : responses )
   {
     std::string strPara;
-    auto*       para = resp->FirstChildElement( "para" );
+    auto* para = resp->FirstChildElement( "para" );
     while ( para )
     {
       strPara += ", msg: ";
@@ -419,16 +419,16 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   fhHeaderIfc.close();
 }
 void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
-                                         const std::string&           ifcName,
-                                         const ElementList&           properties,
-                                         const ElementList&           requests,
-                                         const ElementList&           responses,
-                                         const ElementList&           includes )
+                                         const std::string& ifcName,
+                                         const ElementList& properties,
+                                         const ElementList& requests,
+                                         const ElementList& responses,
+                                         const ElementList& includes )
 {
   std::ofstream fhSource;
   std::ofstream fhHeaderIfc;
 
-  auto sourceFilename    = ( codePath / ( ifcName + "Stub.py" ) ).string();
+  auto sourceFilename = ( codePath / ( ifcName + "Stub.py" ) ).string();
   auto interfaceFilename = ( codePath / ( ifcName + "StubHandler.py" ) ).string();
 
   YaComponentCore::printDbg( std::string( "YaComponentPyCodeGen:: write interface stub source code file " ) + sourceFilename );
@@ -438,7 +438,7 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
   for ( const auto* include : includes )
   {
     auto filename = std::string( include->Attribute( "file" ) );
-    auto suffix   = std::string( ".py" );
+    auto suffix = std::string( ".py" );
     if ( filename.size() >= suffix.size() && filename.compare( filename.size() - suffix.size(), suffix.size(), suffix ) == 0 )
     {
       fhSource << "from " << filename.erase( filename.find( suffix ) ) << " import *" << std::endl;
@@ -482,8 +482,8 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     auto* resp = req->FirstChildElement( "resp" );
     while ( resp )
     {
-      auto  resp_definition = findResponse( responses, resp->Attribute( "id" ) );
-      auto* resp_para       = resp_definition->FirstChildElement( "para" );
+      auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
+      auto* resp_para = resp_definition->FirstChildElement( "para" );
       while ( resp_para )
       {
         fhSource << "    "
@@ -581,8 +581,8 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
   for ( const auto* resp : responses )
   {
     fhSource << "    def response" << resp->Attribute( "id" ) << "( self, key: int, ident: str";
-    auto* para       = resp->FirstChildElement( "para" );
-    auto  strParaMsg = ( para ) ? std::string( ", msg" ) : std::string( ", None" );
+    auto* para = resp->FirstChildElement( "para" );
+    auto strParaMsg = ( para ) ? std::string( ", msg" ) : std::string( ", None" );
     while ( para )
     {
       fhSource << ", msg: " << para->Attribute( "id" );
@@ -659,7 +659,7 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     while ( resp )
     {
       auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
-      para                 = resp_definition->FirstChildElement( "para" );
+      para = resp_definition->FirstChildElement( "para" );
       while ( para )
       {
         fhSource << "                        self._" << req->Attribute( "id" ) << "_" << para->Attribute( "id" ) << ".Clear();\n";
@@ -683,7 +683,7 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     while ( resp )
     {
       auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
-      para                 = resp_definition->FirstChildElement( "para" );
+      para = resp_definition->FirstChildElement( "para" );
       while ( para )
       {
         strPara += std::string( ", self._" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" );
@@ -709,7 +709,7 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       fhSource << "                        self.response" << resp->Attribute( "id" ) << "( " << strResp << ", ident";
 
       auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
-      para                 = resp_definition->FirstChildElement( "para" );
+      para = resp_definition->FirstChildElement( "para" );
       while ( para )
       {
         fhSource << ", self._" << req->Attribute( "id" ) << "_" << resp->Attribute( "id" );

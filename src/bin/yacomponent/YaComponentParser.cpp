@@ -22,16 +22,16 @@ void YaComponentParser::init( const std::filesystem::path& code, const std::file
     std::filesystem::create_directories( mDocPath );
   }
   mLanguage = ( language == "cpp" ) ? LANGUAGE::CPP : LANGUAGE::PY;
-  mVerbose  = verbose;
+  mVerbose = verbose;
 }
 
 void YaComponentParser::parseComponent( const std::filesystem::path& componentPath )
 {
   mComponentPath = std::filesystem::absolute( componentPath );
-  auto baseName  = std::filesystem::absolute( mComponentPath ).stem().string();
+  auto baseName = std::filesystem::absolute( mComponentPath ).stem().string();
 
   tinyxml2::XMLDocument doc;
-  tinyxml2::XMLError    load_state = doc.LoadFile( mComponentPath.string().c_str() );
+  tinyxml2::XMLError load_state = doc.LoadFile( mComponentPath.string().c_str() );
   if ( tinyxml2::XML_SUCCESS == load_state )
   {
   }
@@ -42,7 +42,7 @@ void YaComponentParser::parseComponent( const std::filesystem::path& componentPa
 
   YaComponentCore::printDbg( "parsing component file " + mComponentPath.string() );
 
-  auto* component             = doc.RootElement();
+  auto* component = doc.RootElement();
   auto [providedIfc, usedIfc] = parseComponentDefinitions( component );
 
   switch ( mLanguage )
@@ -70,11 +70,11 @@ void YaComponentParser::parseComponent( const std::filesystem::path& componentPa
 
 void YaComponentParser::parseIfc( const std::filesystem::path& ifcPath )
 {
-  mIfcPath         = std::filesystem::absolute( ifcPath );
+  mIfcPath = std::filesystem::absolute( ifcPath );
   auto ifcBaseName = std::filesystem::absolute( mIfcPath ).stem().string();
 
   tinyxml2::XMLDocument doc;
-  tinyxml2::XMLError    load_state = doc.LoadFile( mIfcPath.string().c_str() );
+  tinyxml2::XMLError load_state = doc.LoadFile( mIfcPath.string().c_str() );
   if ( tinyxml2::XML_SUCCESS == load_state )
   {
   }
@@ -85,7 +85,7 @@ void YaComponentParser::parseIfc( const std::filesystem::path& ifcPath )
 
   YaComponentCore::printDbg( "parsing interface file " + mIfcPath.string() );
 
-  auto* ifc                                        = doc.RootElement();
+  auto* ifc = doc.RootElement();
   auto [properties, requests, responses, includes] = parseIfcDefinitions( ifc );
 
   switch ( mLanguage )
@@ -113,7 +113,7 @@ void YaComponentParser::parseIfc( const std::filesystem::path& ifcPath )
 std::tuple<YaComponentParser::EntryList, YaComponentParser::EntryList> YaComponentParser::parseComponentDefinitions( Element* component )
 {
   auto ifcProvided = EntryList();
-  auto ifcUsed     = EntryList();
+  auto ifcUsed = EntryList();
 
   auto* provides = component->FirstChildElement( "provides" );
   while ( provides )
@@ -125,7 +125,7 @@ std::tuple<YaComponentParser::EntryList, YaComponentParser::EntryList> YaCompone
       {
         YaComponentCore::printFatal( "YaComponentParser:: missing definition of interface id or xml file" );
       }
-      auto id  = std::string( ifc->Attribute( "id" ) );
+      auto id = std::string( ifc->Attribute( "id" ) );
       auto xml = std::string( ifc->Attribute( "xml" ) );
 
       YaComponentCore::printDbg( std::string( "YaComponentParser: id:" ) + id + ", xml:" + xml );
@@ -149,7 +149,7 @@ std::tuple<YaComponentParser::EntryList, YaComponentParser::EntryList> YaCompone
       {
         YaComponentCore::printFatal( "YaComponentParser:: missing definition of interface id or xml file" );
       }
-      auto id  = std::string( ifc->Attribute( "id" ) );
+      auto id = std::string( ifc->Attribute( "id" ) );
       auto xml = std::string( ifc->Attribute( "xml" ) );
 
       YaComponentCore::printDbg( std::string( "YaComponentParser: id:" ) + id + ", xml:" + xml );
@@ -170,9 +170,9 @@ std::tuple<YaComponentParser::ElementList, YaComponentParser::ElementList, YaCom
 YaComponentParser::parseIfcDefinitions( Element* ifc )
 {
   auto properties = ElementList();
-  auto requests   = ElementList();
-  auto responses  = ElementList();
-  auto includes   = ElementList();
+  auto requests = ElementList();
+  auto responses = ElementList();
+  auto includes = ElementList();
 
   auto* prop = ifc->FirstChildElement( "properties" )->FirstChildElement( "prop" );
   while ( prop )

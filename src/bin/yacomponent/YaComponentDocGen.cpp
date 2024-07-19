@@ -7,11 +7,11 @@
 YaComponentDocGen::YaComponentDocGen() {}
 
 void YaComponentDocGen::writeIfc( const std::filesystem::path& docPath,
-                                  const std::string&           ifcName,
-                                  const ElementList&           properties,
-                                  const ElementList&           requests,
-                                  const ElementList&           responses,
-                                  const ElementList&           includes )
+                                  const std::string& ifcName,
+                                  const ElementList& properties,
+                                  const ElementList& requests,
+                                  const ElementList& responses,
+                                  const ElementList& includes )
 {
   std::ofstream fhDoc;
 
@@ -47,7 +47,7 @@ void YaComponentDocGen::writeIfc( const std::filesystem::path& docPath,
     strReq += YaComponentCore::to_upper( req->Attribute( "id" ) );
 
     std::string strPara;
-    auto*       para = req->FirstChildElement( "para" );
+    auto* para = req->FirstChildElement( "para" );
     while ( para )
     {
       para = para->NextSiblingElement( "para" );
@@ -77,9 +77,9 @@ void YaComponentDocGen::writeIfc( const std::filesystem::path& docPath,
 }
 
 void YaComponentDocGen::writeComponent( const std::filesystem::path& docPath,
-                                        const std::string&           compName,
-                                        const EntryList&             providedIfc,
-                                        const EntryList&             usedIfc )
+                                        const std::string& compName,
+                                        const EntryList& providedIfc,
+                                        const EntryList& usedIfc )
 {
   std::ofstream fhDoc;
 

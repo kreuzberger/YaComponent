@@ -27,6 +27,6 @@ void YaBuffer::resize( int iLength )
   {
     delete[] mpcData;
     miDataCnt = pow( 2, ceil( log2( iLength ) ) );
-    mpcData   = new char[miDataCnt];
+    mpcData = new char[miDataCnt];
   }
 }

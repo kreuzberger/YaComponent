@@ -1,2 +1,5 @@
+find_program(clang_format NAMES clang-format)
+if(clang_format)
+    message("Found clang-format ${clang_format}")
+endif()
 add_subdirectory(layout)
-

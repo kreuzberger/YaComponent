@@ -103,3 +103,17 @@ yc_add_pytest(
     PYTHONPATH
     "${CMAKE_CURRENT_BINARY_DIR};${pyyacomponent_SOURCE_DIR};${TextExample_BINARY_DIR}/TextGenIfc/py;${TextExample_BINARY_DIR}/TextGenComp/py;${TextExample_BINARY_DIR}/TextOutIfc/py;${TextExample_BINARY_DIR}/TextOutComp/py;"
 )
+
+if(clang_format)
+    set(clang_files)
+    foreach(_file IN LISTS GENERATED_IFC_SRC GENERATED_IFC_SRC_OUT GENERATED_COMP_GEN_SRC GENERATED_COMP_OUT_SRC)
+        get_filename_component(_ext ${_file} LAST_EXT)
+        if("${_ext}" STREQUAL ".h" OR "${_ext}" STREQUAL ".cpp")
+            # message("clang for ${_file} ${_ext}")
+            list(APPEND clang_files ${_file})
+        endif()
+    endforeach()
+
+    add_test(NAME clang-format-test-text COMMAND ${clang_format} -n -Werror --style=file ${clang_files})
+
+endif()

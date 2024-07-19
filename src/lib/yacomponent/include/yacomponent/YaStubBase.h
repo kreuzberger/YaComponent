@@ -15,7 +15,7 @@ public:
 
 protected:
   YaPUBImpl mPublisher;
-  int       mId;
+  int mId;
 
 private:
   YaStubBase( const YaStubBase& );

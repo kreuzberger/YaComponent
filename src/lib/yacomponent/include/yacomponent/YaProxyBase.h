@@ -24,7 +24,7 @@ public slots:
 
 protected:
   YaSUBImpl mSubscriber;
-  int       mId;
+  int mId;
 
 private:
   YaProxyBase( const YaProxyBase& );

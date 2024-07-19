@@ -8,9 +8,9 @@
 YaComponentCodeGen::YaComponentCodeGen() {}
 
 void YaComponentCodeGen::writeComponent( const std::filesystem::path& codePath,
-                                         const std::string&           compName,
-                                         const EntryList&             providedIfc,
-                                         const EntryList&             usedIfc )
+                                         const std::string& compName,
+                                         const EntryList& providedIfc,
+                                         const EntryList& usedIfc )
 {
   std::ofstream fhSource;
   std::ofstream fhHeader;
@@ -233,28 +233,28 @@ void YaComponentCodeGen::writeComponent( const std::filesystem::path& codePath,
 }
 
 void YaComponentCodeGen::writeIfc( const std::filesystem::path& codePath,
-                                   const std::string&           ifcName,
-                                   const ElementList&           properties,
-                                   const ElementList&           requests,
-                                   const ElementList&           responses,
-                                   const ElementList&           includes )
+                                   const std::string& ifcName,
+                                   const ElementList& properties,
+                                   const ElementList& requests,
+                                   const ElementList& responses,
+                                   const ElementList& includes )
 {
   writeIfcProxy( codePath, ifcName, properties, requests, responses, includes );
   writeIfcStub( codePath, ifcName, properties, requests, responses, includes );
 }
 void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
-                                        const std::string&           ifcName,
-                                        const ElementList&           properties,
-                                        const ElementList&           requests,
-                                        const ElementList&           responses,
-                                        const ElementList&           includes )
+                                        const std::string& ifcName,
+                                        const ElementList& properties,
+                                        const ElementList& requests,
+                                        const ElementList& responses,
+                                        const ElementList& includes )
 {
   std::ofstream fhSource;
   std::ofstream fhHeaderIfc;
   std::ofstream fhHeader;
 
-  auto sourceFilename    = ( codePath / ( ifcName + "Proxy.cpp" ) ).string();
-  auto headerFilename    = ( codePath / ( ifcName + "Proxy.h" ) ).string();
+  auto sourceFilename = ( codePath / ( ifcName + "Proxy.cpp" ) ).string();
+  auto headerFilename = ( codePath / ( ifcName + "Proxy.h" ) ).string();
   auto interfaceFilename = ( codePath / ( "I" + ifcName + "ProxyHandler.h" ) ).string();
 
   YaComponentCore::printDbg( std::string( "YaComponentCodeGen:: write interface proxy source code file " ) + sourceFilename );
@@ -264,13 +264,14 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
 
   fhSource << "#include \"" << ifcName << "Proxy.h\"" << std::endl;
   fhSource << "namespace YaComponent\n{" << std::endl;
-  fhSource << ifcName << "Proxy::" << ifcName << "Proxy( void* context, int id, I" << ifcName << "ProxyHandler& callbackHandler)" << std::endl;
-  fhSource << ": YaProxyBase( context, id )" << std::endl;
-  fhSource << ", mCallbackHandler( callbackHandler )" << std::endl;
+  fhSource << ifcName << "Proxy::" << ifcName << "Proxy( void* context, int id, I" << ifcName << "ProxyHandler& callbackHandler )" << std::endl;
+  fhSource << "  : YaProxyBase( context, id )" << std::endl;
+  fhSource << "  , mCallbackHandler( callbackHandler )" << std::endl;
 
   fhSource << "{\n}\n" << std::endl;
 
-  std::string strDtor = "\n" + ifcName + "Proxy::~" + ifcName + "Proxy()\n{\n";
+  std::string strDtor = ifcName + "Proxy::~" + ifcName + "Proxy() {}\n";
+  fhSource << strDtor << std::endl;
 
   fhHeader << "#pragma once" << std::endl;
 
@@ -279,7 +280,7 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   for ( const auto* include : includes )
   {
     auto filename = std::string( include->Attribute( "file" ) );
-    auto suffix   = std::string( ".h" );
+    auto suffix = std::string( ".h" );
     if ( filename.size() >= suffix.size() && filename.compare( filename.size() - suffix.size(), suffix.size(), suffix ) == 0 )
     {
       fhHeader << "#include \"" << include->Attribute( "file" ) << "\"" << std::endl;
@@ -295,20 +296,22 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   fhHeader << "namespace YaComponent\n{" << std::endl;
   fhHeaderIfc << "namespace YaComponent\n{" << std::endl;
 
-  fhHeader << "class " << ifcName << "Proxy: public YaProxyBase" << std::endl;
+  fhHeader << "class " << ifcName << "Proxy : public YaProxyBase" << std::endl;
   fhHeader << "{" << std::endl;
-  fhHeader << "  public:" << std::endl;
-  fhHeader << "    " << ifcName << "Proxy( void* context, int id, I" << ifcName << "ProxyHandler& );" << std::endl;
-  fhHeader << "    virtual ~" << ifcName << "Proxy();\n" << std::endl;
-  fhHeader << "    virtual void receive();" << std::endl;
+  fhHeader << "public:" << std::endl;
+  fhHeader << "  " << ifcName << "Proxy( void* context, int id, I" << ifcName << "ProxyHandler& );" << std::endl;
+  fhHeader << "  virtual ~" << ifcName << "Proxy();\n" << std::endl;
+  fhHeader << "  virtual void receive();" << std::endl;
 
   fhHeaderIfc << "class I" << ifcName << "ProxyHandler" << std::endl;
   fhHeaderIfc << "{" << std::endl;
-  fhHeaderIfc << "  public:" << std::endl;
-  fhHeaderIfc << "    I" << ifcName << "ProxyHandler() {}" << std::endl;
-  fhHeaderIfc << "    virtual ~I" << ifcName << "ProxyHandler() {}\n" << std::endl;
+  fhHeaderIfc << "public:" << std::endl;
+  fhHeaderIfc << "  I" << ifcName << "ProxyHandler() {}" << std::endl;
+  fhHeaderIfc << "  virtual ~I" << ifcName << "ProxyHandler() {}" << std::endl;
 
-  fhHeader << "    enum KEYS {" << std::endl;
+  fhHeader << "  enum KEYS" << std::endl;
+  fhHeader << "  {" << std::endl;
+
   for ( const auto* prop : properties )
   {
     std::string strProp;
@@ -318,7 +321,7 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
       strProp += YaComponentCore::to_upper( prop->Attribute( "package" ) ) + "_";
     }
     strProp += YaComponentCore::to_upper( prop->Attribute( "id" ) );
-    fhHeader << "      " << strProp << "," << std::endl;
+    fhHeader << "    " << strProp << "," << std::endl;
   }
   for ( const auto* req : requests )
   {
@@ -330,7 +333,7 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     }
 
     strReq += YaComponentCore::to_upper( req->Attribute( "id" ) );
-    fhHeader << "      " << strReq << "," << std::endl;
+    fhHeader << "    " << strReq << "," << std::endl;
   }
   for ( const auto* resp : responses )
   {
@@ -341,13 +344,18 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
       strResp += YaComponentCore::to_upper( resp->Attribute( "package" ) ) + "_";
     }
     strResp += YaComponentCore::to_upper( resp->Attribute( "id" ) );
-    fhHeader << "      " << strResp << "," << std::endl;
+    fhHeader << "    " << strResp << "," << std::endl;
   }
-  fhHeader << "    };\n" << std::endl;
+  fhHeader << "  };" << std::endl;
+
+  if ( !properties.empty() )
+  {
+    fhHeaderIfc << std::endl;
+  }
 
   for ( const auto* prop : properties )
   {
-    fhHeaderIfc << "    virtual void onProperty" << prop->Attribute( "id" ) << "( int proxyId, const ";
+    fhHeaderIfc << "  virtual void onProperty" << prop->Attribute( "id" ) << "( int proxyId, const ";
     if ( prop->Attribute( "package" ) && prop->Attribute( "package" )[0] != '\0' )
     {
       fhHeaderIfc << prop->Attribute( "package" ) << "::";
@@ -355,16 +363,17 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     fhHeaderIfc << prop->Attribute( "id" ) << "& ) = 0;" << std::endl;
   }
 
-  fhHeader << "" << std::endl;
-  fhHeaderIfc << "" << std::endl;
-  fhSource << strDtor << "\n}\n" << std::endl;
+  if ( !requests.empty() )
+  {
+    fhHeader << std::endl;
+  }
 
   for ( const auto* req : requests )
   {
-    fhHeader << "    int request" << req->Attribute( "id" );
+    fhHeader << "  int request" << req->Attribute( "id" );
     fhSource << "int " << ifcName << "Proxy::request" << req->Attribute( "id" );
-    fhHeader << "( ";
-    fhSource << "( ";
+    fhHeader << "(";
+    fhSource << "(";
     std::string strPara;
 
     auto* para = req->FirstChildElement( "para" );
@@ -375,19 +384,21 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
       {
         strPara += std::string( para->Attribute( "package" ) ) + "::";
       }
-      strPara += std::string( para->Attribute( "id" ) ) + "&,";
+      strPara += std::string( para->Attribute( "id" ) ) + "&";
       para = para->NextSiblingElement( "para" );
+      if ( para )
+        strPara += ",";
     }
     if ( !strPara.empty() )
     {
       strPara.pop_back();
-      fhHeader << strPara << ");" << std::endl;
+      fhHeader << strPara << " );" << std::endl;
       fhSource << strPara << " msg )\n{" << std::endl;
     }
     else
     {
-      fhHeader << " );" << std::endl;
-      fhSource << " )\n{" << std::endl;
+      fhHeader << ");" << std::endl;
+      fhSource << ")\n{" << std::endl;
     }
     fhSource << "  return mSubscriber.request( REQ_";
     if ( req->Attribute( "package" ) && req->Attribute( "package" )[0] != '\0' )
@@ -407,16 +418,15 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   fhSource << "{" << std::endl;
   fhSource << "  bool bMsgAvailable = true;" << std::endl;
 
-  fhSource << "  while( bMsgAvailable )" << std::endl;
+  fhSource << "  while ( bMsgAvailable )" << std::endl;
   fhSource << "  {" << std::endl;
   fhSource << "    int key = -1;" << std::endl;
   fhSource << "    int size = -1;" << std::endl;
   fhSource << "    char* msgData = nullptr;" << std::endl;
-
-  fhSource << "    int iBytes = mSubscriber.receive(key, size, &msgData );" << std::endl;
-  fhSource << "    if( 0 <= key )" << std::endl;
+  fhSource << "    int iBytes = mSubscriber.receive( key, size, &msgData );" << std::endl;
+  fhSource << "    if ( 0 <= key )" << std::endl;
   fhSource << "    {" << std::endl;
-  fhSource << "      switch( key )" << std::endl;
+  fhSource << "      switch ( key )" << std::endl;
   fhSource << "      {" << std::endl;
   for ( const auto* resp : responses )
   {
@@ -427,14 +437,15 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
       strResp += YaComponentCore::to_upper( resp->Attribute( "package" ) ) + "_";
     }
     strResp += YaComponentCore::to_upper( resp->Attribute( "id" ) );
-    fhSource << "      case " << strResp << ":" << std::endl;
+    fhSource << "        case " << strResp << ":" << std::endl;
 
     auto* para = resp->FirstChildElement( "para" );
     while ( para )
     {
-      fhSource << "        if( msgData && 0 <= size) {" << std::endl;
-      fhSource << "          m" << para->Attribute( "id" ) << ".ParseFromArray(msgData, size);" << std::endl;
-      fhSource << "        }" << std::endl;
+      fhSource << "          if ( msgData && 0 <= size )" << std::endl;
+      fhSource << "          {" << std::endl;
+      fhSource << "            m" << para->Attribute( "id" ) << ".ParseFromArray( msgData, size );" << std::endl;
+      fhSource << "          }" << std::endl;
       para = para->NextSiblingElement( "para" );
     }
 
@@ -453,8 +464,8 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
 
     // fhSource << "        mCallbackHandler.onResponse( mId, m" << resp->Attribute("id") << ");"
     //          << std::endl;
-    fhSource << "        mCallbackHandler.onResponse" << resp->Attribute( "id" ) << "( mId" << strPara << ");" << std::endl;
-    fhSource << "        break;" << std::endl;
+    fhSource << "          mCallbackHandler.onResponse" << resp->Attribute( "id" ) << "( mId" << strPara << " );" << std::endl;
+    fhSource << "          break;" << std::endl;
   }
 
   for ( const auto* prop : properties )
@@ -466,22 +477,25 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
       strProp += YaComponentCore::to_upper( prop->Attribute( "package" ) ) + "_";
     }
     strProp += YaComponentCore::to_upper( prop->Attribute( "id" ) );
-    fhSource << "      case " << strProp << ":" << std::endl;
-    fhSource << "        if(msgData && 0 <= size) {" << std::endl;
-    fhSource << "          m" << prop->Attribute( "id" ) << ".ParseFromArray(msgData, size);" << std::endl;
-    fhSource << "          mCallbackHandler.onProperty" << prop->Attribute( "id" ) << "( mId, m" << prop->Attribute( "id" ) << ");" << std::endl;
-    fhSource << "        }" << std::endl;
-    fhSource << "        break;" << std::endl;
+    fhSource << "        case " << strProp << ":" << std::endl;
+    fhSource << "          if ( msgData && 0 <= size )" << std::endl;
+    fhSource << "          {" << std::endl;
+    fhSource << "            m" << prop->Attribute( "id" ) << ".ParseFromArray( msgData, size );" << std::endl;
+    fhSource << "            mCallbackHandler.onProperty" << prop->Attribute( "id" ) << "( mId, m" << prop->Attribute( "id" ) << " );" << std::endl;
+    fhSource << "          }" << std::endl;
+    fhSource << "          break;" << std::endl;
   }
 
-  fhSource << "      default:" << std::endl;
-  fhSource << "        if( -1 < key) {" << std::endl;
-  fhSource << "          qFatal(\"" << ifcName << "Proxy::receive(): unknown key '%d'\",key);" << std::endl;
-  fhSource << "        }" << std::endl;
-  fhSource << "        break;" << std::endl;
+  fhSource << "        default:" << std::endl;
+  fhSource << "          if ( -1 < key )" << std::endl;
+  fhSource << "          {" << std::endl;
+  fhSource << "            qFatal( \"" << ifcName << "Proxy::receive(): unknown key '%d'\", key );" << std::endl;
+  fhSource << "          }" << std::endl;
+  fhSource << "          break;" << std::endl;
   fhSource << "      }" << std::endl;
   fhSource << "    }" << std::endl;
-  fhSource << "    else {" << std::endl;
+  fhSource << "    else" << std::endl;
+  fhSource << "    {" << std::endl;
   fhSource << "      bMsgAvailable = false;" << std::endl;
   fhSource << "    }" << std::endl;
 
@@ -489,14 +503,12 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
 
   fhSource << "}" << std::endl;
 
-  fhHeader << "" << std::endl;
-
   // bool empty_response_handled = false;
 
   for ( const auto* resp : responses )
   {
     std::string strPara;
-    auto*       para = resp->FirstChildElement( "para" );
+    auto* para = resp->FirstChildElement( "para" );
     while ( para )
     {
       strPara += ", const ";
@@ -507,18 +519,14 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
       strPara += std::string( para->Attribute( "id" ) ) + "&";
       para = para->NextSiblingElement( "para" );
     }
-    // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
-    //     fhHeaderIfc << resp->Attribute("package") << "::";
-    // }
-    // fhHeaderIfc << resp->Attribute("id") << "& ) = 0;" << std::endl;
-    fhHeaderIfc << "    virtual void onResponse" << resp->Attribute( "id" ) << "( int proxyId";
+    fhHeaderIfc << "  virtual void onResponse" << resp->Attribute( "id" ) << "( int proxyId";
     if ( !strPara.empty() )
     {
-      fhHeaderIfc << strPara << ") = 0;" << std::endl;
+      fhHeaderIfc << strPara << " ) = 0;" << std::endl;
     }
     else
     { // if (!empty_response_handled) {
-      fhHeaderIfc << ") = 0;" << std::endl;
+      fhHeaderIfc << " ) = 0;" << std::endl;
     }
 
     // if (strPara.empty()) {
@@ -526,9 +534,12 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     // }
   }
 
+  fhHeader << std::endl;
   fhHeader << "private:" << std::endl;
   fhHeader << "  " << ifcName << "Proxy();" << std::endl;
   fhHeader << "  I" << ifcName << "ProxyHandler& mCallbackHandler;" << std::endl;
+  fhHeader << std::endl;
+  fhHeader << "  // members to store parameters" << std::endl;
 
   for ( const auto* prop : properties )
   {
@@ -560,31 +571,28 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   fhHeader << "};" << std::endl;
   fhHeaderIfc << "};" << std::endl;
 
-  fhHeader << "}" << std::endl;
-  fhHeaderIfc << "}" << std::endl;
+  fhHeader << "} // namespace YaComponent" << std::endl;
+  fhHeaderIfc << "} // namespace YaComponent" << std::endl;
 
-  fhHeader << "" << std::endl;
-  fhHeaderIfc << "" << std::endl;
-
-  fhSource << "\n}" << std::endl;
+  fhSource << "\n} // namespace YaComponent" << std::endl;
 
   fhHeader.close();
   fhSource.close();
   fhHeaderIfc.close();
 }
 void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
-                                       const std::string&           ifcName,
-                                       const ElementList&           properties,
-                                       const ElementList&           requests,
-                                       const ElementList&           responses,
-                                       const ElementList&           includes )
+                                       const std::string& ifcName,
+                                       const ElementList& properties,
+                                       const ElementList& requests,
+                                       const ElementList& responses,
+                                       const ElementList& includes )
 {
   std::ofstream fhSource;
   std::ofstream fhHeaderIfc;
   std::ofstream fhHeader;
 
-  auto sourceFilename    = ( codePath / ( ifcName + "Stub.cpp" ) ).string();
-  auto headerFilename    = ( codePath / ( ifcName + "Stub.h" ) ).string();
+  auto sourceFilename = ( codePath / ( ifcName + "Stub.cpp" ) ).string();
+  auto headerFilename = ( codePath / ( ifcName + "Stub.h" ) ).string();
   auto interfaceFilename = ( codePath / ( "I" + ifcName + "StubHandler.h" ) ).string();
 
   YaComponentCore::printDbg( std::string( "YaComponentCodeGen:: write interface stub source code file " ) + sourceFilename );
@@ -600,7 +608,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
   for ( const auto* include : includes )
   {
     auto filename = std::string( include->Attribute( "file" ) );
-    auto suffix   = std::string( ".h" );
+    auto suffix = std::string( ".h" );
     if ( filename.size() >= suffix.size() && filename.compare( filename.size() - suffix.size(), suffix.size(), suffix ) == 0 )
     {
       fhHeader << "#include \"" << include->Attribute( "file" ) << "\"" << std::endl;
@@ -625,18 +633,19 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
   fhHeaderIfc << "class I" << ifcName << "StubHandler\n";
   fhHeaderIfc << "{\n";
 
-  fhHeader << "class " << ifcName << "Stub: public YaStubBase\n";
+  fhHeader << "class " << ifcName << "Stub : public YaStubBase\n";
   fhHeader << "{\n";
   fhHeader << "  Q_OBJECT\n";
-  fhHeader << "  public:\n";
-  fhHeaderIfc << "  public:\n";
-  fhHeader << "    " << ifcName << "Stub( void* context, int id, I" << ifcName << "StubHandler& );\n";
-  fhHeader << "    virtual ~" << ifcName << "Stub();\n";
+  fhHeader << "public:\n";
+  fhHeaderIfc << "public:\n";
+  fhHeader << "  " << ifcName << "Stub( void* context, int id, I" << ifcName << "StubHandler& );\n";
+  fhHeader << "  virtual ~" << ifcName << "Stub();\n";
 
-  fhHeaderIfc << "    I" << ifcName << "StubHandler() {}\n";
-  fhHeaderIfc << "    virtual ~I" << ifcName << "StubHandler() {}\n";
+  fhHeaderIfc << "  I" << ifcName << "StubHandler() {}\n";
+  fhHeaderIfc << "  virtual ~I" << ifcName << "StubHandler() {}\n";
 
-  fhHeader << "    enum KEYS {\n";
+  fhHeader << "  enum KEYS\n";
+  fhHeader << "  {\n";
 
   for ( const auto* prop : properties )
   {
@@ -647,7 +656,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       strProp += YaComponentCore::to_upper( prop->Attribute( "package" ) ) + "_";
     }
     strProp += YaComponentCore::to_upper( prop->Attribute( "id" ) );
-    fhHeader << "      " << strProp << ",\n";
+    fhHeader << "    " << strProp << ",\n";
   }
 
   for ( const auto* req : requests )
@@ -659,7 +668,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       strReq += YaComponentCore::to_upper( req->Attribute( "package" ) ) + "_";
     }
     strReq += YaComponentCore::to_upper( req->Attribute( "id" ) );
-    fhHeader << "      " << strReq << ",\n";
+    fhHeader << "    " << strReq << ",\n";
   }
 
   for ( const auto* resp : responses )
@@ -671,9 +680,11 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       strResp += YaComponentCore::to_upper( resp->Attribute( "package" ) ) + "_";
     }
     strResp += YaComponentCore::to_upper( resp->Attribute( "id" ) );
-    fhHeader << "      " << strResp << ",\n";
+    fhHeader << "    " << strResp << ",\n";
   }
-  fhHeader << "    };\n\n";
+  fhHeader << "  };\n";
+
+  fhHeader << std::endl;
 
   for ( const auto* prop : properties )
   {
@@ -683,13 +694,13 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       strMethod += std::string( prop->Attribute( "package" ) ) + "::";
     }
     strMethod += prop->Attribute( "id" );
-    fhHeader << "    int send(int key, const " << strMethod << "&);\n";
+    fhHeader << "  int send( int key, const " << strMethod << "& );\n";
   }
 
   for ( const auto* req : requests )
   {
-    fhHeaderIfc << "    virtual void onRequest" << req->Attribute( "id" );
-    fhHeaderIfc << "( int id ";
+    fhHeaderIfc << "  virtual void onRequest" << req->Attribute( "id" );
+    fhHeaderIfc << "( int id";
     std::string strPara;
 
     auto* para = req->FirstChildElement( "para" );
@@ -732,15 +743,13 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     }
   }
 
-  fhHeader << "\n";
-
   for ( const auto* resp : responses )
   {
-    fhHeader << "    int response" << resp->Attribute( "id" ) << "( int key, const std::string& ident";
+    fhHeader << "  int response" << resp->Attribute( "id" ) << "( int key, const std::string& ident";
     // if (resp->Attribute("package") && resp->Attribute("package")[0] != '\0') {
     //     fhHeader << resp->Attribute("package") << "::";
     // }
-    auto*       respPara = resp->FirstChildElement( "para" );
+    auto* respPara = resp->FirstChildElement( "para" );
     std::string strPara;
     while ( respPara )
     {
@@ -754,12 +763,13 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       respPara = respPara->NextSiblingElement( "para" );
     }
 
-    fhHeader << ");\n";
+    fhHeader << " );\n";
   }
 
-  fhHeader << "    void receive();\n";
+  fhHeader << "  // receive message from message queue\n";
+  fhHeader << "  void receive();\n";
 
-  fhHeader << "  protected:\n";
+  fhHeader << "\nprotected:\n";
 
   fhSource << "  : YaStubBase( context, id )\n";
   fhSource << "  , mCallbackHandler( rCallbackHandler )\n";
@@ -769,7 +779,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
   for ( const auto* resp : responses )
   {
     fhSource << "int " << ifcName << "Stub::response" << resp->Attribute( "id" ) << "( int key, const std::string& ident";
-    auto*       respPara = resp->FirstChildElement( "para" );
+    auto* respPara = resp->FirstChildElement( "para" );
     std::string strPara;
     while ( respPara )
     {
@@ -783,15 +793,15 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       respPara = respPara->NextSiblingElement( "para" );
     }
     // fhSource << resp->Attribute("id") << "& msg )\n";
-    fhSource << ")\n";
+    fhSource << " )\n";
     fhSource << "{\n";
     if ( !strPara.empty() )
     {
-      fhSource << "  return mPublisher.response(key, ident, msg);\n";
+      fhSource << "  return mPublisher.response( key, ident, msg );\n";
     }
     else
     {
-      fhSource << "  return mPublisher.response(key, ident);\n";
+      fhSource << "  return mPublisher.response( key, ident );\n";
     }
     fhSource << "}\n\n";
   }
@@ -831,7 +841,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
 
     fhSource << "}\n";
 
-    fhHeader << "    " << strMethod << " m" << prop->Attribute( "id" ) << ";\n";
+    fhHeader << "  " << strMethod << " m" << prop->Attribute( "id" ) << ";\n";
   }
 
   fhSource << "void " << ifcName << "Stub::receive()\n";
@@ -841,11 +851,10 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
   fhSource << "  while ( bMsgAvailable )\n";
   fhSource << "  {\n";
   fhSource << "    std::string ident;\n";
-  fhSource << "    int         key     = -1;\n";
-  fhSource << "    int         size    = -1;\n";
-  fhSource << "    char*       msgData = nullptr;\n";
+  fhSource << "    int key = -1;\n";
+  fhSource << "    int size = -1;\n";
+  fhSource << "    char* msgData = nullptr;\n";
   fhSource << "    ident.clear();\n";
-
   fhSource << "    int iBytes = mPublisher.receive( key, size, &msgData, ident );\n";
   fhSource << "    if ( 0 <= key )\n";
   fhSource << "    {\n";
@@ -870,7 +879,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     {
       strMember += "          if ( msgData && 0 <= size )\n";
       strMember += "          {\n";
-      strMember += std::string( "          m" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" ) + ".ParseFromArray(msgData, size);\n";
+      strMember += std::string( "            m" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" ) + ".ParseFromArray( msgData, size );\n";
       strMember += "          }\n";
       para = para->NextSiblingElement( "para" );
     }
@@ -884,10 +893,10 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     while ( resp )
     {
       auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
-      para                 = resp_definition->FirstChildElement( "para" );
+      para = resp_definition->FirstChildElement( "para" );
       while ( para )
       {
-        fhSource << "        m" << req->Attribute( "id" ) << "_" << para->Attribute( "id" ) << ".Clear();\n";
+        fhSource << "          m" << req->Attribute( "id" ) << "_" << para->Attribute( "id" ) << ".Clear();\n";
         para = para->NextSiblingElement( "para" );
       }
       resp = resp->NextSiblingElement( "resp" );
@@ -907,7 +916,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     while ( resp )
     {
       auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
-      para                 = resp_definition->FirstChildElement( "para" );
+      para = resp_definition->FirstChildElement( "para" );
       while ( para )
       {
         strPara += std::string( ", m" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" );
@@ -934,9 +943,9 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
         strResp += YaComponentCore::to_upper( resp->Attribute( "package" ) ) + "_";
       }
       strResp += YaComponentCore::to_upper( resp->Attribute( "id" ) );
-      fhSource << "        response" << resp->Attribute( "id" ) << "( " << strResp << ", ident";
+      fhSource << "          response" << resp->Attribute( "id" ) << "( " << strResp << ", ident";
       auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
-      para                 = resp_definition->FirstChildElement( "para" );
+      para = resp_definition->FirstChildElement( "para" );
       while ( para )
       {
         fhSource << ", m" << req->Attribute( "id" ) << "_" << para->Attribute( "id" );
@@ -966,7 +975,8 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
 
   fhSource << "}\n";
 
-  fhHeader << "    I" << ifcName << "StubHandler& mCallbackHandler;\n";
+  fhHeader << "  // member to store callback interface for actions\n";
+  fhHeader << "  I" << ifcName << "StubHandler& mCallbackHandler;\n";
 
   for ( const auto* req : requests )
   {
@@ -975,7 +985,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     auto* para = req->FirstChildElement( "para" );
     while ( para )
     {
-      strPara += "    ";
+      strPara += "  ";
       if ( para->Attribute( "package" ) && para->Attribute( "package" )[0] != '\0' )
       {
         strPara += std::string( para->Attribute( "package" ) ) + "::";
@@ -993,11 +1003,11 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       // }
       // strPara += std::string(resp->Attribute("id")) + " m" + req->Attribute("id") + "_"
       //            + resp->Attribute("id") + ";\n";
-      auto  resp_definition = findResponse( responses, resp->Attribute( "id" ) );
-      auto* respPara        = resp_definition->FirstChildElement( "para" );
+      auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
+      auto* respPara = resp_definition->FirstChildElement( "para" );
       while ( respPara )
       {
-        strPara += "    ";
+        strPara += "  ";
         if ( respPara->Attribute( "package" ) && respPara->Attribute( "package" )[0] != '\0' )
         {
           strPara += std::string( respPara->Attribute( "package" ) ) + "::";
@@ -1010,19 +1020,17 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
 
     if ( !strPara.empty() )
     {
-      fhHeader << strPara << std::endl;
+      fhHeader << strPara;
+      //<< std::endl;
     }
   }
 
-  fhHeader << "\n};\n";
-  fhHeaderIfc << "\n};\n";
+  fhHeader << "};\n";
+  fhHeaderIfc << "};\n";
 
-  fhHeader << "\n}\n";
-  fhHeaderIfc << "\n}\n";
+  fhHeader << "\n} // namespace YaComponent\n";
+  fhHeaderIfc << "\n} // namespace YaComponent\n";
   fhSource << "} // namespace YaComponent\n";
-
-  fhHeader << "\n";
-  fhHeaderIfc << "\n";
 
   fhHeader.close();
   fhSource.close();
