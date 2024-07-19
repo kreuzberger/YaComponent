@@ -115,5 +115,20 @@ if(clang_format)
     endforeach()
 
     add_test(NAME clang-format-test-text COMMAND ${clang_format} -n -Werror --style=file ${clang_files})
+endif()
 
+if(ruff)
+    set(ruff_files)
+    foreach(_file IN LISTS PYGENERATED_IFC_SRC PYGENERATED_IFC_SRC_OUT PYGENERATED_COMP_GEN_SRC
+                           PYGENERATED_COMP_OUT_SRC PyProtoSourcesTextGen
+    )
+        get_filename_component(_ext ${_file} LAST_EXT)
+        if("${_ext}" STREQUAL ".h" OR "${_ext}" STREQUAL ".py")
+            # message("clang for ${_file} ${_ext}")
+            list(APPEND ruff_files ${_file})
+        endif()
+    endforeach()
+
+    add_test(NAME ruff-check-text COMMAND ${ruff} check ${ruff_files})
+    add_test(NAME ruff-check-format-text COMMAND ${ruff} format --diff ${ruff_files})
 endif()

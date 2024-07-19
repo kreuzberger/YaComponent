@@ -70,3 +70,17 @@ yc_add_pytest(
     PYTHONPATH
     "${CMAKE_CURRENT_BINARY_DIR};${pyyacomponent_SOURCE_DIR};${SubscriptionsTest_BINARY_DIR}/python/PublisherIfc/py;${SubscriptionsTest_BINARY_DIR}/python/PublisherComp/py;${SubscriptionsTest_BINARY_DIR}/python/SubscriberComp/py"
 )
+
+if(ruff)
+    set(ruff_files)
+    foreach(_file IN LISTS GENERATED_IFC_SRC_PUB_PY GENERATED_COMP_PUB_SRC_PY GENERATED_COMP_SUB_SRC_PY)
+        get_filename_component(_ext ${_file} LAST_EXT)
+        if("${_ext}" STREQUAL ".h" OR "${_ext}" STREQUAL ".py")
+            # message("clang for ${_file} ${_ext}")
+            list(APPEND ruff_files ${_file})
+        endif()
+    endforeach()
+
+    add_test(NAME ruff-check-subscriptions COMMAND ${ruff} check ${ruff_files})
+    add_test(NAME ruff-check-format-subscriptions COMMAND ${ruff} format --diff ${ruff_files})
+endif()

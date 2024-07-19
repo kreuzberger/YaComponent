@@ -149,7 +149,21 @@ if(WITH_UBSAN)
     endif()
 endif()
 
+find_program(clang_format NAMES clang-format clang-format.exe)
+if(clang_format)
+    message("Found clang-format ${clang_format}")
+endif()
+
+find_program(ruff NAMES ruff)
+if(ruff)
+    message("Found ruff ${ruff}")
+endif()
+
 add_subdirectory(src)
 add_subdirectory(doc)
 add_subdirectory(test)
 add_subdirectory(dist)
+
+if(ruff)
+    add_test(NAME ruff-check COMMAND ${ruff} check ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/test)
+endif()
