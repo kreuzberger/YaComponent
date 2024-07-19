@@ -95,6 +95,14 @@ if(Python_FOUND)
     find_package(PySide2 REQUIRED)
     include(cmake/PyTestTools.cmake)
     execute_process(COMMAND $<TARGET_FILE:Python::Interpreter> --version)
+    set(PYTHON_VENV_DIR "${yacomponent_BINARY_DIR}/pypackages/venv")
+
+    if(WIN32)
+        set(ruff ${PYTHON_VENV_DIR}/Scripts/ruff.exe)
+    else()
+        set(ruff ${PYTHON_VENV_DIR}/bin/ruff)
+    endif()
+
 endif()
 
 include(ProcessorCount)
@@ -154,16 +162,7 @@ if(clang_format)
     message("Found clang-format ${clang_format}")
 endif()
 
-find_program(ruff NAMES ruff)
-if(ruff)
-    message("Found ruff ${ruff}")
-endif()
-
 add_subdirectory(src)
 add_subdirectory(doc)
 add_subdirectory(test)
 add_subdirectory(dist)
-
-if(ruff)
-    add_test(NAME ruff-check COMMAND ${ruff} check ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/test)
-endif()

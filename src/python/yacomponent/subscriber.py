@@ -37,7 +37,7 @@ class Subscriber:
             self._connected = True
             key = yc.KeyFmt % yc.KeySync
 
-            rc = self._reqresp_socket.send_string("", zmq.Flag.SNDMORE)
+            self._reqresp_socket.send_string("", zmq.Flag.SNDMORE)
             self._reqresp_socket.send_string(key, 0)
             sleep(yc.TimeOut)
             sync = False
@@ -52,7 +52,7 @@ class Subscriber:
     def send(self, key: int, msgSize: int, data: bytes) -> int:
         rc = -1
         if self._reqresp_socket is None:
-            raise RuntimerError("_reqresp_socket_should not be none")
+            raise RuntimeError("_reqresp_socket_should not be none")
         if self._reqresp_socket is not None:
             rc = self._reqresp_socket.send(b"", zmq.Flag.SNDMORE)
             assert -1 != rc
@@ -90,13 +90,13 @@ class Subscriber:
                         logging.debug(f"Subscriber::receive key {key} msg {msg}")
                         more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                         if more:
-                            raise RuntimerError(
+                            raise RuntimeError(
                                 "Subscriber::receive: KeyFmt unexpected end of message"
                             )
                 # logging.info(f"Subscriber::receive 3")
 
                 elif yc.KeySync == key:
-                    logging.debug(f"Subscriber::receive keySync")
+                    logging.debug("Subscriber::receive keySync")
                     key = None  # returning key should not be handled by caller
                     more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                     if more:

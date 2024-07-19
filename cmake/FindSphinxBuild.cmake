@@ -8,7 +8,7 @@ if(Python_FOUND)
     set(USE_DOC true)
 endif()
 
-set(SPHINX_VENV_DIR "${YaComponent_BINARY_DIR}/pypackages/venv")
+set(SPHINX_VENV_DIR "${yacomponent_BINARY_DIR}/pypackages/venv")
 
 if(WIN32)
     set(SPHINX_VENV_PYTHON_EXECUTABLE ${SPHINX_VENV_DIR}/Scripts/python.exe)

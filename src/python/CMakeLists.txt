@@ -31,3 +31,18 @@ install(
     COMPONENT "yacomponent"
     PATTERN "__pycache__" EXCLUDE
 )
+
+if(ruff)
+    set(ruff_files
+        ${CMAKE_CURRENT_SOURCE_DIR}/yacomponent/__init__.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/yacomponent/ctx.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/yacomponent/proxy.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/yacomponent/publisher.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/yacomponent/stub.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/yacomponent/subscriber.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/yacomponent/variables.py
+    )
+
+    add_test(NAME ruff-check-yacomponent COMMAND ${ruff} check ${ruff_files})
+    add_test(NAME ruff-check-format-yacomponent COMMAND ${ruff} format --diff ${ruff_files})
+endif()

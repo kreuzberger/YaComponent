@@ -2,8 +2,6 @@ import zmq
 from . import variables as yc
 
 from google.protobuf.message import Message
-from time import sleep
-from PySide2.QtCore import QCoreApplication
 
 import logging
 
@@ -65,7 +63,7 @@ class Publisher:
     def _send(self, key: int, msgSize: int, msgData: bytes) -> int:
         rc = -1
         if self._reqresp_socket is None:
-            raise RuntimerError("_reqresp_socket_should not be none")
+            raise RuntimeError("_reqresp_socket_should not be none")
         else:
             # store msg vor last value caching
             # logging.info(f"Publisher::_send store {msgData} with {key} to lvc_map")
@@ -95,11 +93,10 @@ class Publisher:
         return rc
 
     def _send_ident(self, key: int, msgSize: int, msgData: bytes, ident: str) -> int:
-        rc = -1
         response_all = True if 0 == len(ident) else False
 
         if self._reqresp_socket is None:
-            raise RuntimerError("_reqresp_socket_should not be none")
+            raise RuntimeError("_reqresp_socket_should not be none")
 
         if self._reqresp_socket is not None:
             for peer_name, value in self._peer_map.items():
@@ -145,7 +142,7 @@ class Publisher:
                             )
                             more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                             if more:
-                                msg = self._reqresp_socket.recv(zmq.NOBLOCK)
+                                msgData = self._reqresp_socket.recv(zmq.NOBLOCK)
                                 more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                                 if more:
                                     raise RuntimeError(
@@ -238,7 +235,7 @@ class Publisher:
                                 # more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                                 # if more:
                                 #     raise RuntimeError("Publisher:receive KeyEnd unexpected end")
-                                close()
+                                self.close()
                         else:
                             raise RuntimeError(f"Publisher:receive unknown key {key}")
 
