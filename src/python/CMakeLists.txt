@@ -43,6 +43,10 @@ if(ruff)
         ${CMAKE_CURRENT_SOURCE_DIR}/yacomponent/variables.py
     )
 
-    add_test(NAME ruff-check-yacomponent COMMAND ${ruff} check ${ruff_files})
+    add_custom_target(
+        ruff-check-yacomponent ALL
+        COMMAND ${ruff} check ${ruff_files}
+        DEPENDS python-update
+    )
     add_test(NAME ruff-check-format-yacomponent COMMAND ${ruff} format --diff ${ruff_files})
 endif()

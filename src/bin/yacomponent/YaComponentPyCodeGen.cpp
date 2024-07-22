@@ -45,14 +45,14 @@ void YaComponentPyCodeGen::writeComponent( const std::filesystem::path& codePath
   fhSource << "from yacomponent import variables as yc" << std::endl;
   fhSource << "import zmq" << std::endl;
   fhSource << "from PySide2.QtCore import QObject" << std::endl;
-  fhSource << "from PySide2.QtCore import QTimer, Signal, Slot" << std::endl;
+  fhSource << "from PySide2.QtCore import QTimer, Signal" << std::endl;
   fhSource << "from enum import IntEnum" << std::endl;
-  fhSource << "import logging" << std::endl;
+  // fhSource << "# import logging" << std::endl;
   fhSource << "from time import sleep" << std::endl;
+  fhSource << std::endl;
   fhSource << std::endl;
 
   fhSource << "class " << compName << "Impl(QObject):";
-  fhSource << std::endl;
   fhSource << std::endl;
 
   auto keyIdx = 0;
@@ -104,36 +104,35 @@ void YaComponentPyCodeGen::writeComponent( const std::filesystem::path& codePath
   fhSource << "    _startTimer = Signal(int)" << std::endl;
   fhSource << "    _stopTimer = Signal()" << std::endl;
 
-  fhSource << std::endl << std::endl;
+  fhSource << std::endl;
 
   fhSource << "    def __init__(self, " << strCtor << "):" << std::endl;
   fhSource << "        super().__init__()" << std::endl;
 
   for ( const auto& ifc : usedIfc )
   {
-    fhSource << "        self._" + ifc.at( "id" ) + " = " + ifc.at( "classname" ) + "Proxy( context, self.PROXY_IDS." +
-                  YaComponentCore::to_upper( ifc.at( "id" ) ) + ", cb_" + ifc.at( "classname" ) + " )"
+    fhSource << "        self._" + ifc.at( "id" ) + " = " + ifc.at( "classname" ) + "Proxy(context, self.PROXY_IDS." +
+                  YaComponentCore::to_upper( ifc.at( "id" ) ) + ", cb_" + ifc.at( "classname" ) + ")"
              << std::endl;
   }
 
   for ( const auto& ifc : providedIfc )
   {
-    fhSource << "        self._" + ifc.at( "id" ) + " = " + ifc.at( "classname" ) + "Stub( context, self.STUB_IDS." +
-                  YaComponentCore::to_upper( ifc.at( "id" ) ) + ", cb_" + ifc.at( "classname" ) + " )"
+    fhSource << "        self._" + ifc.at( "id" ) + " = " + ifc.at( "classname" ) + "Stub(context, self.STUB_IDS." +
+                  YaComponentCore::to_upper( ifc.at( "id" ) ) + ", cb_" + ifc.at( "classname" ) + ")"
              << std::endl;
   }
 
-  fhSource << "        self._Timer = QTimer( self )" << std::endl;
+  fhSource << "        self._Timer = QTimer(self)" << std::endl;
 
-  fhSource << std::endl;
   fhSource << std::endl;
 
   fhSource << "    def init(self):" << std::endl;
   fhSource << "        self._Timer.timeout.connect(self._onTimer)" << std::endl;
   fhSource << "        self._startTimer.connect(self._Timer.start)" << std::endl;
   fhSource << "        self._stopTimer.connect(self._Timer.stop)" << std::endl;
-  fhSource << "        self._startTimer.emit( yc.TimeOutMs )" << std::endl;
-  fhSource << std::endl << std::endl;
+  fhSource << "        self._startTimer.emit(yc.TimeOutMs)" << std::endl;
+  fhSource << std::endl;
 
   fhSource << "    def close(self):" << std::endl;
   fhSource << "        self._stopTimer.emit()" << std::endl;
@@ -151,22 +150,20 @@ void YaComponentPyCodeGen::writeComponent( const std::filesystem::path& codePath
     fhSource << "        self._" << ifc.at( "id" ) << ".close()" << std::endl;
   }
 
-  fhSource << std::endl << std::endl;
-
-  fhSource << std::endl << std::endl;
+  fhSource << std::endl;
 
   for ( const auto& ifc : providedIfc )
   {
-    fhSource << "    def setConnectionPara" << ifc.at( "id" ) << "(self, address: str, hwm:int ):" << std::endl;
-    fhSource << "        self._" << ifc.at( "id" ) << ".setConnectionPara( address, hwm )" << std::endl;
-    fhSource << std::endl << std::endl;
+    fhSource << "    def setConnectionPara" << ifc.at( "id" ) << "(self, address: str, hwm: int):" << std::endl;
+    fhSource << "        self._" << ifc.at( "id" ) << ".setConnectionPara(address, hwm)" << std::endl;
+    fhSource << std::endl;
   }
 
   for ( const auto& ifc : usedIfc )
   {
-    fhSource << "    def setConnectionPara" << ifc.at( "id" ) << "( self, address: str, ident: str ):" << std::endl;
-    fhSource << "        self._" << ifc.at( "id" ) << ".setConnectionPara( address, ident )" << std::endl;
-    fhSource << std::endl << std::endl;
+    fhSource << "    def setConnectionPara" << ifc.at( "id" ) << "(self, address: str, ident: str):" << std::endl;
+    fhSource << "        self._" << ifc.at( "id" ) << ".setConnectionPara(address, ident)" << std::endl;
+    fhSource << std::endl;
   }
 
   fhSource << "    def _onTimer(self):" << std::endl;
@@ -180,7 +177,6 @@ void YaComponentPyCodeGen::writeComponent( const std::filesystem::path& codePath
     fhSource << "        self._" << ifc.at( "id" ) << ".receive()" << std::endl;
   }
 
-  fhSource << std::endl;
   fhSource.close();
 }
 
@@ -211,14 +207,15 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   fhSource.open( sourceFilename, std::ios::out | std::ios::trunc );
   fhHeaderIfc.open( ifcFilename, std::ios::out | std::ios::trunc );
 
-  fhSource << "# import " << ifcName << "ProxyHandler" << std::endl;
+  // fhSource << "# import " << ifcName << "ProxyHandler" << std::endl;
   fhSource << "import zmq" << std::endl;
-  fhSource << "from yacomponent.proxy import *" << std::endl;
-  fhSource << "from yacomponent.stub import *" << std::endl;
+  fhSource << "from yacomponent.proxy import Proxy" << std::endl;
 
-  fhSource << "from PySide2.QtCore import QObject" << std::endl;
-  fhSource << "from enum import IntEnum, auto" << std::endl;
-  fhSource << "import logging" << std::endl;
+  if ( !( properties.empty() && requests.empty() && responses.empty() ) )
+  {
+    fhSource << "from enum import IntEnum" << std::endl;
+  }
+  // fhSource << "import logging" << std::endl;
 
   for ( const auto* include : includes )
   {
@@ -226,38 +223,37 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     auto suffix = std::string( ".py" );
     if ( filename.size() >= suffix.size() && filename.compare( filename.size() - suffix.size(), suffix.size(), suffix ) == 0 )
     {
-      fhSource << "from " << filename.erase( filename.find( suffix ) ) << " import *" << std::endl;
-      fhHeaderIfc << "from " << filename << " import *" << std::endl;
+      fhSource << "from " << filename.erase( filename.find( suffix ) ) << " import *  # noqa: F403" << std::endl;
+      fhHeaderIfc << "from " << filename << " import *  # noqa: F403" << std::endl;
     }
   }
 
-  fhSource << std::endl;
-  fhSource << std::endl;
+  fhSource << std::endl << std::endl;
 
-  fhSource << "class " << ifcName << "Proxy( Proxy ):" << std::endl << std::endl;
+  fhSource << "class " << ifcName << "Proxy(Proxy):" << std::endl;
   fhSource << "    _callback = None" << std::endl;
 
   for ( const auto* prop : properties )
   {
     fhSource << "    ";
-    fhSource << "_" << prop->Attribute( "id" ) << " = " << prop->Attribute( "id" ) << "()" << std::endl;
+    fhSource << "_" << prop->Attribute( "id" ) << " = " << prop->Attribute( "id" ) << "()  # noqa: F405\n";
   }
   for ( const auto* resp : responses )
   {
-    fhSource << "    ";
     auto* para = resp->FirstChildElement( "para" );
     while ( para )
     {
-      fhSource << "_" << para->Attribute( "id" ) << " = " << para->Attribute( "id" ) << "()" << std::endl;
+      fhSource << "    ";
+      fhSource << "_" << para->Attribute( "id" ) << " = " << para->Attribute( "id" ) << "()  # noqa: F405\n";
       para = para->NextSiblingElement( "para" );
     }
   }
 
   fhSource << std::endl;
 
-  auto keyIdx = 0;
   if ( !( properties.empty() && requests.empty() && responses.empty() ) )
   {
+    auto keyIdx = 0;
     fhSource << "    class KEYS(IntEnum):" << std::endl;
 
     for ( const auto* prop : properties )
@@ -282,16 +278,14 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
       fhSource << "        " << strResp << " = " << keyIdx++ << std::endl;
     }
 
-    fhSource << std::endl << std::endl;
+    fhSource << std::endl;
   }
-  fhSource << "    def __init__(self, context: zmq.Context, id: int, callback ): # todo callback "
-              "handler"
-           << std::endl;
+  fhSource << "    def __init__(self, context: zmq.Context, id: int, callback):" << std::endl;
 
-  fhSource << "        super().__init__(context,id)" << std::endl;
+  fhSource << "        super().__init__(context, id)" << std::endl;
   fhSource << "        self._callback = callback" << std::endl;
 
-  fhSource << std::endl << std::endl;
+  fhSource << std::endl;
 
   if ( !( properties.empty() && responses.empty() ) )
   {
@@ -301,7 +295,7 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     for ( const auto* prop : properties )
     {
       fhHeaderIfc << "    def onProperty" << prop->Attribute( "id" ) << "(self, id: int, property: ";
-      fhHeaderIfc << prop->Attribute( "id" ) << " ):" << std::endl;
+      fhHeaderIfc << prop->Attribute( "id" ) << "):" << std::endl;
       fhHeaderIfc << "        pass" << std::endl;
       fhHeaderIfc << std::endl << std::endl;
     }
@@ -321,10 +315,10 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
       para = para->NextSiblingElement( "para" );
       paraIdx++;
     }
-    strPara += " ) -> int:";
+    strPara += ") -> int:  # noqa: F405";
     fhSource << "    def request" << req->Attribute( "id" ) << "(self" << strPara << std::endl;
 
-    fhSource << "        return self._Subscriber.request( self.KEYS.REQ_";
+    fhSource << "        return self._Subscriber.request(self.KEYS.REQ_";
     fhSource << YaComponentCore::to_upper( req->Attribute( "id" ) );
     if ( has_para )
     {
@@ -334,8 +328,8 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     {
       fhSource << ", None";
     }
-    fhSource << " )" << std::endl;
-    fhSource << std::endl << std::endl;
+    fhSource << ")" << std::endl;
+    fhSource << std::endl;
   }
 
   fhSource << "    def receive(self) -> None:" << std::endl;
@@ -345,9 +339,9 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   fhSource << "            key = -1" << std::endl;
   fhSource << "            msgData = None" << std::endl;
 
-  fhSource << "            (key, msgData) = self._Subscriber.receive( )" << std::endl;
+  fhSource << "            (key, msgData) = self._Subscriber.receive()" << std::endl;
   fhSource << "            if key is not None:" << std::endl;
-  fhSource << "                match (key):" << std::endl;
+  fhSource << "                match key:" << std::endl;
   for ( const auto* resp : responses )
   {
     std::string strResp;
@@ -374,7 +368,7 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     }
     else
     {
-      fhSource << "                        self._callback.onResponse" << resp->Attribute( "id" ) << "(self._id )" << std::endl;
+      fhSource << "                        self._callback.onResponse" << resp->Attribute( "id" ) << "(self._id)" << std::endl;
     }
   }
 
@@ -386,7 +380,7 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     fhSource << "                    case self.KEYS." << strProp << ":" << std::endl;
     fhSource << "                        if msgData is not None:" << std::endl;
     fhSource << "                            self._" << prop->Attribute( "id" ) << ".ParseFromString(msgData)" << std::endl;
-    fhSource << "                            self._callback.onProperty" << prop->Attribute( "id" ) << "( self._id, self._" << prop->Attribute( "id" )
+    fhSource << "                            self._callback.onProperty" << prop->Attribute( "id" ) << "(self._id, self._" << prop->Attribute( "id" )
              << ")" << std::endl;
   }
 
@@ -397,7 +391,8 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   fhSource << "            else:" << std::endl;
   fhSource << "                msgAvailable = False" << std::endl;
 
-  fhSource << std::endl << std::endl;
+  // if responses
+  // fhSource << std::endl;
 
   for ( const auto* resp : responses )
   {
@@ -409,7 +404,7 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
       strPara += std::string( para->Attribute( "id" ) );
       para = para->NextSiblingElement( "para" );
     }
-    fhHeaderIfc << "    def onResponse" << resp->Attribute( "id" ) << "( self, proxyId: int";
+    fhHeaderIfc << "    def onResponse" << resp->Attribute( "id" ) << "(self, proxyId: int";
     fhHeaderIfc << strPara << "):" << std::endl;
     fhHeaderIfc << "        pass" << std::endl;
     fhHeaderIfc << std::endl << std::endl;
@@ -441,33 +436,36 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     auto suffix = std::string( ".py" );
     if ( filename.size() >= suffix.size() && filename.compare( filename.size() - suffix.size(), suffix.size(), suffix ) == 0 )
     {
-      fhSource << "from " << filename.erase( filename.find( suffix ) ) << " import *" << std::endl;
-      fhHeaderIfc << "from " << filename << " import *" << std::endl;
+      fhSource << "from " << filename.erase( filename.find( suffix ) ) << " import *  # noqa: F403" << std::endl;
+      fhHeaderIfc << "from " << filename << " import *  # noqa: F403" << std::endl;
       // fhHeaderIfc << "#include \"" << include->Attribute("file") << "\"" << std::endl;
     }
   }
 
-  fhSource << "# import" << ifcName << "StubHandler\n";
+  // fhSource << "# import " << ifcName << "StubHandler\n";
+
+  fhSource << "from yacomponent.stub import Stub" << std::endl;
+
+  // fhSource << "# todo python equivalent to <google/protobuf/util/message_differencer.h>\n";
+
+  if ( !( properties.empty() && requests.empty() && responses.empty() ) )
+  {
+    fhSource << "from enum import IntEnum" << std::endl;
+  }
 
   fhSource << "import zmq" << std::endl;
-  fhSource << "from yacomponent.stub import *" << std::endl;
-
-  fhSource << "# todo python equivalent to <google/protobuf/util/message_differencer.h>\n";
-
-  fhSource << "from PySide2.QtCore import QObject" << std::endl;
-  fhSource << "from enum import IntEnum, auto" << std::endl;
   fhSource << "import logging" << std::endl;
 
   fhSource << std::endl;
   fhSource << std::endl;
 
-  fhSource << "class " << ifcName << "Stub( Stub ):" << std::endl << std::endl;
+  fhSource << "class " << ifcName << "Stub(Stub):" << std::endl;
   fhSource << "    _callback = None" << std::endl;
 
   for ( const auto* prop : properties )
   {
     fhSource << "    ";
-    fhSource << "_" << prop->Attribute( "id" ) << " = None" << std::endl;
+    fhSource << "_" << prop->Attribute( "id" ) << " = " << prop->Attribute( "id" ) << "()  # noqa: F405" << std::endl;
   }
 
   for ( const auto* req : requests )
@@ -476,7 +474,8 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     while ( para )
     {
       fhSource << "    "
-               << "_" << req->Attribute( "id" ) << "_" << para->Attribute( "id" ) << " = " << para->Attribute( "id" ) << "()" << std::endl;
+               << "_" << req->Attribute( "id" ) << "_" << para->Attribute( "id" ) << " = " << para->Attribute( "id" ) << "()  # noqa: F405"
+               << std::endl;
       para = para->NextSiblingElement( "para" );
     }
     auto* resp = req->FirstChildElement( "resp" );
@@ -487,8 +486,8 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       while ( resp_para )
       {
         fhSource << "    "
-                 << "_" << req->Attribute( "id" ) << "_" << resp_para->Attribute( "id" ) << " = " << resp_para->Attribute( "id" ) << "()"
-                 << std::endl;
+                 << "_" << req->Attribute( "id" ) << "_" << resp_para->Attribute( "id" ) << " = " << resp_para->Attribute( "id" )
+                 << "()  # noqa: F405" << std::endl;
         resp_para = resp_para->NextSiblingElement( "para" );
       }
       resp = resp->NextSiblingElement( "resp" );
@@ -497,11 +496,11 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
 
   fhSource << std::endl;
 
-  auto keyIdx = 0;
 
   if ( !( properties.empty() && requests.empty() && responses.empty() ) )
   {
     fhSource << "    class KEYS(IntEnum):" << std::endl;
+    auto keyIdx = 0;
 
     for ( const auto* prop : properties )
     {
@@ -526,11 +525,8 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       fhSource << "        " << strResp << " = " << keyIdx++ << std::endl;
     }
 
-    fhSource << std::endl << std::endl;
-  }
+    fhSource << std::endl;
 
-  if ( !( properties.empty() && requests.empty() && responses.empty() ) )
-  {
     fhHeaderIfc << "class " << ifcName << "StubHandler:" << std::endl;
     fhHeaderIfc << std::endl;
 
@@ -557,30 +553,26 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       }
       if ( !strPara.empty() )
       {
-        fhHeaderIfc << strPara << " ):\n";
+        fhHeaderIfc << strPara << "):\n";
       }
       else
       {
-        fhHeaderIfc << " ):\n";
+        fhHeaderIfc << "):\n";
       }
       fhHeaderIfc << "        pass" << std::endl;
-      fhHeaderIfc << std::endl << std::endl;
+      fhHeaderIfc << std::endl;
     }
   }
 
-  fhSource << "    def __init__(self, context: zmq.Context, id: int, callback ): # todo callback "
-              "handler"
-           << std::endl;
-
-  fhSource << "        super().__init__(context,id)" << std::endl;
+  fhSource << "    def __init__(self, context: zmq.Context, id: int, callback):" << std::endl;
+  fhSource << "        super().__init__(context, id)" << std::endl;
   fhSource << "        self._callback = callback" << std::endl;
 
-  fhSource << std::endl;
   fhSource << std::endl;
 
   for ( const auto* resp : responses )
   {
-    fhSource << "    def response" << resp->Attribute( "id" ) << "( self, key: int, ident: str";
+    fhSource << "    def response" << resp->Attribute( "id" ) << "(self, key: int, ident: str";
     auto* para = resp->FirstChildElement( "para" );
     auto strParaMsg = ( para ) ? std::string( ", msg" ) : std::string( ", None" );
     while ( para )
@@ -588,10 +580,9 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       fhSource << ", msg: " << para->Attribute( "id" );
       para = para->NextSiblingElement( "para" );
     }
-    fhSource << ") -> int:\n";
+    fhSource << ") -> int:  # noqa: F405\n";
 
     fhSource << "        return self._Publisher.response(key, ident" << strParaMsg << ")\n";
-    fhSource << std::endl;
     fhSource << std::endl;
   }
 
@@ -599,7 +590,7 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
   {
     std::string strMethod;
     strMethod += prop->Attribute( "id" );
-    fhSource << "    def send" << prop->Attribute( "id" ) << "(self, key: int, msg: " << strMethod << ") -> int:\n";
+    fhSource << "    def send" << prop->Attribute( "id" ) << "(self, key: int, msg: " << strMethod << ") -> int:  # noqa: F405\n";
 
     bool onChange = std::string( prop->Attribute( "onChange" ) ) == "0" ? false : true;
 
@@ -607,16 +598,15 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     {
       fhSource << "        rc = 0\n";
       fhSource << "        if not self._" << prop->Attribute( "id" ) << " == msg:\n";
-      fhSource << "            rc = self._Publisher.send(key, msg )\n";
+      fhSource << "            rc = self._Publisher.send(key, msg)\n";
       fhSource << "            self._" << prop->Attribute( "id" ) << " = msg\n";
       fhSource << "        return rc\n";
     }
     else
     {
-      fhSource << "        return self._Publisher.send(key, msg )\n";
+      fhSource << "        return self._Publisher.send(key, msg)\n";
     }
 
-    fhSource << std::endl;
     fhSource << std::endl;
   }
 
@@ -662,13 +652,13 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       para = resp_definition->FirstChildElement( "para" );
       while ( para )
       {
-        fhSource << "                        self._" << req->Attribute( "id" ) << "_" << para->Attribute( "id" ) << ".Clear();\n";
+        fhSource << "                        self._" << req->Attribute( "id" ) << "_" << para->Attribute( "id" ) << ".Clear()\n";
         para = para->NextSiblingElement( "para" );
       }
       resp = resp->NextSiblingElement( "resp" );
     }
 
-    fhSource << "                        self._callback.onRequest" << req->Attribute( "id" ) << "( self._id";
+    fhSource << "                        self._callback.onRequest" << req->Attribute( "id" ) << "(self._id";
     std::string strPara;
 
     para = req->FirstChildElement( "para" );
@@ -693,11 +683,11 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     }
     if ( !strPara.empty() )
     {
-      fhSource << strPara << " )\n";
+      fhSource << strPara << ")\n";
     }
     else
     {
-      fhSource << " )\n";
+      fhSource << ")\n";
     }
 
     resp = req->FirstChildElement( "resp" );
@@ -706,7 +696,7 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       std::string strResp;
       strResp += "self.KEYS.RESP_";
       strResp += YaComponentCore::to_upper( resp->Attribute( "id" ) );
-      fhSource << "                        self.response" << resp->Attribute( "id" ) << "( " << strResp << ", ident";
+      fhSource << "                        self.response" << resp->Attribute( "id" ) << "(" << strResp << ", ident";
 
       auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
       para = resp_definition->FirstChildElement( "para" );
@@ -724,14 +714,13 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
   }
 
   fhSource << "                    case _:\n";
-  fhSource << "                        if  -1 < key:\n";
+  fhSource << "                        if -1 < key:\n";
   fhSource << "                            raise RuntimeError(f\"" << ifcName << "Stub::receive() unknown key '{key}'\")" << std::endl;
-
-  fhSource << std::endl;
   fhSource << "            else:" << std::endl;
   fhSource << "                msgAvailable = False" << std::endl;
 
-  fhSource << std::endl << std::endl;
+  // if requests?
+  // fhSource << std::endl;
 
   for ( const auto* req : requests )
   {
