@@ -83,10 +83,10 @@ else()
     find_package(Protobuf REQUIRED PATHS ${Protobuf_DIR} NO_DEFAULT_PATH)
 endif()
 
+find_package(Python 3.11 COMPONENTS Interpreter Development)
+
 find_package(PlantUML REQUIRED)
 find_package(SphinxBuild REQUIRED)
-
-find_package(Python 3.11 COMPONENTS Interpreter Development)
 
 enable_testing()
 include(CTest)

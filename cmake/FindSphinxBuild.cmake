@@ -4,7 +4,7 @@
 
 set(USE_DOC false)
 if(Python_FOUND)
-    message(STATUS "python was not found, the documentation will not be generated.")
+    message(STATUS "python found, the documentation will be generated.")
     set(USE_DOC true)
 endif()
 
@@ -136,7 +136,7 @@ macro(sphinx_doc_generate outtarget)
         add_custom_command(
             OUTPUT ${SPHINX_DOC_OUTPUT_DIRECTORY}/html/${_project_name}.html
             COMMAND
-                ${CMAKE_COMMAND} -E env ${SPHINX_ENV}${SPHINX_VENV_PYTHON_EXECUTABLE} -s -m sphinx -c
+                ${CMAKE_COMMAND} -E env ${SPHINX_ENV} ${SPHINX_VENV_PYTHON_EXECUTABLE} -s -m sphinx -c
                 "${SPHINX_DOC_CONFIGDIR}" ${_sphinx_options} -b html ${SPHINX_DOC_WORKING_DIRECTORY}
                 ${SPHINX_DOC_OUTPUT_DIRECTORY}/html
             DEPENDS ${SPHINX_DOC_DEPENDS} ${SPHINX_DOC_RST_FILES}
