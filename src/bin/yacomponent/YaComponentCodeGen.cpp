@@ -423,7 +423,7 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
   fhSource << "    int key = -1;" << std::endl;
   fhSource << "    int size = -1;" << std::endl;
   fhSource << "    char* msgData = nullptr;" << std::endl;
-  fhSource << "    int iBytes = mSubscriber.receive( key, size, &msgData );" << std::endl;
+  fhSource << "    mSubscriber.receive( key, size, &msgData );" << std::endl;
   fhSource << "    if ( 0 <= key )" << std::endl;
   fhSource << "    {" << std::endl;
   fhSource << "      switch ( key )" << std::endl;
@@ -855,7 +855,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
   fhSource << "    int size = -1;\n";
   fhSource << "    char* msgData = nullptr;\n";
   fhSource << "    ident.clear();\n";
-  fhSource << "    int iBytes = mPublisher.receive( key, size, &msgData, ident );\n";
+  fhSource << "    mPublisher.receive( key, size, &msgData, ident );\n";
   fhSource << "    if ( 0 <= key )\n";
   fhSource << "    {\n";
 
