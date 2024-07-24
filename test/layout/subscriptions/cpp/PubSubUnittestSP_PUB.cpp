@@ -3,37 +3,38 @@
 
 #include <QtCore/QtDebug>
 
-PublisherComp::PublisherComp(void *context)
-    : YaComponent::PublisherCompImpl(context, static_cast<IPublisherIfcStubHandler &>(*this))
-    , IPublisherIfcStubHandler(*this)
-    , mData()
-    , mTime()
-{}
+PublisherComp::PublisherComp( void* context )
+  : YaComponent::PublisherCompImpl( context, static_cast<IPublisherIfcStubHandler&>( *this ) )
+  , IPublisherIfcStubHandler( *this )
+  , mData()
+  , mTime()
+{
+}
 
 void PublisherComp::init()
 {
-    PublisherCompImpl::init();
-    mData.mutable_samples()->Reserve(4096);
+  PublisherCompImpl::init();
+  mData.mutable_samples()->Reserve( 4096 );
 }
 
-void PublisherComp::onRequestStartData(int id)
+void PublisherComp::onRequestStartData( int id )
 {
-    qDebug() << "received onRequestStartData, start sending";
+  qDebug() << "received onRequestStartData, start sending";
 }
 
-void PublisherComp::onRequestStopData(int id)
+void PublisherComp::onRequestStopData( int id )
 {
-    qDebug() << "received onRequestStopData";
+  qDebug() << "received onRequestStopData";
 }
 
-int PublisherComp::sendData(const Data &data)
+int PublisherComp::sendData( const Data& data )
 {
-    mData = data;
-    return mReceiverData.send(YaComponent::PublisherIfcStub::PROP_DATA, data);
+  mData = data;
+  return mReceiverData.send( YaComponent::PublisherIfcStub::PROP_DATA, data );
 }
 
-int PublisherComp::sendTime(const Time &time)
+int PublisherComp::sendTime( const Time& time )
 {
-    mTime = time;
-    return mReceiverData.send(YaComponent::PublisherIfcStub::PROP_TIME, time);
+  mTime = time;
+  return mReceiverData.send( YaComponent::PublisherIfcStub::PROP_TIME, time );
 }

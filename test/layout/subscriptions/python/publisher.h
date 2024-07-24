@@ -9,23 +9,23 @@
 class PublisherComp : public YaComponent::PublisherCompImpl, public YaComponent::IPublisherIfcStubHandler
 {
 public:
-    PublisherComp(void *context);
-    virtual ~PublisherComp() {}
+  PublisherComp( void* context );
+  virtual ~PublisherComp() {}
 
-    virtual void onRequestStartData(int id);
-    virtual void onRequestStopData(int id);
-    virtual void init();
-    int miTimerID;
-    int mConsumers = 0;
-    bool mbFinished;
+  virtual void onRequestStartData( int id );
+  virtual void onRequestStopData( int id );
+  virtual void init();
+  int miTimerID;
+  int mConsumers = 0;
+  bool mbFinished;
 
-    void sendResponseStop();
+  void sendResponseStop();
 
 protected:
-    virtual void timerEvent(QTimerEvent *);
+  virtual void timerEvent( QTimerEvent* );
 
 private:
-    Data moData;
+  Data moData;
 };
 
 // class PubSubUnittestMPPub : public QObject

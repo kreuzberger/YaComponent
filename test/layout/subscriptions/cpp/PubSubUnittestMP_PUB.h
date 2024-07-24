@@ -9,46 +9,46 @@
 class PublisherComp : public YaComponent::PublisherCompImpl, public YaComponent::IPublisherIfcStubHandler
 {
 public:
-    PublisherComp(void *context);
-    virtual ~PublisherComp() {}
+  PublisherComp( void* context );
+  virtual ~PublisherComp() {}
 
-    virtual void onRequestStartData(int id);
-    virtual void onRequestStopData(int id);
-    virtual void init();
-    int miTimerID;
-    int mConsumers = 0;
-    bool mbFinished;
+  virtual void onRequestStartData( int id );
+  virtual void onRequestStopData( int id );
+  virtual void init();
+  int miTimerID;
+  int mConsumers = 0;
+  bool mbFinished;
 
-    void sendResponseStop();
+  void sendResponseStop();
 
 protected:
-    virtual void timerEvent(QTimerEvent *);
+  virtual void timerEvent( QTimerEvent* );
 
 private:
-    Data moData;
+  Data moData;
 };
 
 class PubSubUnittestMPPub : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    PubSubUnittestMPPub(QObject *parent = 0);
-    ~PubSubUnittestMPPub() {}
+  PubSubUnittestMPPub( QObject* parent = 0 );
+  ~PubSubUnittestMPPub() {}
 
 signals:
 
 private slots:
 
-    void initTestCase() {}
-    void cleanupTestCase();
-    void testMPMTPub();
+  void initTestCase() {}
+  void cleanupTestCase();
+  void testMPMTPub();
 
 private:
-    void initComponentsMPMT();
-    void cleanupComponents();
-    void testRoutine();
+  void initComponentsMPMT();
+  void cleanupComponents();
+  void testRoutine();
 
-    void *mpContext;
-    QThread *mpPublisherThread;
-    PublisherComp *mpPublisher;
+  void* mpContext;
+  QThread* mpPublisherThread;
+  PublisherComp* mpPublisher;
 };

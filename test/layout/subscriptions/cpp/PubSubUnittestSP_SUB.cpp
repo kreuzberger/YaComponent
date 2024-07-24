@@ -4,51 +4,51 @@
 //#include "PublisherIfcProxy.h"
 #include <QtCore/QtDebug>
 
-SubscriberComp::SubscriberComp(void *context)
-    : IPublisherIfcProxyHandler(*this)
-    , YaComponent::SubscriberCompImpl(context, static_cast<IPublisherIfcProxyHandler &>(*this))
-    , miPropertiesCnt(0)
-    , miPropertiesTimeCnt(0)
+SubscriberComp::SubscriberComp( void* context )
+  : IPublisherIfcProxyHandler( *this )
+  , YaComponent::SubscriberCompImpl( context, static_cast<IPublisherIfcProxyHandler&>( *this ) )
+  , miPropertiesCnt( 0 )
+  , miPropertiesTimeCnt( 0 )
 {
-    //  setNotification(YaComponent::TextGenIfcProxy::PROP_TEXTGEN_TEXT);
+  //  setNotification(YaComponent::TextGenIfcProxy::PROP_TEXTGEN_TEXT);
 }
 
 void SubscriberComp::init()
 {
-    SubscriberCompImpl::init();
+  SubscriberCompImpl::init();
 }
 
 int SubscriberComp::setNotifications()
 {
-    int rc = -1;
-    rc = mData.setNotification(YaComponent::PublisherIfcProxy::PROP_DATA);
-    if (-1 == rc)
-        return rc;
-    rc = mData.setNotification(YaComponent::PublisherIfcProxy::PROP_TIME);
+  int rc = -1;
+  rc = mData.setNotification( YaComponent::PublisherIfcProxy::PROP_DATA );
+  if ( -1 == rc )
     return rc;
+  rc = mData.setNotification( YaComponent::PublisherIfcProxy::PROP_TIME );
+  return rc;
 }
 
 int SubscriberComp::requestStart()
 {
-    return mData.requestStartData();
+  return mData.requestStartData();
 }
 
 int SubscriberComp::requestStop()
 {
-    return mData.requestStartData();
+  return mData.requestStartData();
 }
 
-void SubscriberComp::onPropertyData(int proxyId, const Data &data)
+void SubscriberComp::onPropertyData( int proxyId, const Data& data )
 {
-    assert(PROXY_DATA == proxyId);
-    qDebug() << "received onProperty" << data.counter();
-    miPropertiesCnt++;
-    mLastData = data;
+  assert( PROXY_DATA == proxyId );
+  qDebug() << "received onProperty" << data.counter();
+  miPropertiesCnt++;
+  mLastData = data;
 }
-void SubscriberComp::onPropertyTime(int proxyId, const Time &time)
+void SubscriberComp::onPropertyTime( int proxyId, const Time& time )
 {
-    assert(PROXY_DATA == proxyId);
-    qDebug() << "received onProperty Time" << time.counter();
-    miPropertiesTimeCnt++;
-    mLastTime = time;
+  assert( PROXY_DATA == proxyId );
+  qDebug() << "received onProperty Time" << time.counter();
+  miPropertiesTimeCnt++;
+  mLastTime = time;
 }

@@ -5,24 +5,24 @@
 class TextGenComp : public YaComponent::TextGenCompImpl, public YaComponent::ITextGenIfcStubHandler
 {
 public:
-    TextGenComp(void *context);
-    virtual ~TextGenComp() {}
+  TextGenComp( void* context );
+  virtual ~TextGenComp() {}
 
-    void onRequestStartText( int id, const TextGen::Request&, TextGen::RequestInfo& ) override;
-    void onRequestStopText( int id, const TextGen::Request&, TextGen::RequestInfo& ) override;
-    void onRequestTerminate(int id) override;
-    void init() override;
-    int miRequestStop;
-    int miTimerID;
-    int miMessageCnt;
-    int miMaxMessageCnt;
-    bool mbSendAutoStop;
+  void onRequestStartText( int id, const TextGen::Request&, TextGen::RequestInfo& ) override;
+  void onRequestStopText( int id, const TextGen::Request&, TextGen::RequestInfo& ) override;
+  void onRequestTerminate( int id ) override;
+  void init() override;
+  int miRequestStop;
+  int miTimerID;
+  int miMessageCnt;
+  int miMaxMessageCnt;
+  bool mbSendAutoStop;
 
-    void sendResponseStop();
+  void sendResponseStop();
 
 protected:
-    void timerEvent(QTimerEvent *) override;
+  void timerEvent( QTimerEvent* ) override;
 
 private:
-    TextGen::Text moText;
+  TextGen::Text moText;
 };

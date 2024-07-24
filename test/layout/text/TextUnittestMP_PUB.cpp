@@ -1,66 +1,70 @@
 #include "TextUnittestMP_PUB.h"
 #include <QtTest>
 
-QTEST_MAIN(TextUnittestMPPub);
+QTEST_MAIN( TextUnittestMPPub );
 
-TextUnittestMPPub::TextUnittestMPPub(QObject *parent)
-    : QObject(parent)
-    , mpContext(0)
-    , mpTextGenThread(0)
-    , mpTextGen1(0)
-{}
+TextUnittestMPPub::TextUnittestMPPub( QObject* parent )
+  : QObject( parent )
+  , mpContext( 0 )
+  , mpTextGenThread( 0 )
+  , mpTextGen1( 0 )
+{
+}
 
 void TextUnittestMPPub::initComponentsMPMT()
 {
-    mpContext = YaComponent::context_new();
-    mpTextGen1 = new TextGenComp(mpContext);
-    mpTextGenThread = new QThread();
+  mpContext = YaComponent::context_new();
+  mpTextGen1 = new TextGenComp( mpContext );
+  mpTextGenThread = new QThread();
 
-    mpTextGenThread->start();
+  mpTextGenThread->start();
 
-    mpTextGen1->init();
-    mpTextGen1->setConnectionParaTextGenXml("tcp://*:42164", 5000);
-    mpTextGen1->setConnectionParaTextGenPlain("tcp://*:42263", 5000);
-    mpTextGen1->moveToThread(mpTextGenThread);
+  mpTextGen1->init();
+  mpTextGen1->setConnectionParaTextGenXml( "tcp://*:42164", 5000 );
+  mpTextGen1->setConnectionParaTextGenPlain( "tcp://*:42263", 5000 );
+  mpTextGen1->moveToThread( mpTextGenThread );
 }
 void TextUnittestMPPub::cleanupTestCase() {}
 
 void TextUnittestMPPub::cleanupComponents()
 {
-    mpTextGen1->close();
+  mpTextGen1->close();
 
-    YaComponent::context_term(mpContext);
+  YaComponent::context_term( mpContext );
 
-    if (mpTextGenThread) {
-        mpTextGenThread->quit();
-        QTest::qWait(100);
-        QVERIFY(mpTextGenThread->isFinished());
-    }
+  if ( mpTextGenThread )
+  {
+    mpTextGenThread->quit();
+    QTest::qWait( 100 );
+    QVERIFY( mpTextGenThread->isFinished() );
+  }
 
-    mpContext = 0;
-    delete mpTextGenThread;
-    mpTextGenThread = 0;
-    delete mpTextGen1;
-    mpTextGen1 = 0;
+  mpContext = 0;
+  delete mpTextGenThread;
+  mpTextGenThread = 0;
+  delete mpTextGen1;
+  mpTextGen1 = 0;
 }
 
 void TextUnittestMPPub::testMPMTPub()
 {
-    initComponentsMPMT();
+  initComponentsMPMT();
 
-    testRoutine();
-    cleanupComponents();
+  testRoutine();
+  cleanupComponents();
 }
 
 void TextUnittestMPPub::testRoutine()
 {
-    QVERIFY(0 == mpTextGen1->miRequestStop);
-    for (int idx = 0; idx < 10; idx++) {
-        QTest::qWait(500);
-        if (1 == mpTextGen1->miRequestStop) {
-            break;
-        }
+  QVERIFY( 0 == mpTextGen1->miRequestStop );
+  for ( int idx = 0; idx < 10; idx++ )
+  {
+    QTest::qWait( 500 );
+    if ( 1 == mpTextGen1->miRequestStop )
+    {
+      break;
     }
-    QVERIFY(1 == mpTextGen1->miRequestStop);
-    QTest::qWait(1000);
+  }
+  QVERIFY( 1 == mpTextGen1->miRequestStop );
+  QTest::qWait( 1000 );
 }

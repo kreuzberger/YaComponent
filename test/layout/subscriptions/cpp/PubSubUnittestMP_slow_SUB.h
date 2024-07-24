@@ -6,47 +6,45 @@
 #include <yacomponent/YaComponent.h>
 #include <QtCore/QThread>
 
-class SubscriberComp : public YaComponent::SubscriberCompImpl,
-                       public YaComponent::IPublisherIfcProxyHandler
+class SubscriberComp : public YaComponent::SubscriberCompImpl, public YaComponent::IPublisherIfcProxyHandler
 {
 public:
-    explicit SubscriberComp(void *context);
-    virtual ~SubscriberComp() {}
+  explicit SubscriberComp( void* context );
+  virtual ~SubscriberComp() {}
 
-    void onPropertyData(int, const Data &) override;
-    void onPropertyTime(int, const Time &) override;
+  void onPropertyData( int, const Data& ) override;
+  void onPropertyTime( int, const Time& ) override;
 
-    virtual void init() override;
+  virtual void init() override;
 
-    int setNotifications();
-    int clearNotifications();
+  int setNotifications();
+  int clearNotifications();
 
-    int requestStart();
-    int requestStop();
+  int requestStart();
+  int requestStop();
 
-    int miPropertiesCnt;
-
+  int miPropertiesCnt;
 };
 
 class TextUnittestMPSub : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    TextUnittestMPSub(QObject *parent = 0);
-    ~TextUnittestMPSub() {}
+  TextUnittestMPSub( QObject* parent = 0 );
+  ~TextUnittestMPSub() {}
 
 signals:
 
 private slots:
 
-    void initTestCase();
-    void cleanupTestCase();
-    void testMPMTSub();
+  void initTestCase();
+  void cleanupTestCase();
+  void testMPMTSub();
 
 private:
-    void testRoutine();
+  void testRoutine();
 
-    void *mpContext;
-    QThread *mpSubscriberThread;
-    SubscriberComp *mpSubscriberComp;
+  void* mpContext;
+  QThread* mpSubscriberThread;
+  SubscriberComp* mpSubscriberComp;
 };

@@ -1,51 +1,52 @@
 #include "publisher.h"
 #include <QtTest>
 
-//QTEST_MAIN(PubSubUnittestMPPub);
+// QTEST_MAIN(PubSubUnittestMPPub);
 
 #include <stdio.h>
 #include <QtCore/QCoreApplication>
 
-void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+void myMessageOutput( QtMsgType type, const QMessageLogContext& context, const QString& msg )
 {
-    QByteArray localMsg = msg.toLocal8Bit();
-    const char *file = context.file ? context.file : "";
-    const char *function = context.function ? context.function : "";
-    switch (type) {
+  QByteArray localMsg = msg.toLocal8Bit();
+  const char* file = context.file ? context.file : "";
+  const char* function = context.function ? context.function : "";
+  switch ( type )
+  {
     case QtDebugMsg:
-        fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
+      fprintf( stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function );
+      break;
     case QtInfoMsg:
-        fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
+      fprintf( stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function );
+      break;
     case QtWarningMsg:
-        fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
+      fprintf( stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function );
+      break;
     case QtCriticalMsg:
-        fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
+      fprintf( stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function );
+      break;
     case QtFatalMsg:
-        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    }
+      fprintf( stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function );
+      break;
+  }
 }
 
-int main(int argc, char **argv)
+int main( int argc, char** argv )
 {
-    qInstallMessageHandler(myMessageOutput);
-    QCoreApplication app(argc, argv);
+  qInstallMessageHandler( myMessageOutput );
+  QCoreApplication app( argc, argv );
 
-    auto mpContext = YaComponent::context_new();
-    auto mpPublisher = new PublisherComp(mpContext);
-    auto mpPublisherThread = new QThread();
+  auto mpContext = YaComponent::context_new();
+  auto mpPublisher = new PublisherComp( mpContext );
+  auto mpPublisherThread = new QThread();
 
-    mpPublisherThread->start();
+  mpPublisherThread->start();
 
-    mpPublisher->init();
-    mpPublisher->setConnectionParaReceiverData("tcp://*:42165", 5000);
-    mpPublisher->moveToThread(mpPublisherThread);
+  mpPublisher->init();
+  mpPublisher->setConnectionParaReceiverData( "tcp://*:42165", 5000 );
+  mpPublisher->moveToThread( mpPublisherThread );
 
-    return app.exec();
+  return app.exec();
 }
 
 // PubSubUnittestMPPub::PubSubUnittestMPPub(QObject *parent)
@@ -108,71 +109,80 @@ int main(int argc, char **argv)
 
 #include <QtCore/QtDebug>
 
-PublisherComp::PublisherComp(void *context)
-    : YaComponent::PublisherCompImpl(context, dynamic_cast<IPublisherIfcStubHandler &>(*this))
-    , IPublisherIfcStubHandler(*this)
-    , miTimerID(-1)
-    , moData()
-    , mbFinished(false)
-{}
+PublisherComp::PublisherComp( void* context )
+  : YaComponent::PublisherCompImpl( context, dynamic_cast<IPublisherIfcStubHandler&>( *this ) )
+  , IPublisherIfcStubHandler( *this )
+  , miTimerID( -1 )
+  , moData()
+  , mbFinished( false )
+{
+}
 
 void PublisherComp::init()
 {
-    PublisherCompImpl::init();
-    moData.mutable_samples()->Reserve(4096);
-    mConsumers = 0;
+  PublisherCompImpl::init();
+  moData.mutable_samples()->Reserve( 4096 );
+  mConsumers = 0;
 }
 
-void PublisherComp::onRequestStartData(int id)
+void PublisherComp::onRequestStartData( int id )
 {
-    mConsumers++;
-    assert(mConsumers <= 2);
-    if (mConsumers > 2) {
-        qFatal("maximum number of consumers greater than expected 2");
-    }
-    qDebug() << "received onRequestStartData, start sending, consumers currently" << mConsumers;
-    if (0 < miTimerID) {
-        qDebug() << "already started";
-    } else {
-        miTimerID = QObject::startTimer(YaComponent::TimeOut);
-    }
+  mConsumers++;
+  assert( mConsumers <= 2 );
+  if ( mConsumers > 2 )
+  {
+    qFatal( "maximum number of consumers greater than expected 2" );
+  }
+  qDebug() << "received onRequestStartData, start sending, consumers currently" << mConsumers;
+  if ( 0 < miTimerID )
+  {
+    qDebug() << "already started";
+  }
+  else
+  {
+    miTimerID = QObject::startTimer( YaComponent::TimeOut );
+  }
 }
 
-void PublisherComp::onRequestStopData(int id)
+void PublisherComp::onRequestStopData( int id )
 {
-    mConsumers--;
-    qDebug() << "received onRequestStopData, actual consumers" << mConsumers;
-    if (0 == mConsumers) {
-        qInfo() << "no more consumers, stop and exit";
-        mbFinished = true;
+  mConsumers--;
+  qDebug() << "received onRequestStopData, actual consumers" << mConsumers;
+  if ( 0 == mConsumers )
+  {
+    qInfo() << "no more consumers, stop and exit";
+    mbFinished = true;
 
-        if (0 < miTimerID) {
-            QObject::killTimer(miTimerID);
-            miTimerID = 0;
-        }
+    if ( 0 < miTimerID )
+    {
+      QObject::killTimer( miTimerID );
+      miTimerID = 0;
     }
+  }
 }
 
-void PublisherComp::timerEvent(QTimerEvent *)
+void PublisherComp::timerEvent( QTimerEvent* )
 {
-    int rc = -1;
-    static int messageCount = 0;
+  int rc = -1;
+  static int messageCount = 0;
 
-    do {
-        //moText.set_text(qPrintable(oText.arg(miMessageCnt)));
-        moData.set_timeseconds(0);
-        moData.set_timefraction(0.0);
-        moData.set_counter(messageCount);
-        messageCount++;
-        // for (int idx = 0; idx < 2048; idx++) {
-        //     //moData.set_samples(idx, rand() / std::numeric_limits<int>::max() );
-        // }
+  do
+  {
+    // moText.set_text(qPrintable(oText.arg(miMessageCnt)));
+    moData.set_timeseconds( 0 );
+    moData.set_timefraction( 0.0 );
+    moData.set_counter( messageCount );
+    messageCount++;
+    // for (int idx = 0; idx < 2048; idx++) {
+    //     //moData.set_samples(idx, rand() / std::numeric_limits<int>::max() );
+    // }
 
-        rc = mReceiverData.send(YaComponent::PublisherIfcStub::PROP_DATA, moData);
-        messageCount++;
-        if (messageCount % 10 == 0) {
-            break;
-        }
+    rc = mReceiverData.send( YaComponent::PublisherIfcStub::PROP_DATA, moData );
+    messageCount++;
+    if ( messageCount % 10 == 0 )
+    {
+      break;
+    }
 
-    } while (rc != -1);
+  } while ( rc != -1 );
 }

@@ -7,25 +7,25 @@
 
 class TextUnittestMPPub : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    TextUnittestMPPub(QObject *parent = 0);
-    ~TextUnittestMPPub() {}
+  TextUnittestMPPub( QObject* parent = 0 );
+  ~TextUnittestMPPub() {}
 
 signals:
 
 private slots:
 
-    void initTestCase() {}
-    void cleanupTestCase();
-    void testMPMTPub();
+  void initTestCase() {}
+  void cleanupTestCase();
+  void testMPMTPub();
 
 private:
-    void initComponentsMPMT();
-    void cleanupComponents();
-    void testRoutine();
+  void initComponentsMPMT();
+  void cleanupComponents();
+  void testRoutine();
 
-    void *mpContext;
-    QThread *mpTextGenThread;
-    TextGenComp *mpTextGen1;
+  void* mpContext;
+  QThread* mpTextGenThread;
+  TextGenComp* mpTextGen1;
 };

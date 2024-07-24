@@ -7,28 +7,28 @@
 class TextOutComp : public YaComponent::TextOutCompImpl, public YaComponent::ITextGenIfcProxyHandler
 {
 public:
-    TextOutComp(void *context);
-    virtual ~TextOutComp() {}
+  TextOutComp( void* context );
+  virtual ~TextOutComp() {}
 
-    void onPropertyText(int, const TextGen::Text &) override;
+  void onPropertyText( int, const TextGen::Text& ) override;
 
-    void onResponseStartedText( int, const TextGen::RequestInfo& ) override;
-    void onResponseStoppedText( int, const TextGen::RequestInfo& ) override;
-    void onResponseTerminated(int) override;
+  void onResponseStartedText( int, const TextGen::RequestInfo& ) override;
+  void onResponseStoppedText( int, const TextGen::RequestInfo& ) override;
+  void onResponseTerminated( int ) override;
 
-    void init() override;
+  void init() override;
 
-    void setNotifications();
-    void clearNotifications();
+  void setNotifications();
+  void clearNotifications();
 
-    void requestStart();
-    void requestStop();
-    void requestTerminate();
+  void requestStart();
+  void requestStop();
+  void requestTerminate();
 
-    int miPropertiesCnt;
-    int miResponseStartCnt;
-    int miResponseStopCnt;
-    int miResponseTerminatedCnt;
+  int miPropertiesCnt;
+  int miResponseStartCnt;
+  int miResponseStopCnt;
+  int miResponseTerminatedCnt;
 
 private:
 };

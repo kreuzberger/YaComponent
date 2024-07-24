@@ -496,7 +496,6 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
 
   fhSource << std::endl;
 
-
   if ( !( properties.empty() && requests.empty() && responses.empty() ) )
   {
     fhSource << "    class KEYS(IntEnum):" << std::endl;
