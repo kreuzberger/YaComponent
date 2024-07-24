@@ -551,21 +551,27 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     fhHeader << prop->Attribute( "id" );
     fhHeader << " m" << prop->Attribute( "id" ) << ";" << std::endl;
   }
+  std::map<std::string, std::string> memberMap;
+
   for ( const auto* resp : responses )
   {
     auto* para = resp->FirstChildElement( "para" );
     while ( para )
     {
-      fhHeader << "  ";
+      std::string name;
+
       if ( para->Attribute( "package" ) && para->Attribute( "package" )[0] != '\0' )
       {
-        fhHeader << std::string( para->Attribute( "package" ) ) + "::";
+        name += std::string( para->Attribute( "package" ) ) + std::string( "::" );
       }
-      fhHeader << std::string( para->Attribute( "id" ) );
-      fhHeader << " m" << para->Attribute( "id" ) << ";" << std::endl;
-
+      name += std::string( para->Attribute( "id" ) );
+      memberMap.insert( { name, std::string( "  " ) + name + std::string( " m" ) + std::string( para->Attribute( "id" ) ) + std::string( ";\n" ) } );
       para = para->NextSiblingElement( "para" );
     }
+  }
+  for ( const auto& member : memberMap )
+  {
+    fhHeader << member.second;
   }
 
   fhHeader << "};" << std::endl;
@@ -724,11 +730,11 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       while ( respPara )
       {
         strPara += ", ";
-        if ( resp_definition->Attribute( "package" ) && resp_definition->Attribute( "package" )[0] != '\0' )
+        if ( respPara->Attribute( "package" ) && respPara->Attribute( "package" )[0] != '\0' )
         {
-          strPara += std::string( resp->Attribute( "package" ) ) + "::";
+          strPara += std::string( respPara->Attribute( "package" ) ) + "::";
         }
-        strPara += std::string( resp_definition->Attribute( "id" ) ) + "&";
+        strPara += std::string( respPara->Attribute( "id" ) ) + "&";
         respPara = respPara->NextSiblingElement( "para" );
       }
       resp = resp->NextSiblingElement( "resp" );
@@ -754,11 +760,11 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     while ( respPara )
     {
       strPara += ", const ";
-      if ( resp->Attribute( "package" ) && resp->Attribute( "package" )[0] != '\0' )
+      if ( respPara->Attribute( "package" ) && respPara->Attribute( "package" )[0] != '\0' )
       {
-        strPara += std::string( resp->Attribute( "package" ) ) + "::";
+        strPara += std::string( respPara->Attribute( "package" ) ) + "::";
       }
-      strPara += std::string( resp->Attribute( "id" ) ) + "&";
+      strPara += std::string( respPara->Attribute( "id" ) ) + "&";
       fhHeader << strPara;
       respPara = respPara->NextSiblingElement( "para" );
     }
@@ -784,11 +790,11 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     while ( respPara )
     {
       strPara += ", const ";
-      if ( resp->Attribute( "package" ) && resp->Attribute( "package" )[0] != '\0' )
+      if ( respPara->Attribute( "package" ) && respPara->Attribute( "package" )[0] != '\0' )
       {
-        strPara += std::string( resp->Attribute( "package" ) ) + "::";
+        strPara += std::string( respPara->Attribute( "package" ) ) + "::";
       }
-      strPara += std::string( resp->Attribute( "id" ) ) + "& msg";
+      strPara += std::string( respPara->Attribute( "id" ) ) + "& msg";
       fhSource << strPara;
       respPara = respPara->NextSiblingElement( "para" );
     }

@@ -15,16 +15,16 @@
       <resp id="StoppedText" package="TextGen"/>
     </req>
     <req id="Terminate">
-      <resp id="Terminated"/>
+      <resp id="Terminated" package="TextGen"/>
     </req>
   </requests>
   <responses>
     <resp id="StartedText" package="TextGen">
-      <para id="StartedText" package="TextGen"/>
+      <para id="RequestInfo" package="TextGen"/>
     </resp>
     <resp id="StoppedText" package="TextGen">
-      <para id="StoppedText" package="TextGen"/>
+      <para id="RequestInfo" package="TextGen"/>
     </resp>
-    <resp id="Terminated"/>
+    <resp id="Terminated" package="TextGen"/>
   </responses>
 </interface>

@@ -40,11 +40,11 @@ class TextOutStubCallback(TextGenIfcProxyHandler):
         logging.info(f"TextOutStubCallback::onPropertyText")
 
 
-    def onResponseStartedText( self, proxyId: int, msg: StartedText):
+    def onResponseStartedText( self, proxyId: int, msg: RequestInfo):
         assert(TextOutCompImpl.PROXY_IDS.XML == proxyId)
         self._ResponseStartCnt += 1
 
-    def onResponseStoppedText( self, proxyId: int, msg: StoppedText):
+    def onResponseStoppedText( self, proxyId: int, msg: RequestInfo):
         logging.info(f"TextOutStubCallback::onResponseStoppedText")
 
 
@@ -55,13 +55,13 @@ class TextOutStubCallback(TextGenIfcProxyHandler):
 
 class TextGenStubCallback(TextGenIfcStubHandler):
 
-    def onRequestStartText(self, id: int , Request, StartedText ):
+    def onRequestStartText(self, id: int , Request, RequestInfo ):
         if StartedText is None:
             StartedText = StartedText()
         StartedText.id = 3
 
 
-    def onRequestStopText(self, id: int , Request, StoppedText ):
+    def onRequestStopText(self, id: int , Request, RequestInfo ):
         logging.info(f"TextGenStubCallback::onRequestStopText")
 
 

@@ -11,20 +11,11 @@ message Request {
   int32 id = 1;
 }
 
-message Response {
-  int32 id = 1;
-}
-
-
-message StartedText {
-  optional int32 id = 1;
-}
-
-message StoppedText {
+message RequestInfo {
   optional int32 id = 1;
 }
 
 service Requests {
-  rpc StartText(Request) returns (StartedText);
-  rpc StopText(Request) returns (StoppedText);
+  rpc StartText(Request) returns (RequestInfo);
+  rpc StopText(Request) returns (RequestInfo);
 }

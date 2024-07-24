@@ -8,8 +8,8 @@ public:
     TextGenComp(void *context);
     virtual ~TextGenComp() {}
 
-    void onRequestStartText(int id, const TextGen::Request &, TextGen::StartedText &) override;
-    void onRequestStopText(int id, const TextGen::Request &, TextGen::StoppedText &) override;
+    void onRequestStartText( int id, const TextGen::Request&, TextGen::RequestInfo& ) override;
+    void onRequestStopText( int id, const TextGen::Request&, TextGen::RequestInfo& ) override;
     void onRequestTerminate(int id) override;
     void init() override;
     int miRequestStop;

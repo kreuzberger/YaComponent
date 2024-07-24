@@ -51,7 +51,7 @@ void TextOutComp::onPropertyText(int proxyId, const TextGen::Text & /*text*/)
     miPropertiesCnt++;
 }
 
-void TextOutComp::onResponseStartedText(int proxyId, const TextGen::StartedText &resp)
+void TextOutComp::onResponseStartedText( int proxyId, const TextGen::RequestInfo& resp )
 {
     assert(PROXY_XML == proxyId);
     fprintf(stderr, "received onResponse startedText\n");
@@ -59,7 +59,7 @@ void TextOutComp::onResponseStartedText(int proxyId, const TextGen::StartedText 
     miResponseStartCnt++;
 }
 
-void TextOutComp::onResponseStoppedText(int proxyId, const TextGen::StoppedText &resp)
+void TextOutComp::onResponseStoppedText( int proxyId, const TextGen::RequestInfo& resp )
 {
     fprintf(stderr, "received onResponse stoppedText\n");
     assert(PROXY_XML == proxyId);

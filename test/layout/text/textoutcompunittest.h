@@ -12,8 +12,8 @@ public:
 
     void onPropertyText(int, const TextGen::Text &) override;
 
-    void onResponseStartedText(int, const TextGen::StartedText &) override;
-    void onResponseStoppedText(int, const TextGen::StoppedText &) override;
+    void onResponseStartedText( int, const TextGen::RequestInfo& ) override;
+    void onResponseStoppedText( int, const TextGen::RequestInfo& ) override;
     void onResponseTerminated(int) override;
 
     void init() override;
