@@ -1,6 +1,6 @@
 set(INCLUDE_INSTALL_DIR "include")
 set(LIBRARY_INSTALL_DIR "lib")
-set(LIBRARY_VERSION "24.3")
+set(LIBRARY_VERSION "24.4")
 set(LIBRARY_SYSTEM_NAME "${CMAKE_HOST_SYSTEM_NAME}")
 
 include(CMakePackageConfigHelpers)
@@ -38,7 +38,6 @@ install(
     DESTINATION lib/cmake/YaComponent
     COMPONENT "yacomponent"
 )
-
 
 add_subdirectory(tinyxml2)
 add_subdirectory(lib)
