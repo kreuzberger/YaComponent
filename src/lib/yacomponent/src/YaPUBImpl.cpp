@@ -126,15 +126,20 @@ int YaPUBImpl::receive( int& key, int& size, char** pcData, std::string& ident )
                   qFatal( "YaPUBImpl::receive KeySetNotification unexpected end" );
                 }
                 // send values from LVC Cache
-                if ( mLVC.find( notKey ) != mLVC.end() )
+                auto lvc = LVC();
                 {
-                  auto lvc = mLVC[notKey];
-                  if ( 0 < lvc.msgSize && !lvc.msg.empty() )
+                  const std::lock_guard<std::mutex> lock( mLVCMutex );
+                  if ( mLVC.find( notKey ) != mLVC.end() )
                   {
-                    qDebug() << "YaPUBImpl::receive: sending LVC cache values on "
-                                "setNotification";
-                    send( notKey, lvc.msgSize, lvc.msg.c_str() );
+                    lvc = mLVC[notKey];
                   }
+                }
+                if ( 0 < lvc.msgSize && !lvc.msg.empty() )
+                {
+                  qDebug() << "YaPUBImpl::receive: sending LVC cache values on "
+                              "setNotification: size"
+                           << lvc.msgSize << "msg" << lvc.msg.c_str();
+                  send( notKey, lvc.msgSize, lvc.msg.c_str() );
                 }
               }
             }
@@ -268,7 +273,15 @@ int YaPUBImpl::send( int key, int msgSize, const char* msgData )
     memset( cKey, 0, YaComponent::KeySize + 1 );
     sprintf( cKey, YaComponent::KeyFmt, key );
 
-    mLVC[key] = { msgSize, msgData };
+    if ( msgSize >= YaComponent::MaxMessageSize )
+    {
+      fprintf( stderr, "YaPUBImpl::send: message size %d exceeds maximum message size of %d", msgSize, YaComponent::MaxMessageSize );
+      return -1;
+    }
+    {
+      const std::lock_guard<std::mutex> lock( mLVCMutex );
+      mLVC[key] = { msgSize, msgData };
+    }
 
     for ( auto it = mPeerMap.begin(); it != mPeerMap.end(); ++it )
     {
@@ -289,7 +302,7 @@ int YaPUBImpl::send( int key, int msgSize, const char* msgData )
         rc = zmq_send( mpReqRespSocket, 0, 0, ZMQ_SNDMORE );
         assert( -1 != rc );
 
-        auto send_more = ( 0 != msgSize && 0 != msgData );
+        auto send_more = ( 0 != msgSize && nullptr != msgData );
 
         int flags = send_more ? ZMQ_SNDMORE : 0;
 
@@ -355,7 +368,7 @@ int YaPUBImpl::send( int key, int msgSize, const char* msgData, const std::strin
       assert( it->first.length() == rc );
       rc = zmq_send( mpReqRespSocket, 0, 0, ZMQ_SNDMORE );
       assert( -1 != rc );
-      auto send_more = ( 0 != msgSize && 0 != msgData );
+      auto send_more = ( 0 != msgSize && nullptr != msgData );
       int flags = send_more ? ZMQ_SNDMORE : 0;
       rc = zmq_send( mpReqRespSocket, cKey, YaComponent::KeySize, flags );
       assert( YaComponent::KeySize == rc );

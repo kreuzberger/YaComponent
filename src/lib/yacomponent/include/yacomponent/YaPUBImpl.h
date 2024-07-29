@@ -4,6 +4,7 @@
 #include <google/protobuf/message_lite.h>
 
 #include <map>
+#include <mutex>
 #include <unordered_map>
 
 class YaPUBImpl
@@ -45,4 +46,5 @@ private:
 
   // LastValueCaching
   std::unordered_map<int, LVC> mLVC;
+  std::mutex mLVCMutex;
 };

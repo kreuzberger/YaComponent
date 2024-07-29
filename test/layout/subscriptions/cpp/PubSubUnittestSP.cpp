@@ -99,7 +99,7 @@ void PubSubUnittestSP::testSendLVCConnect()
   int rc = -1;
   rc = mSubScriber->setNotifications();
   QVERIFY( -1 != rc );
-  QTest::qWait( 50 );
+  QVERIFY( QTest::qWaitFor( [this]() { return 1 == mSubScriber->miPropertiesCnt; } ) );
   QCOMPARE( mSubScriber->miPropertiesCnt, 1 );
   QCOMPARE( mSubScriber->mLastData.counter(), 9 );
 }
