@@ -1,13 +1,13 @@
 #include "BasicReqRespTest.h"
 #include <QtTest>
 
-QTEST_MAIN( TextUnittest );
+QTEST_MAIN( BasicReqRespTest );
 
-TextUnittest::TextUnittest( QObject* parent )
+BasicReqRespTest::BasicReqRespTest( QObject* parent )
   : QObject( parent )
 {
 }
-void TextUnittest::initComponents()
+void BasicReqRespTest::initComponents()
 {
   mpContext = YaComponent::context_new();
   mpWorker = new WorkerComp( mpContext );
@@ -28,9 +28,9 @@ void TextUnittest::initComponents()
   mpControl->moveToThread( mpControlThread );
 }
 
-void TextUnittest::cleanupTestCase() {}
+void BasicReqRespTest::cleanupTestCase() {}
 
-void TextUnittest::cleanupComponents()
+void BasicReqRespTest::cleanupComponents()
 {
   mpControl->close();
   mpWorker->close();
@@ -60,7 +60,7 @@ void TextUnittest::cleanupComponents()
   mpContext = 0;
 }
 
-void TextUnittest::testSingleReqResp()
+void BasicReqRespTest::testSingleReqResp()
 {
   initComponents();
 
@@ -72,7 +72,7 @@ void TextUnittest::testSingleReqResp()
   cleanupComponents();
 }
 
-void TextUnittest::testReqRespRepeated()
+void BasicReqRespTest::testReqRespRepeated()
 {
   initComponents();
 
@@ -82,5 +82,18 @@ void TextUnittest::testReqRespRepeated()
     QVERIFY( QTest::qWaitFor( [=]() { return ( idx + 1 ) == mpControl->messageCount(); }, 1000 ) );
     QCOMPARE( QString::fromStdString( std::string( "what " ) + std::to_string( idx + 1 ) ), QString::fromStdString( mpControl->message().msg() ) );
   }
+  cleanupComponents();
+}
+
+void BasicReqRespTest::testMaxMessageSize()
+{
+  initComponents();
+  std::string s( YaComponent::MaxMessageSize + 10, 'a' ); // s == "aaaaa"
+  auto rc = mpControl->sendReq( s );
+
+  QVERIFY( -1 != rc );
+  QVERIFY( QTest::qWaitFor( [this]() { return 1 == mpControl->messageCount(); }, 1000 ) );
+  QCOMPARE( s + std::string( " 1" ), mpControl->message().msg() );
+
   cleanupComponents();
 }

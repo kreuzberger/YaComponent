@@ -87,6 +87,9 @@ class Publisher:
                         logging.info(
                             f"Publisher::_send msg {msgData} with {key} to {peer_name}"
                         )
+                        self._reqresp_socket.send_string(
+                            yc.MessageSizeFmt % msgSize, send_flags
+                        )
                         self._reqresp_socket.send(msgData, 0)
 
                     rc = 1
@@ -110,6 +113,9 @@ class Publisher:
                 self._reqresp_socket.send_string(yc.KeyFmt % key, send_flags)
 
                 if send_more:
+                    self._reqresp_socket.send_string(
+                        yc.MessageSizeFmt % msgSize, send_flags
+                    )
                     self._reqresp_socket.send(msgData, 0)
 
         return 1
@@ -142,6 +148,7 @@ class Publisher:
                             )
                             more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                             if more:
+                                self._reqresp_socket.recv(zmq.NOBLOCK)  # msgSize
                                 msgData = self._reqresp_socket.recv(zmq.NOBLOCK)
                                 more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                                 if more:
@@ -176,6 +183,7 @@ class Publisher:
                             logging.info(
                                 f"Publisher::receive peer {ident} KeySetNotification"
                             )
+                            self._reqresp_socket.recv(zmq.NOBLOCK)  # msgSize
                             notification_key_str = self._reqresp_socket.recv(
                                 zmq.NOBLOCK
                             )
@@ -209,6 +217,7 @@ class Publisher:
                             logging.info(
                                 f"Publisher::receive peer {ident} KeyClearNotification"
                             )
+                            self._reqresp_socket.recv(zmq.NOBLOCK)  # msg_size
                             notification_key_str = self._reqresp_socket.recv(
                                 zmq.NOBLOCK
                             )

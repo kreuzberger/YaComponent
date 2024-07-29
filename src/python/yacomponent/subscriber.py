@@ -62,6 +62,10 @@ class Subscriber:
         rc = self._reqresp_socket.send((yc.KeyFmt % key).encode("ascii"), flags)
         assert -1 != rc
         if send_more:
+            rc = self._reqresp_socket.send(
+                (yc.MessageSizeFmt % msgSize).encode("ascii"), flags
+            )
+            assert -1 != rc
             rc = self._reqresp_socket.send(data.encode("utf-8"), 0)
 
         return rc
@@ -86,6 +90,7 @@ class Subscriber:
                 if 0 <= key:
                     more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                     if more:
+                        self._reqresp_socket.recv(zmq.NOBLOCK)  # msgSize
                         msg = self._reqresp_socket.recv(zmq.NOBLOCK)
                         logging.debug(f"Subscriber::receive key {key} msg {msg}")
                         more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
@@ -100,6 +105,7 @@ class Subscriber:
                     key = None  # returning key should not be handled by caller
                     more = self._reqresp_socket.getsockopt(zmq.RCVMORE)
                     if more:
+                        # self._reqresp_socket.recv(zmq.NOBLOCK)  # msgSize
                         msg = self._reqresp_socket.recv(zmq.NOBLOCK)
                         logging.debug(f"Subscriber::receive keySync msg {msg}")
                         if 0 < len(msg):

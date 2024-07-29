@@ -41,12 +41,12 @@ public:
   const OutgoingMessage& message() const { return mLastRespMessage; }
   int messageCount() const { return mRespMessageCnt; }
 
-  void sendReq( const std::string& str )
+  int sendReq( const std::string& str )
   {
     IncomingMessage msg;
     msg.set_id( 1 );
     msg.set_msg( str );
-    mWorker.requestText( msg );
+    return mWorker.requestText( msg );
   }
 
 private:
@@ -54,12 +54,12 @@ private:
   int mRespMessageCnt = 0;
 };
 
-class TextUnittest : public QObject
+class BasicReqRespTest : public QObject
 {
   Q_OBJECT
 public:
-  TextUnittest( QObject* parent = 0 );
-  ~TextUnittest() {}
+  BasicReqRespTest( QObject* parent = 0 );
+  ~BasicReqRespTest() {}
 
 signals:
 
@@ -69,6 +69,7 @@ private slots:
   void cleanupTestCase();
   void testSingleReqResp();
   void testReqRespRepeated();
+  void testMaxMessageSize();
 
 private:
   void initComponents();

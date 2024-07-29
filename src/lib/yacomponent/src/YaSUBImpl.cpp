@@ -51,6 +51,10 @@ int YaSUBImpl::request( int key, const ::google::protobuf::MessageLite& msg )
 {
   int rc = -1;
   int iSize = msg.ByteSizeLong();
+  if ( iSize > mMsgOutBuffer.size() )
+  {
+    mMsgOutBuffer.resize( iSize );
+  }
   msg.SerializeToArray( mMsgOutBuffer.data(), iSize );
   assert( iSize == msg.GetCachedSize() );
   rc = send( key, iSize, mMsgOutBuffer.data() );
@@ -86,6 +90,11 @@ int YaSUBImpl::send( int key, int size, const char* data )
     assert( -1 != rc );
     if ( send_more )
     {
+      char skey[YaComponent::MessageSize + 1];
+      sprintf( skey, YaComponent::MessageSizeFmt, size );
+      // qDebug() << "YaSUBImpl::send: key " << ckey << "from key value" << key;
+      rc = zmq_send( mpReqRespSocket, skey, YaComponent::MessageSize, flags );
+      assert( -1 != rc );
       rc = zmq_send( mpReqRespSocket, data, size, 0 );
       if ( -1 == rc )
       {
@@ -221,16 +230,34 @@ int YaSUBImpl::receive( int& key, int& size, char** pcData )
         zmq_getsockopt( mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize );
         if ( more )
         {
-          iBytes = zmq_recv( mpReqRespSocket, mMsgRespBuffer.data(), YaComponent::MaxMessageSize, 0 );
+          char sKey[YaComponent::MessageSize + 1];
+          memset( sKey, 0, YaComponent::MessageSize + 1 );
+          iBytes = zmq_recv( mpReqRespSocket, sKey, YaComponent::MessageSize, 0 );
           if ( 0 < iBytes )
           {
-            size = iBytes;
-            *pcData = mMsgRespBuffer.data();
-          }
-          rc = zmq_getsockopt( mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize );
-          if ( more && -1 < rc )
-          {
-            qFatal( "YaSUBImpl::receive: KeyFmt unexpected end of message" );
+            assert( iBytes == YaComponent::MessageSize );
+            int msgSize = 0;
+            auto ok = sscanf( sKey, YaComponent::MessageSizeFmt, &msgSize );
+            if ( ok )
+            {
+              if ( msgSize > mMsgRespBuffer.size() )
+              {
+                qInfo() << "YaSUBImpl::receive msgsize" << msgSize << "exceeds current buffer size, resize";
+                mMsgRespBuffer.resize( msgSize );
+              }
+
+              iBytes = zmq_recv( mpReqRespSocket, mMsgRespBuffer.data(), msgSize, 0 );
+              if ( 0 < iBytes )
+              {
+                size = iBytes;
+                *pcData = mMsgRespBuffer.data();
+              }
+              rc = zmq_getsockopt( mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize );
+              if ( more && -1 < rc )
+              {
+                qFatal( "YaSUBImpl::receive: KeyFmt unexpected end of message" );
+              }
+            }
           }
         }
         else
@@ -243,8 +270,8 @@ int YaSUBImpl::receive( int& key, int& size, char** pcData )
         rc = zmq_getsockopt( mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize );
         if ( -1 < rc && more )
         {
-          auto keyBytes = zmq_recv( mpReqRespSocket, mMsgRespBuffer.data(), YaComponent::MaxMessageSize, 0 );
-          if ( 0 < keyBytes )
+          auto syncBytes = zmq_recv( mpReqRespSocket, mMsgRespBuffer.data(), strlen( YaComponent::SynAck ), 0 );
+          if ( 0 < syncBytes )
           {
             mbSync = ( 0 == strncmp( YaComponent::SynAck, mMsgRespBuffer.data(), strlen( YaComponent::SynAck ) ) ) ? true : false;
             rc = zmq_getsockopt( mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize );
