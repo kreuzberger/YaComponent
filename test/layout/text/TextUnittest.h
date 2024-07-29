@@ -37,6 +37,6 @@ private:
   QThread* mpTextGenThread;
   TextGenComp* mpTextGen1;
   QThread* mpTextOutThread;
-  void* mpContext2;
+  // void* mpContext2;
   TextOutComp* mpTextOut;
 };

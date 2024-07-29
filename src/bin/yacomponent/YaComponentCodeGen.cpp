@@ -391,7 +391,7 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     }
     if ( !strPara.empty() )
     {
-      strPara.pop_back();
+      // strPara.pop_back();
       fhHeader << strPara << " );" << std::endl;
       fhSource << strPara << " msg )\n{" << std::endl;
     }

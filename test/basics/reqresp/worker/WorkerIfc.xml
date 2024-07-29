@@ -1,0 +1,17 @@
+<interface>
+  <version maj="1" min="1" rev="0"/>
+  <include file="WorkerIfc.pb.h"/>
+  <properties>
+  </properties>
+  <requests>
+    <req id="Text">
+      <para id="IncomingMessage"/>
+      <resp id="Text" />
+    </req>
+  </requests>
+  <responses>
+    <resp id="Text" >
+      <para id="OutgoingMessage" />
+    </resp>
+  </responses>
+</interface>

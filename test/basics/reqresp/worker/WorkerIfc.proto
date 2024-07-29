@@ -1,0 +1,13 @@
+syntax = "proto3";
+option cc_generic_services = false;
+
+message IncomingMessage {
+  int32 id = 1;
+  string msg = 2;
+}
+
+message OutgoingMessage {
+  int32 id = 1;
+  string msg = 2;
+}
+
