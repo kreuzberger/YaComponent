@@ -30,7 +30,10 @@ from time import sleep
 
 class TextOutStubCallback(TextGenIfcProxyHandler):
     _ResponseStartCnt = 0
+    _ResponseStopCnt = 0
     _ResponseTerminateCnt = 0
+    _Resp_StartText = None
+    _Resp_StopText = None
 
     def __init__(self):
         self._ResponseStartCnt = 0
@@ -41,11 +44,15 @@ class TextOutStubCallback(TextGenIfcProxyHandler):
 
 
     def onResponseStartedText( self, proxyId: int, msg: RequestInfo):
+        logging.info(f"TextOutStubCallback::onResponseStartedText {RequestInfo}")
         assert(TextOutCompImpl.PROXY_IDS.XML == proxyId)
         self._ResponseStartCnt += 1
+        self._Resp_StartText = msg
 
     def onResponseStoppedText( self, proxyId: int, msg: RequestInfo):
-        logging.info(f"TextOutStubCallback::onResponseStoppedText")
+        logging.info(f"TextOutStubCallback::onResponseStoppedText {RequestInfo}")
+        self._ResponseStopCnt += 1
+        self._Resp_StopText = msg
 
 
     def onResponseTerminated( self, proxyId: int):
@@ -56,13 +63,13 @@ class TextOutStubCallback(TextGenIfcProxyHandler):
 class TextGenStubCallback(TextGenIfcStubHandler):
 
     def onRequestStartText(self, id: int , Request, RequestInfo ):
-        if StartedText is None:
-            StartedText = StartedText()
-        StartedText.id = 3
+        logging.info(f"TextGenStubCallback::onRequestStartText Request: {Request}, RequestInfo {RequestInfo}")
+        RequestInfo.id = Request.id
 
 
     def onRequestStopText(self, id: int , Request, RequestInfo ):
-        logging.info(f"TextGenStubCallback::onRequestStopText")
+        logging.info(f"TextGenStubCallback::onRequestStopText  Request: {Request}, RequestInfo {RequestInfo}")
+        RequestInfo.id = Request.id
 
 
     def onRequestTerminate(self, id: int  ):
@@ -124,12 +131,28 @@ def texttest():
 def test_text_env(texttest, qapp):
     assert texttest._context is not None
 
+
 def test_request_response_without_parameter(texttest, qapp):
+    assert texttest._context is not None
+
+    texttest._textout._Xml.requestTerminate()
+    sleep(0.5)
+    assert texttest._textout_cb._ResponseTerminateCnt == 1
+
+def test_request_response_with_parameter(texttest, qapp):
     assert texttest._context is not None
     request = Request()
     request.id = 2
 
-    texttest._textout._Xml.requestStartText(Request())
-    texttest._textout._Xml.requestTerminate()
+    logging.info(f"sending request {request}")
+    texttest._textout._Xml.requestStartText(request)
     sleep(0.5)
-    assert texttest._textout_cb._ResponseTerminateCnt == 1
+    assert texttest._textout_cb._Resp_StartText.id == 2
+
+    logging.info(f"sending request {request}")
+    request.id = 4
+    texttest._textout._Xml.requestStopText(request)
+    sleep(0.5)
+    assert texttest._textout_cb._Resp_StopText.id == 4
+
+

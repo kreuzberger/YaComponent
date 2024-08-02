@@ -546,8 +546,15 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       auto* resp = req->FirstChildElement( "resp" );
       while ( resp )
       {
-        strPara += ", ";
-        strPara += std::string( resp->Attribute( "id" ) );
+        auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
+        auto* resp_para = resp_definition->FirstChildElement( "para" );
+        while ( resp_para )
+        {
+          strPara += ", ";
+          strPara += std::string( resp_para->Attribute( "id" ) );
+          resp_para = resp_para->NextSiblingElement( "para" );
+        }
+         //strPara += std::string( resp->Attribute( "id" ) );
         resp = resp->NextSiblingElement( "resp" );
       }
       if ( !strPara.empty() )
@@ -627,34 +634,35 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     fhSource << "                    case self.KEYS." << strReq << ":\n";
     std::string strMember;
 
-    auto* para = req->FirstChildElement( "para" );
-    if ( para )
-    {
-      fhSource << "                        if msgData is not None:" << std::endl;
-    }
-    while ( para )
-    {
-      strMember += std::string( "                            self._" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" ) +
-                   ".ParseFromArray(msgData, msgSize)\n";
-      para = para->NextSiblingElement( "para" );
-    }
-
-    if ( !strMember.empty() )
-    {
-      fhSource << strMember;
-    }
-
     auto* resp = req->FirstChildElement( "resp" );
     while ( resp )
     {
       auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
-      para = resp_definition->FirstChildElement( "para" );
+      auto para = resp_definition->FirstChildElement( "para" );
       while ( para )
       {
         fhSource << "                        self._" << req->Attribute( "id" ) << "_" << para->Attribute( "id" ) << ".Clear()\n";
         para = para->NextSiblingElement( "para" );
       }
       resp = resp->NextSiblingElement( "resp" );
+    }
+
+
+    auto* para = req->FirstChildElement( "para" );
+    //if ( para )
+    //{
+      //fhSource << "                        if msgData is not None:" << std::endl;
+    //}
+    while ( para )
+    {
+      strMember += std::string( "                        self._" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" ) +
+                   ".ParseFromString(msgData)\n";
+      para = para->NextSiblingElement( "para" );
+    }
+
+    if ( !strMember.empty() )
+    {
+      fhSource << strMember;
     }
 
     fhSource << "                        self._callback.onRequest" << req->Attribute( "id" ) << "(self._id";
@@ -701,7 +709,7 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       para = resp_definition->FirstChildElement( "para" );
       while ( para )
       {
-        fhSource << ", self._" << req->Attribute( "id" ) << "_" << resp->Attribute( "id" );
+        fhSource << ", self._" << req->Attribute( "id" ) << "_" << para->Attribute( "id" );
         para = para->NextSiblingElement( "para" );
       }
       fhSource << ")\n";

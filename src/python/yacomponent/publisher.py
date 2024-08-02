@@ -123,7 +123,6 @@ class Publisher:
     def receive(self) -> tuple[int, int, bytes, str]:
         more = -1
         key = None
-        msgSize = 0
         msgData = None
         ident = None
 
@@ -248,7 +247,7 @@ class Publisher:
                         else:
                             raise RuntimeError(f"Publisher:receive unknown key {key}")
 
-        return (key, msgSize, msgData, ident)
+        return (key, 0 if msgData is None else len(msgData), msgData, ident)
 
     def close(self):
         if self._reqresp_socket is not None:

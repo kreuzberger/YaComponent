@@ -49,7 +49,7 @@ class Subscriber:
         else:
             raise RuntimeError("no valid socket or not connected")
 
-    def send(self, key: int, msgSize: int, data: bytes) -> int:
+    def send(self, key: int, msgSize: int, data: str) -> int:
         rc = -1
         if self._reqresp_socket is None:
             raise RuntimeError("_reqresp_socket_should not be none")
@@ -62,11 +62,15 @@ class Subscriber:
         rc = self._reqresp_socket.send((yc.KeyFmt % key).encode("ascii"), flags)
         assert -1 != rc
         if send_more:
+            logging.debug(f"Subscriber::send: send msg_size {msgSize}, msg {data}")
             rc = self._reqresp_socket.send(
                 (yc.MessageSizeFmt % msgSize).encode("ascii"), flags
             )
             assert -1 != rc
-            rc = self._reqresp_socket.send(data.encode("utf-8"), 0)
+            if isinstance(data, str):
+                rc = self._reqresp_socket.send_string(data, 0)
+            else:
+                rc = self._reqresp_socket.send(data, 0)
 
         return rc
 
@@ -141,8 +145,7 @@ class Subscriber:
         rc = -1
         if msg is not None:
             size = msg.ByteSize()
-            msg.SerializeToString(self._msg_outbuffer)
-            rc = self.send(key, size, self._msg_outbuffer)
+            rc = self.send(key, size, msg.SerializeToString())
         else:
             rc = self.send(key, 0, 0)
 
@@ -151,7 +154,7 @@ class Subscriber:
     def setNotification(self, key: int) -> int:
         rc = -1
         msg = yc.KeyFmt % (key)
-        rc = self.send(yc.KeySetNotification, yc.KeySize, msg)
+        rc = self.send(yc.KeySetNotification, yc.KeySize, str(msg))
         return rc
 
     def clearNotification(self, key: int) -> int:
