@@ -103,7 +103,7 @@ int YaPUBImpl::receive( int& key, int& size, char** pcData, std::string& ident )
                     rc = zmq_getsockopt( mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize );
                     if ( -1 < rc && more )
                     {
-                      qFatal( "YaPUBImpl::receive KeySize unexpected end" );
+                      qFatal( "YaPUBImpl::receive unexpected end" );
                     }
                   }
                 }

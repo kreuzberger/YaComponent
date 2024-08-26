@@ -11,7 +11,6 @@ import logging
 class Subscriber:
     _reqresp_socket = None
     _ident = None
-    _msg_outbuffer = ""
     _connected = False
     _sync = False
 
@@ -49,7 +48,7 @@ class Subscriber:
         else:
             raise RuntimeError("no valid socket or not connected")
 
-    def send(self, key: int, msgSize: int, data: str) -> int:
+    def send(self, key: int, msgSize: int, data: str | bytes) -> int:
         rc = -1
         if self._reqresp_socket is None:
             raise RuntimeError("_reqresp_socket_should not be none")
@@ -147,7 +146,7 @@ class Subscriber:
             size = msg.ByteSize()
             rc = self.send(key, size, msg.SerializeToString())
         else:
-            rc = self.send(key, 0, 0)
+            rc = self.send(key, 0, None)
 
         return rc
 
