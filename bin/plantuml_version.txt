@@ -1,0 +1,1 @@
+GPL plantuml-1.2024.6
