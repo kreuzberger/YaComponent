@@ -442,6 +442,7 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     auto* para = resp->FirstChildElement( "para" );
     while ( para )
     {
+      // fhSource << "          m" << para->Attribute( "id" ) << ".Clear();" << std::endl
       fhSource << "          if ( msgData && 0 <= size )" << std::endl;
       fhSource << "          {" << std::endl;
       fhSource << "            m" << para->Attribute( "id" ) << ".ParseFromArray( msgData, size );" << std::endl;
@@ -478,11 +479,12 @@ void YaComponentCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     }
     strProp += YaComponentCore::to_upper( prop->Attribute( "id" ) );
     fhSource << "        case " << strProp << ":" << std::endl;
+    fhSource << "          m" << prop->Attribute( "id" ) << ".Clear();" << std::endl;
     fhSource << "          if ( msgData && 0 <= size )" << std::endl;
     fhSource << "          {" << std::endl;
     fhSource << "            m" << prop->Attribute( "id" ) << ".ParseFromArray( msgData, size );" << std::endl;
-    fhSource << "            mCallbackHandler.onProperty" << prop->Attribute( "id" ) << "( mId, m" << prop->Attribute( "id" ) << " );" << std::endl;
     fhSource << "          }" << std::endl;
+    fhSource << "          mCallbackHandler.onProperty" << prop->Attribute( "id" ) << "( mId, m" << prop->Attribute( "id" ) << " );" << std::endl;
     fhSource << "          break;" << std::endl;
   }
 
@@ -883,6 +885,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     auto* para = req->FirstChildElement( "para" );
     while ( para )
     {
+      strMember += std::string( "          m" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" ) + ".Clear();\n";
       strMember += "          if ( msgData && 0 <= size )\n";
       strMember += "          {\n";
       strMember += std::string( "            m" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" ) + ".ParseFromArray( msgData, size );\n";

@@ -155,4 +155,41 @@ def test_request_response_with_parameter(texttest, qapp):
     sleep(0.5)
     assert texttest._textout_cb._Resp_StopText.id == 4
 
+def test_request_response_with_defaults(texttest, qapp):
+    assert texttest._context is not None
+    request = Request()
+    request.id = 0 # this should be the "default" for numerics
+    assert texttest._textout_cb._ResponseStartCnt == 0
+    assert texttest._textout_cb._ResponseStopCnt == 0
 
+    logging.info(f"sending request {request}")
+    texttest._textout._Xml.requestStartText(request)
+    sleep(0.5)
+    assert texttest._textout_cb._ResponseStartCnt == 1
+    assert texttest._textout_cb._Resp_StartText.id == 0
+
+    logging.info(f"sending request {request}")
+    request.id = 0
+    texttest._textout._Xml.requestStopText(request)
+    sleep(0.5)
+    assert texttest._textout_cb._ResponseStopCnt == 1
+    assert texttest._textout_cb._Resp_StopText.id == 0
+
+
+def test_request_response_with_defaults_after_valid(texttest, qapp):
+    assert texttest._context is not None
+    request = Request()
+
+    for id in [1,0]:
+        request.id = id
+
+        logging.info(f"sending request {request}")
+        texttest._textout._Xml.requestStartText(request)
+        sleep(0.5)
+        assert texttest._textout_cb._Resp_StartText.id == id
+
+        logging.info(f"sending request {request}")
+        request.id = id
+        texttest._textout._Xml.requestStopText(request)
+        sleep(0.5)
+        assert texttest._textout_cb._Resp_StopText.id == id

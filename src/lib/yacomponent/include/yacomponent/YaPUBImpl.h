@@ -27,7 +27,7 @@ public:
 private:
   struct LVC
   {
-    int msgSize = 0;
+    int msgSize = -1;
     std::string msg = {};
   };
 

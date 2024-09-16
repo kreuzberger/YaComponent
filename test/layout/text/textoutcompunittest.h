@@ -22,11 +22,16 @@ public:
   void clearNotifications();
 
   void requestStart();
+  void requestStart(int id);
   void requestStop();
+  void requestStop(int id);
   void requestTerminate();
 
   int miPropertiesCnt;
   int miResponseStartCnt;
+  TextGen::RequestInfo mResponseStartInfo;
+  TextGen::RequestInfo mResponseStopInfo;
+
   int miResponseStopCnt;
   int miResponseTerminatedCnt;
 

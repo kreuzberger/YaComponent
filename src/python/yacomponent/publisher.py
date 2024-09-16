@@ -212,6 +212,12 @@ class Publisher:
                                         self._send(
                                             notification_key, lvc["size"], lvc["msg"]
                                         )
+                                    else:
+                                        logging.info(
+                                            f"Publisher::receive sending LVC cache default values on {notification_key} {lvc}"
+                                        )
+                                        self._send(notification_key, 0, None)
+
                         elif key == yc.KeyClearNotification:
                             logging.info(
                                 f"Publisher::receive peer {ident} KeyClearNotification"

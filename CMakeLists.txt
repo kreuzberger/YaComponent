@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.22)
 project(yacomponent)
 
+
+if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
+if(POLICY CMP0094)
+    cmake_policy(SET CMP0094 NEW)
+endif()
+
+
 find_package(
     Qt5
     COMPONENTS Core Test
@@ -82,6 +92,8 @@ else()
     find_package(utf8_range REQUIRED PATHS ${Protobuf_DIR} NO_DEFAULT_PATH)
     find_package(Protobuf REQUIRED PATHS ${Protobuf_DIR} NO_DEFAULT_PATH)
 endif()
+
+set( Python_FIND_STRATEGY "LOCATION")
 
 find_package(Python 3.11 COMPONENTS Interpreter Development)
 

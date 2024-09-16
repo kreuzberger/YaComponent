@@ -184,3 +184,38 @@ void TextUnittest::testSPMTReqRespWithoutParameters()
   mpTextOut->requestTerminate();
   QVERIFY( QTest::qWaitFor( [=]() { return mpTextOut->miResponseTerminatedCnt == 1; }, YaComponent::TimeOut * 3 ) );
 }
+
+void TextUnittest::testSPMTReqRespWithDefaultParameters()
+{
+  initComponentsSPMT();
+  mpTextOut->mResponseStartInfo.Clear();
+  mpTextOut->mResponseStopInfo.Clear();
+  mpTextOut->setNotifications();
+  int id = 0;
+  mpTextOut->requestStart( id );
+  QVERIFY( QTest::qWaitFor( [=]() { return mpTextOut->miResponseStartCnt == 1; }, YaComponent::TimeOut * 3 ) );
+  QCOMPARE( mpTextOut->mResponseStartInfo.id(), id );
+  mpTextOut->requestStop( id );
+  QVERIFY( QTest::qWaitFor( [=]() { return mpTextOut->miResponseStopCnt == 1; }, YaComponent::TimeOut * 3 ) );
+  QCOMPARE( mpTextOut->mResponseStopInfo.id(), id );
+}
+
+void TextUnittest::testSPMTReqRespWithDefaultAfterValidParameters()
+{
+  initComponentsSPMT();
+  mpTextOut->mResponseStartInfo.Clear();
+  mpTextOut->mResponseStopInfo.Clear();
+  mpTextOut->setNotifications();
+
+  Q_FOREACH ( int id, QList<int>() << 1 << 0 )
+  {
+    mpTextOut->miResponseStartCnt = 0;
+    mpTextOut->miResponseStopCnt = 0;
+    mpTextOut->requestStart( id );
+    QVERIFY( QTest::qWaitFor( [=]() { return mpTextOut->miResponseStartCnt == 1; }, YaComponent::TimeOut * 3 ) );
+    QCOMPARE( mpTextOut->mResponseStartInfo.id(), id );
+    mpTextOut->requestStop( id );
+    QVERIFY( QTest::qWaitFor( [=]() { return mpTextOut->miResponseStopCnt == 1; }, YaComponent::TimeOut * 3 ) );
+    QCOMPARE( mpTextOut->mResponseStopInfo.id(), id );
+  }
+}

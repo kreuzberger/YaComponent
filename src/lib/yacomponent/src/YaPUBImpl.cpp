@@ -169,6 +169,13 @@ int YaPUBImpl::receive( int& key, int& size, char** pcData, std::string& ident )
                                << lvc.msgSize << "msg" << lvc.msg.c_str();
                       send( notKey, lvc.msgSize, lvc.msg.c_str() );
                     }
+                    else if ( 0 == lvc.msgSize /*&& lvc.msg.empty() */ )
+                    {
+                      qDebug() << "YaPUBImpl::receive: sending default LVC cache values on "
+                                  "setNotification: size"
+                               << lvc.msgSize << "msg" << lvc.msg.c_str();
+                      send( notKey, lvc.msgSize, lvc.msg.c_str() );
+                    }
                   }
                 }
               }

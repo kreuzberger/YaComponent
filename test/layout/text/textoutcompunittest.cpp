@@ -31,12 +31,29 @@ void TextOutComp::requestStart()
   mXml.requestStartText( oRequest );
 }
 
+void TextOutComp::requestStart(int id)
+{
+  TextGen::Request oRequest;
+  oRequest.set_id( id );
+  // int size = oRequest.ByteSizeLong();
+  mXml.requestStartText( oRequest );
+}
+
+
 void TextOutComp::requestStop()
 {
   TextGen::Request oRequest;
   oRequest.set_id( 2 );
   mXml.requestStopText( oRequest );
 }
+
+void TextOutComp::requestStop(int id)
+{
+  TextGen::Request oRequest;
+  oRequest.set_id( id );
+  mXml.requestStopText( oRequest );
+}
+
 
 void TextOutComp::requestTerminate()
 {
@@ -55,7 +72,8 @@ void TextOutComp::onResponseStartedText( int proxyId, const TextGen::RequestInfo
 {
   assert( PROXY_XML == proxyId );
   fprintf( stderr, "received onResponse startedText\n" );
-  assert( 1 == resp.id() );
+  assert( 1 == resp.id() || 0 == resp.id() );
+  mResponseStartInfo = resp;
   miResponseStartCnt++;
 }
 
@@ -64,6 +82,7 @@ void TextOutComp::onResponseStoppedText( int proxyId, const TextGen::RequestInfo
   fprintf( stderr, "received onResponse stoppedText\n" );
   assert( PROXY_XML == proxyId );
   assert( 2 == resp.id() || 4242 == resp.id() );
+  mResponseStopInfo = resp;
   miResponseStopCnt++;
 }
 

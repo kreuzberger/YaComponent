@@ -104,6 +104,31 @@ void PubSubUnittestSP::testSendLVCConnect()
   QCOMPARE( mSubScriber->mLastData.counter(), 9 );
 }
 
+void PubSubUnittestSP::testSendLVCConnectDefaultsAfterValid()
+{
+  auto cnt = 10;
+  for ( auto i = 0; i < cnt; i++ )
+  {
+    Data data;
+    data.set_timeseconds( 0 );
+    data.set_timefraction( 0.0 );
+    data.set_counter( i );
+    mPublisher->sendData( data );
+    QTest::qWait( 10 );
+  }
+
+  Data data;
+  mPublisher->sendData( data );
+  QTest::qWait( 10 );
+
+  int rc = -1;
+  rc = mSubScriber->setNotifications();
+  QVERIFY( -1 != rc );
+  QVERIFY( QTest::qWaitFor( [this]() { return 1 == mSubScriber->miPropertiesCnt; } ) );
+  QCOMPARE( mSubScriber->miPropertiesCnt, 1 );
+  QCOMPARE( mSubScriber->mLastData.counter(), 0 );
+}
+
 void PubSubUnittestSP::testSendLVCConnectEmpty()
 {
   int rc = -1;

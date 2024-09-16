@@ -378,9 +378,10 @@ void YaComponentPyCodeGen::writeIfcProxy( const std::filesystem::path& codePath,
     strProp += "PROP_";
     strProp += YaComponentCore::to_upper( prop->Attribute( "id" ) );
     fhSource << "                    case self.KEYS." << strProp << ":" << std::endl;
+    fhSource << "                        self._" << prop->Attribute( "id" ) << ".Clear()" << std::endl;
     fhSource << "                        if msgData is not None:" << std::endl;
     fhSource << "                            self._" << prop->Attribute( "id" ) << ".ParseFromString(msgData)" << std::endl;
-    fhSource << "                            self._callback.onProperty" << prop->Attribute( "id" ) << "(self._id, self._" << prop->Attribute( "id" )
+    fhSource << "                        self._callback.onProperty" << prop->Attribute( "id" ) << "(self._id, self._" << prop->Attribute( "id" )
              << ")" << std::endl;
   }
 
@@ -655,8 +656,10 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
     //}
     while ( para )
     {
-      strMember += std::string( "                        self._" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" ) +
-                   ".ParseFromString(msgData)\n";
+      strMember += std::string( "                        self._" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" ) + ".Clear()\n";
+      strMember += std::string( "                        if msgData is not None and 0 < len(msgData):\n" );
+      strMember +=
+        std::string( "                            self._" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" ) + ".ParseFromString(msgData)\n";
       para = para->NextSiblingElement( "para" );
     }
 

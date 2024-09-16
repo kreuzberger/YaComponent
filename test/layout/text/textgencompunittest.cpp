@@ -55,6 +55,30 @@ void TextGenComp::sendResponseStop()
   fprintf( stderr, "send %d messages\n", miMessageCnt );
 }
 
+void TextGenComp::sendResponseStop( int id )
+{
+  TextGen::RequestInfo oResponse;
+  oResponse.set_id( id );
+  mTextGenXml.responseStoppedText( YaComponent::TextGenIfcStub::RESP_TEXTGEN_STOPPEDTEXT, "", oResponse );
+  if ( 0 < miTimerID )
+  {
+    QObject::killTimer( miTimerID );
+  }
+  fprintf( stderr, "send %d messages\n", miMessageCnt );
+}
+
+void TextGenComp::sendResponseStart( int id )
+{
+  TextGen::RequestInfo oResponse;
+  oResponse.set_id( id );
+  mTextGenXml.responseStartedText( YaComponent::TextGenIfcStub::RESP_TEXTGEN_STARTEDTEXT, "", oResponse );
+  if ( 0 < miTimerID )
+  {
+    QObject::killTimer( miTimerID );
+  }
+  fprintf( stderr, "send %d messages\n", miMessageCnt );
+}
+
 void TextGenComp::timerEvent( QTimerEvent* )
 {
   QString oText( "%1: The quick brown fox jumps over the lazy dog 0123456789\n" );

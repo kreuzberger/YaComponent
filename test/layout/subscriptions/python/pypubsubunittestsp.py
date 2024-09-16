@@ -181,6 +181,27 @@ def test_send_lvc_connect_empty(pubsubtest, qapp):
     assert pubsubtest._sub_cb._last_data is None
 
 
+def test_send_lvc_connect_defaults_after_valid(pubsubtest, qapp):
+    for i in range(10):
+        data = Data()
+        data.timeSeconds = 0
+        data.timeFraction = 0.0
+        data.counter = i
+        rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA, data)
+        assert -1 == rc
+        sleep(0.05)
+
+    data = Data()
+    rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA, data)
+    assert -1 == rc
+    sleep(0.05)
+
+    rc = pubsubtest._sub._Data.setNotification(PublisherIfcProxy.KEYS.PROP_DATA);
+    assert -1 != rc
+    sleep(0.05)
+    assert 1 == pubsubtest._sub_cb._properties_cnt
+    assert 0 == pubsubtest._sub_cb._last_data.counter
+
 def test_send_on_change_off(pubsubtest, qapp):
     # send identical value twice, should be received a second time
     rc = pubsubtest._sub._Data.setNotification(PublisherIfcProxy.KEYS.PROP_DATA);

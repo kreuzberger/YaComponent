@@ -19,6 +19,8 @@ public:
   bool mbSendAutoStop;
 
   void sendResponseStop();
+  void sendResponseStop( int id );
+  void sendResponseStart( int id );
 
 protected:
   void timerEvent( QTimerEvent* ) override;

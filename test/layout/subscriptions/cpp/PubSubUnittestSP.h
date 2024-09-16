@@ -24,6 +24,7 @@ private slots:
   void testNotification();
   void testSendWithoutSubscriptions();
   void testSendLVCConnect();
+  void testSendLVCConnectDefaultsAfterValid();
   void testSendLVCConnectEmpty();
   void testSendOnChangeOff();
   void testSendOnChangeOn();
