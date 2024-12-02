@@ -961,9 +961,10 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
         // if a response is found for a request and has a parameter , we wait for the response para to be changed
         std::string memberPara = std::string( "m" ) + req->Attribute( "id" ) + std::string( "_" ) + para->Attribute( "id" );
 
-        strResp = std::string( "          waitFor( [this]() { return !google::protobuf::util::MessageDifferencer::Equals(" + memberPara + ", " +
-                               memberPara + ".default_instance()); } );\n" ) +
-                  strResp;
+        // strResp = std::string( "          waitFor( [this]() { return !google::protobuf::util::MessageDifferencer::Equals(" + memberPara + ", " +
+        //                        memberPara + ".default_instance()); } );\n" ) +
+        //           strResp;
+        strResp = std::string( "          waitFor( [this]() { return 0 < " + memberPara + ".ByteSize(); } );\n" ) + strResp;
 
         strResp += std::string( ", m" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" );
         para = para->NextSiblingElement( "para" );
