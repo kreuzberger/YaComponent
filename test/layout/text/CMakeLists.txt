@@ -104,6 +104,18 @@ yc_add_pytest(
     "${CMAKE_CURRENT_BINARY_DIR};${pyyacomponent_SOURCE_DIR};${TextExample_BINARY_DIR}/TextGenIfc/py;${TextExample_BINARY_DIR}/TextGenComp/py;${TextExample_BINARY_DIR}/TextOutIfc/py;${TextExample_BINARY_DIR}/TextOutComp/py;"
 )
 
+yc_add_pytest(
+    NAME
+    pytextunittestguisp
+    WHAT
+    textunittestguisp.py
+    --log-cli-level=Info
+    PYTHONPATH
+    "${CMAKE_CURRENT_BINARY_DIR};${pyyacomponent_SOURCE_DIR};${TextExample_BINARY_DIR}/TextGenIfc/py;${TextExample_BINARY_DIR}/TextGenComp/py;${TextExample_BINARY_DIR}/TextOutIfc/py;${TextExample_BINARY_DIR}/TextOutComp/py;"
+)
+
+
+
 if(clang_format)
     set(clang_files)
     foreach(_file IN LISTS GENERATED_IFC_SRC GENERATED_IFC_SRC_OUT GENERATED_COMP_GEN_SRC GENERATED_COMP_OUT_SRC)

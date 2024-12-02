@@ -22,27 +22,33 @@ from enum import IntEnum
 import logging
 from time import sleep
 
-
+import threading
 
 class PublisherProxyCallback(PublisherIfcProxyHandler):
 
     _last_data = None
     _last_time = None
     _properties_cnt = 0
+    _lock = threading.Lock()
 
     def __init__(self):
         self._properties_cnt = 0
         self._last_data = None
         self._last_time = None
 
+    def lock(self):
+        return self._lock
+
     def onPropertyData(self, id: int, property: Data):
         logging.info(f"PublisherProxyCallback::onProperty Data:")
-        self._last_data = property
-        self._properties_cnt += 1
+        with self._lock:
+            self._last_data = property
+            self._properties_cnt += 1
 
     def onPropertyTime(self, id: int, property: Time ):
-        self._last_time = property
-        self._properties_cnt += 1
+        with self._lock:
+            self._last_time = property
+            self._properties_cnt += 1
         logging.info(f"PublisherProxyCallback::onProperty Time:")
 
 class PublisherStubCallback(PublisherIfcStubHandler):
@@ -142,8 +148,9 @@ def test_notifications(pubsubtest, qapp):
     rc = pubsubtest._pub._ReceiverData.sendData(PublisherIfcStub.KEYS.PROP_DATA, data)
     sleep(0.05)
 
-    assert 123 == pubsubtest._sub_cb._last_data.counter
-    assert 1 == pubsubtest._sub_cb._properties_cnt
+    with pubsubtest._sub_cb.lock():
+        assert 123 == pubsubtest._sub_cb._last_data.counter
+        assert 1 == pubsubtest._sub_cb._properties_cnt
 
 def test_send_without_subscriptions(pubsubtest, qapp):
     data = Data()

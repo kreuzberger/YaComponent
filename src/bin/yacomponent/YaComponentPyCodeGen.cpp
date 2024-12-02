@@ -446,6 +446,7 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
   // fhSource << "# import " << ifcName << "StubHandler\n";
 
   fhSource << "from yacomponent.stub import Stub" << std::endl;
+  fhSource << "from yacomponent.utils import wait_until  # noqa: F401" << std::endl;
 
   // fhSource << "# todo python equivalent to <google/protobuf/util/message_differencer.h>\n";
 
@@ -706,16 +707,18 @@ void YaComponentPyCodeGen::writeIfcStub( const std::filesystem::path& codePath,
       std::string strResp;
       strResp += "self.KEYS.RESP_";
       strResp += YaComponentCore::to_upper( resp->Attribute( "id" ) );
-      fhSource << "                        self.response" << resp->Attribute( "id" ) << "(" << strResp << ", ident";
+      strResp = std::string( "                        self.response" ) + resp->Attribute( "id" ) + "(" + strResp + ", ident";
 
       auto resp_definition = findResponse( responses, resp->Attribute( "id" ) );
       para = resp_definition->FirstChildElement( "para" );
       while ( para )
       {
-        fhSource << ", self._" << req->Attribute( "id" ) << "_" << para->Attribute( "id" );
+        std::string member_para = std::string( "self._" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" );
+        strResp = std::string( "                        wait_until(lambda: 0 < " ) + member_para + ".ByteSize())\n" + strResp;
+        strResp += std::string( ", self._" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" );
         para = para->NextSiblingElement( "para" );
       }
-      fhSource << ")\n";
+      fhSource << strResp + ")\n";
 
       resp = resp->NextSiblingElement( "resp" );
     }

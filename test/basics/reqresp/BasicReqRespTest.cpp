@@ -1,8 +1,6 @@
 #include "BasicReqRespTest.h"
 #include <QtTest>
 
-QTEST_MAIN( BasicReqRespTest );
-
 BasicReqRespTest::BasicReqRespTest( QObject* parent )
   : QObject( parent )
 {

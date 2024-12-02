@@ -3,7 +3,7 @@ from . import variables as yc
 
 from google.protobuf.message import Message
 from time import sleep
-# from PySide2.QtCore import QCoreApplication
+from PySide2.QtCore import QCoreApplication
 
 import logging
 
@@ -42,7 +42,7 @@ class Subscriber:
             sync = False
             while not sync:
                 # logging.info("Subscriber::setConnectionPara: syncing")
-                # QCoreApplication.processEvents()
+                QCoreApplication.processEvents()
                 sleep(yc.TimeOut)
                 sync = self._checkSync()
         else:

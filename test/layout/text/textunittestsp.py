@@ -24,8 +24,6 @@ from time import sleep
 import logging
 from enum import IntEnum
 
-import logging
-from time import sleep
 
 
 class TextOutStubCallback(TextGenIfcProxyHandler):

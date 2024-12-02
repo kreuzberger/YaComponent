@@ -20,12 +20,20 @@ set(basic_reqresp_test_SRCS ${GENERATED_IFC_SRC} ${GENERATED_COMP_WORKER_SRC} ${
                             ${ProtoSourcesWorker} BasicReqRespTest.cpp BasicReqRespTest.h
 )
 
-add_executable(basic_reqresp_test ${basic_reqresp_test_SRCS})
+set(basic_reqresp_gui_test_SRCS ${basic_reqresp_test_SRCS} BasicReqRespGuiTest.cpp BasicReqRespGuiTest.h
+)
 
-target_link_libraries(basic_reqresp_test PRIVATE YaComponent Qt5::Test)
+add_executable(basic_reqresp_test ${basic_reqresp_test_SRCS} BasicReqRespTestMain.cpp)
+add_executable(basic_reqresp_gui_test ${basic_reqresp_gui_test_SRCS} BasicReqRespGuiTestMain.cpp)
+
+target_link_libraries(basic_reqresp_test PRIVATE YaComponent Qt5::Core Qt5::Test)
+target_link_libraries(basic_reqresp_gui_test PRIVATE YaComponent Qt5::Core Qt5::Test)
 
 yc_add_test(NAME basic_reqresp_test COMMAND basic_reqresp_test)
 set_tests_properties(basic_reqresp_test PROPERTIES TIMEOUT 60)
+
+yc_add_test(NAME basic_reqresp_gui_test COMMAND basic_reqresp_test)
+set_tests_properties(basic_reqresp_gui_test PROPERTIES TIMEOUT 60)
 
 if(clang_format)
     set(clang_files)

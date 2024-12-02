@@ -1,5 +1,5 @@
 #pragma once
-#include <QObject>
+#include <QtCore/QObject>
 #include "WorkerCompImpl.h"
 #include "ControlCompImpl.h"
 #include <yacomponent/YaComponent.h>
@@ -71,7 +71,7 @@ private slots:
   void testReqRespRepeated();
   void testMaxMessageSize();
 
-private:
+protected:
   void initComponents();
   void cleanupComponents();
 
