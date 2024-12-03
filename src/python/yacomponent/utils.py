@@ -1,6 +1,7 @@
 from PySide2.QtCore import QCoreApplication, QEventLoop, QEvent
+from .variables import RequestResponseTimeoutMs
 
-def wait_until(callback, *, timeout=5000):
+def wait_until(callback, *, timeout=RequestResponseTimeoutMs):
         """
         Wait in a busy loop, calling the given callback periodically until timeout is reached.
 

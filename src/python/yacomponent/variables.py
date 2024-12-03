@@ -11,3 +11,4 @@ KeySetNotification = -4
 KeyClearNotification = -5
 TimeOut = 0.02
 TimeOutMs = 20
+RequestResponseTimeoutMs = 5000

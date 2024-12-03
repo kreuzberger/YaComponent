@@ -964,7 +964,7 @@ void YaComponentCodeGen::writeIfcStub( const std::filesystem::path& codePath,
         // strResp = std::string( "          waitFor( [this]() { return !google::protobuf::util::MessageDifferencer::Equals(" + memberPara + ", " +
         //                        memberPara + ".default_instance()); } );\n" ) +
         //           strResp;
-        strResp = std::string( "          waitFor( [this]() { return 0 < " + memberPara + ".ByteSize(); } );\n" ) + strResp;
+        strResp = std::string( "          waitFor( [this]() { return 0 < " + memberPara + ".ByteSizeLong(); } );\n" ) + strResp;
 
         strResp += std::string( ", m" ) + req->Attribute( "id" ) + "_" + para->Attribute( "id" );
         para = para->NextSiblingElement( "para" );
