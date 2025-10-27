@@ -327,7 +327,10 @@ int YaPUBImpl::send( int key, int msgSize, const char* msgData )
 
     {
       const std::lock_guard<std::mutex> lock( mLVCMutex );
-      mLVC[key] = { msgSize, msgData };
+      LVC lvc;
+      lvc.msgSize = msgSize;
+      lvc.msg.assign( msgData, msgData + msgSize );
+      mLVC[key] = lvc;
     }
 
     for ( auto it = mPeerMap.begin(); it != mPeerMap.end(); ++it )
