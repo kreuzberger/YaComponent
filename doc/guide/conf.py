@@ -18,9 +18,9 @@ master_doc = 'UserGuide'
 project = u'YaComponent UserGuide'
 copyright = u'2014, Joerg Kreuzberger'
 
-version = '24.7'
+version = '25.1'
 # The full version, including alpha/beta/rc tags.
-release = '24.7.0'
+release = '25.1.0'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

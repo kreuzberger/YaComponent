@@ -4,6 +4,8 @@
 #include <zmq.h>
 #include <QtCore/QtDebug>
 
+Q_LOGGING_CATEGORY( publisher, "yc.publisher" );
+
 YaPUBImpl::YaPUBImpl( void* context )
 {
   assert( 0 != context );
@@ -13,7 +15,7 @@ YaPUBImpl::YaPUBImpl( void* context )
   }
   else
   {
-    fprintf( stderr, "error: invalid context\n" );
+    qFatal( "error: invalid context" );
   }
 }
 
@@ -74,7 +76,7 @@ int YaPUBImpl::receive( int& key, int& size, char** pcData, std::string& ident )
           {
             if ( 0 <= key )
             {
-              qDebug() << "peer" << ident.c_str() << "with key" << key;
+              qDebug( publisher ) << "peer" << ident.c_str() << "with key" << key;
 
               rc = zmq_getsockopt( mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize );
               if ( -1 < rc && more )
@@ -91,7 +93,7 @@ int YaPUBImpl::receive( int& key, int& size, char** pcData, std::string& ident )
                   {
                     if ( msgSize > mMsgBufferReq.size() )
                     {
-                      qInfo() << "YaPUBImpl::receive msgsize" << msgSize << "exceeds current buffer size, resize";
+                      qInfo( publisher ) << "YaPUBImpl::receive msgsize" << msgSize << "exceeds current buffer size, resize";
                       mMsgBufferReq.resize( msgSize );
                     }
                     iBytes = zmq_recv( mpReqRespSocket, mMsgBufferReq.data(), msgSize, 0 );
@@ -126,7 +128,7 @@ int YaPUBImpl::receive( int& key, int& size, char** pcData, std::string& ident )
             }
             else if ( YaComponent::KeySetNotification == key )
             {
-              qDebug() << "peer" << ident.c_str() << "setNotification";
+              qDebug( publisher ) << "peer" << ident.c_str() << "setNotification";
               char sKey[YaComponent::MessageSize + 1];
               memset( sKey, 0, YaComponent::MessageSize + 1 );
               iBytes = zmq_recv( mpReqRespSocket, sKey, YaComponent::MessageSize, 0 );
@@ -146,7 +148,7 @@ int YaPUBImpl::receive( int& key, int& size, char** pcData, std::string& ident )
                   {
                     int notKey = -1;
                     sscanf( cNotKey, YaComponent::KeyFmt, &notKey );
-                    qDebug() << "peer" << ident.c_str() << "setNotification property " << notKey;
+                    qDebug( publisher ) << "peer" << ident.c_str() << "setNotification property " << notKey;
                     mPeerMap[ident][notKey] = 1;
                     rc = zmq_getsockopt( mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize );
                     if ( -1 < rc && more )
@@ -164,17 +166,17 @@ int YaPUBImpl::receive( int& key, int& size, char** pcData, std::string& ident )
                     }
                     if ( 0 < lvc.msgSize && !lvc.msg.empty() )
                     {
-                      qDebug() << "YaPUBImpl::receive: sending LVC cache values on "
-                                  "setNotification: size"
-                               << lvc.msgSize << "msg" << lvc.msg.c_str();
-                      send( notKey, lvc.msgSize, lvc.msg.c_str() );
+                      qDebug( publisher ) << "YaPUBImpl::receive: sending LVC cache values on "
+                                             "setNotification: size"
+                                          << lvc.msgSize;
+                      send( notKey, lvc.msgSize, lvc.msg.data() );
                     }
                     else if ( 0 == lvc.msgSize /*&& lvc.msg.empty() */ )
                     {
-                      qDebug() << "YaPUBImpl::receive: sending default LVC cache values on "
-                                  "setNotification: size"
-                               << lvc.msgSize << "msg" << lvc.msg.c_str();
-                      send( notKey, lvc.msgSize, lvc.msg.c_str() );
+                      qDebug( publisher ) << "YaPUBImpl::receive: sending default LVC cache values on "
+                                             "setNotification: size"
+                                          << lvc.msgSize;
+                      send( notKey, lvc.msgSize, lvc.msg.data() );
                     }
                   }
                 }
@@ -213,7 +215,7 @@ int YaPUBImpl::receive( int& key, int& size, char** pcData, std::string& ident )
             }
             else if ( YaComponent::KeyEnd == key )
             {
-              qDebug() << "peer " << ident.c_str() << " closes";
+              qDebug( publisher ) << "peer " << ident.c_str() << " closes";
               mPeerMap.erase( ident );
               // rc = zmq_getsockopt(mpReqRespSocket, ZMQ_RCVMORE, &more, &moreSize);
               // if (-1 < rc && more) {
@@ -267,18 +269,18 @@ void YaPUBImpl::setConnectionPara( const char* address, int hwm )
     }
     else
     {
-      fprintf( stderr, "error: cannot bind to address %s\n", address );
+      qFatal( "error: cannot bind to address %s", address );
     }
   }
   else
   {
     if ( mbBound )
     {
-      fprintf( stderr, "error: already bound!\n" );
+      qFatal( "error: already bound!" );
     }
     if ( !mpReqRespSocket )
     {
-      fprintf( stderr, "error: no socket!\n" );
+      qFatal( "error: no socket!" );
     }
   }
 
@@ -337,7 +339,7 @@ int YaPUBImpl::send( int key, int msgSize, const char* msgData )
         if ( -1 == rc )
         {
           // something went wrong
-          // fprintf(stderr,
+          // qFatal(
           //         "YaPUBImpl::send::error %s from sending to peer %s\n",
           //         zmq_strerror(errno),
           //         it->first.c_str());
@@ -369,7 +371,7 @@ int YaPUBImpl::send( int key, int msgSize, const char* msgData )
         {
           if ( errno != EAGAIN )
           {
-            fprintf( stderr, "YaPUBImpl::send::received error %s from sending to peer %s\n", zmq_strerror( errno ), it->first.c_str() );
+            qFatal( "YaPUBImpl::send::received error %s from sending to peer %s\n", zmq_strerror( errno ), it->first.c_str() );
           }
           assert( errno == EAGAIN );
         }

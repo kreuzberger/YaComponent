@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(yacomponent VERSION 24.7)
+project(yacomponent VERSION 25.1)
 
 
 if(POLICY CMP0135)

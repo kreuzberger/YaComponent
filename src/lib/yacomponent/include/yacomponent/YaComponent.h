@@ -2,6 +2,7 @@
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDeadlineTimer>
+#include <QtCore/QLoggingCategory>
 #include <thread>
 #include <chrono>
 
@@ -22,6 +23,10 @@ constexpr int TimeOut = 20;
 constexpr int RequestResponseTimeoutMs = 5000;
 void* context_new();
 void context_term( void* context );
+
+Q_DECLARE_LOGGING_CATEGORY( publisher );
+Q_DECLARE_LOGGING_CATEGORY( subscriber );
+
 template <typename Functor> constexpr bool waitFor( Functor predicate, int timeout = RequestResponseTimeoutMs )
 {
   if ( predicate() )

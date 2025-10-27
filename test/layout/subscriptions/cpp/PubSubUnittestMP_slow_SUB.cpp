@@ -88,7 +88,13 @@ void SubscriberComp::init()
 
 int SubscriberComp::setNotifications()
 {
-  return mData.setNotification( YaComponent::PublisherIfcProxy::PROP_DATA );
+  int rc = -1;
+  rc = mData.setNotification( YaComponent::PublisherIfcProxy::PROP_DATA );
+  if ( -1 < rc )
+  {
+    rc = mData.setNotification( YaComponent::PublisherIfcProxy::PROP_TIME );
+  }
+  return rc;
 }
 
 int SubscriberComp::clearNotifications()

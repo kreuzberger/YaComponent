@@ -7,6 +7,8 @@
 #include <assert.h>
 #include <thread>
 
+Q_LOGGING_CATEGORY( subscriber, "yc.subscriber" );
+
 YaSUBImpl::YaSUBImpl( void* context )
 {
   assert( 0 != context );
@@ -17,7 +19,7 @@ YaSUBImpl::YaSUBImpl( void* context )
   }
   else
   {
-    fprintf( stderr, "error: invalid context\n" );
+    qFatal( "error: invalid context" );
   }
   memset( mcIdent, 0, YaComponent::MaxIdentSize );
 }
@@ -78,27 +80,27 @@ int YaSUBImpl::send( int key, int size, const char* data )
     assert( -1 != rc );
     if ( -1 == rc )
     {
-      fprintf( stderr, "YaSUBImpl::send:error: %s\n", zmq_strerror( zmq_errno() ) );
+      qFatal( "YaSUBImpl::send:error: %s", zmq_strerror( zmq_errno() ) );
     }
 
     auto send_more = ( 0 != size && data );
     int flags = send_more ? ZMQ_SNDMORE : 0;
     char ckey[YaComponent::KeySize + 1];
     sprintf( ckey, YaComponent::KeyFmt, key );
-    // qDebug() << "YaSUBImpl::send: key " << ckey << "from key value" << key;
+    qDebug(subscriber) << "YaSUBImpl::send: key " << ckey << "from key value" << key;
     rc = zmq_send( mpReqRespSocket, ckey, YaComponent::KeySize, flags );
     assert( -1 != rc );
     if ( send_more )
     {
       char skey[YaComponent::MessageSize + 1];
       sprintf( skey, YaComponent::MessageSizeFmt, size );
-      // qDebug() << "YaSUBImpl::send: key " << ckey << "from key value" << key;
+      qDebug(subscriber) << "YaSUBImpl::send: key " << ckey << "from key value" << key;
       rc = zmq_send( mpReqRespSocket, skey, YaComponent::MessageSize, flags );
       assert( -1 != rc );
       rc = zmq_send( mpReqRespSocket, data, size, 0 );
       if ( -1 == rc )
       {
-        fprintf( stderr, "error: %s\n", zmq_strerror( zmq_errno() ) );
+        qFatal( "error: %s", zmq_strerror( zmq_errno() ) );
       }
     }
   }
@@ -148,14 +150,14 @@ void YaSUBImpl::setConnectionPara( const char* address, const char* ident )
     }
     else
     {
-      fprintf( stderr, "error: cannot connect to address %s\n", address );
+      qFatal( "error: cannot connect to address %s", address );
     }
   }
   else
   {
     if ( mbConnected )
     {
-      fprintf( stderr, "error: already connected!\n" );
+      qFatal( "error: already connected!" );
     }
   }
 }
@@ -217,7 +219,7 @@ int YaSUBImpl::receive( int& key, int& size, char** pcData )
       assert( keyBytes == YaComponent::KeySize );
       if ( keyBytes != YaComponent::KeySize )
       {
-        fprintf( stderr, "YaSUBImpl::receive:error: %s\n", zmq_strerror( zmq_errno() ) );
+        qFatal( "YaSUBImpl::receive:error: %s", zmq_strerror( zmq_errno() ) );
       }
       else
       {
@@ -242,7 +244,7 @@ int YaSUBImpl::receive( int& key, int& size, char** pcData )
             {
               if ( msgSize > mMsgRespBuffer.size() )
               {
-                qInfo() << "YaSUBImpl::receive msgsize" << msgSize << "exceeds current buffer size, resize";
+                qInfo( subscriber ) << "YaSUBImpl::receive msgsize" << msgSize << "exceeds current buffer size, resize";
                 mMsgRespBuffer.resize( msgSize );
               }
 
@@ -284,7 +286,7 @@ int YaSUBImpl::receive( int& key, int& size, char** pcData )
       }
       else if ( YaComponent::KeyEnd == rcvKey )
       {
-        qInfo( "YaSUBImpl::receive: KeyEnd, closing connection" );
+        qInfo( subscriber ) << "YaSUBImpl::receive: KeyEnd, closing connection";
         close();
       }
       else

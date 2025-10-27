@@ -92,16 +92,24 @@ void PubSubUnittestSP::testSendLVCConnect()
     data.set_timeseconds( 0 );
     data.set_timefraction( 0.0 );
     data.set_counter( i );
+    Time time;
+    time.set_timeseconds( 0 );
+    time.set_timefraction( 0.0 );
+    time.set_counter( i );
+
     mPublisher->sendData( data );
+    mPublisher->sendTime( time );
     QTest::qWait( 10 );
   }
 
   int rc = -1;
   rc = mSubScriber->setNotifications();
   QVERIFY( -1 != rc );
-  QVERIFY( QTest::qWaitFor( [this]() { return 1 == mSubScriber->miPropertiesCnt; } ) );
+  QVERIFY( QTest::qWaitFor( [this]() { return 1 == mSubScriber->miPropertiesCnt && 1 == mSubScriber->miPropertiesTimeCnt; } ) );
   QCOMPARE( mSubScriber->miPropertiesCnt, 1 );
   QCOMPARE( mSubScriber->mLastData.counter(), 9 );
+  QCOMPARE( mSubScriber->miPropertiesTimeCnt, 1 );
+  QCOMPARE( mSubScriber->mLastTime.counter(), 9 );
 }
 
 void PubSubUnittestSP::testSendLVCConnectDefaultsAfterValid()
